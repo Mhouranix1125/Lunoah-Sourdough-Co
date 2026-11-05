@@ -1,0 +1,8 @@
+# Live data: database, accounts, uploaded photos. Back up separately, never commit.
+pb_data/
+
+# macOS
+.DS_Store
+
+# PocketBase binary (installed via Homebrew / downloaded on the server)
+pocketbase

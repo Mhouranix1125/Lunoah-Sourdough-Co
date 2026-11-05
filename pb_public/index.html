@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lunoah Sourdough Co.</title>
+  <meta name="description" content="Naturally leavened sourdough, baked in small batches. Text your order for pickup.">
+  <link rel="icon" href="/img/loaf.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="brand">
+      <span class="brand-name">Lunoah</span>
+      <span class="brand-sub">Sourdough Co.</span>
+    </a>
+    <nav>
+      <a href="#menu">Bread</a>
+      <a href="#order">How to order</a>
+      <a href="#pay" id="nav-pay" hidden>Pay</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">Small-batch · Naturally leavened</p>
+        <h1 id="tagline">Naturally leavened bread, baked in small batches.</h1>
+        <p id="about" class="lead"></p>
+        <a href="#menu" class="btn">See this week's bread</a>
+      </div>
+      <div class="hero-img"><img id="hero-img" src="/img/hero-basket.webp" alt="A basket of fresh bread"></div>
+    </section>
+
+    <section id="menu" class="menu">
+      <h2>This week's bread</h2>
+      <div id="grid" class="grid" aria-live="polite"><p class="muted">Loading…</p></div>
+    </section>
+
+    <section id="order" class="order-info">
+      <h2>How to order</h2>
+      <div class="order-cols">
+        <div>
+          <h3>1. Pick your loaves</h3>
+          <p>Use the <strong>+</strong> buttons above, then tap <em>Checkout</em>.</p>
+        </div>
+        <div>
+          <h3>2. Pay &amp; text us</h3>
+          <p id="phone-line">Ordering by text opens soon.</p>
+        </div>
+        <div>
+          <h3>3. Pick up</h3>
+          <p id="pickup"></p>
+        </div>
+      </div>
+      <p id="order-note" class="note"></p>
+    </section>
+
+    <section id="pay" class="pay" hidden>
+      <h2>How to pay</h2>
+      <p class="muted">Tap an app to see how to pay us.</p>
+      <div id="pay-logos" class="pay-logos"></div>
+      <div id="pay-panel" class="pay-panel" hidden aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© <span id="year"></span> Lunoah Sourdough Co. <span id="insta"></span></p>
+  </footer>
+
+  <!-- Sticky order bar -->
+  <div id="bar" class="bar" hidden>
+    <span id="bar-summary"></span>
+    <button id="bar-btn" class="btn">Checkout</button>
+  </div>
+
+  <dialog id="order-dialog">
+    <form method="dialog" id="order-form" novalidate>
+      <ol class="steps" id="steps">
+        <li data-step="1" class="current">Your order</li>
+        <li data-step="2" id="steps-pay">Pay</li>
+        <li data-step="3">Send order</li>
+      </ol>
+
+      <!-- STEP 1: order details -->
+      <section class="step" data-step="1">
+        <h2>Your order</h2>
+        <ul id="order-lines" class="order-lines"></ul>
+        <label>Your name <input id="o-name" required autocomplete="name"></label>
+        <label>Pickup day <input id="o-day" placeholder="e.g. Saturday morning"></label>
+        <label>Anything else? <textarea id="o-notes" rows="2"></textarea></label>
+        <div class="dialog-actions">
+          <button type="button" id="to-step-2" class="btn">Continue to payment →</button>
+        </div>
+      </section>
+
+      <!-- STEP 2: pay -->
+      <section class="step" data-step="2" hidden>
+        <h2>Pay <span id="pay-total"></span></h2>
+        <p class="muted small">Please pay before sending your order. Choose an app:</p>
+        <div id="co-apps" class="co-apps"></div>
+        <div id="co-panel" class="co-panel" hidden></div>
+        <div id="co-confirm" class="co-confirm" hidden>
+          <label class="check"><input type="checkbox" id="co-paid"> <span id="co-paid-label">I've sent the payment</span></label>
+          <label>Name on your payment <span class="muted">(so we can find it)</span><input id="co-payer" autocomplete="name"></label>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-ghost" data-back="1">← Back</button>
+          <button type="button" id="to-step-3" class="btn" disabled>Continue →</button>
+        </div>
+      </section>
+
+      <!-- STEP 3: send the order text -->
+      <section class="step" data-step="3" hidden>
+        <h2>Last step: text us your order</h2>
+        <pre id="order-preview" class="order-preview"></pre>
+        <div class="dialog-actions">
+          <button type="button" id="send-text" class="btn">Open Messages</button>
+          <button type="button" id="copy-order" class="btn btn-ghost">Copy order</button>
+        </div>
+        <p class="muted small">This opens your phone's texting app with your order filled in. Just press send.<br>On a computer? Copy the order and text it to <strong class="phone-text"></strong>.</p>
+        <button type="button" class="link-back" data-back="2" id="back-to-pay">← Back</button>
+      </section>
+
+      <button type="button" class="close" id="close-dialog" aria-label="Close">×</button>
+    </form>
+  </dialog>
+
+  <script src="/pay-apps.js"></script>
+  <script src="/site.js"></script>
+</body>
+</html>

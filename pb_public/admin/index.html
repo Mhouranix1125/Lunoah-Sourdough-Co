@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Lunoah · My Bakery</title>
+  <link rel="icon" href="/img/loaf.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+  <!-- LOGIN -->
+  <section id="login-view" class="login" hidden>
+    <form id="login-form" class="login-card form">
+      <h1>Lunoah</h1>
+      <p class="muted">Log in to update your bread.</p>
+      <label>Email <input type="email" id="l-email" autocomplete="username" required></label>
+      <label>Password <input type="password" id="l-pass" autocomplete="current-password" required></label>
+      <button class="btn big" type="submit">Log in</button>
+      <p id="login-error" class="error" hidden></p>
+      <p class="muted small-print">There's no sign-up here. Your login is set up once by your website helper. Forgot it? Ask them to reset it.</p>
+    </form>
+  </section>
+
+  <!-- FIRST-TIME SETUP -->
+  <section id="setup-view" class="login" hidden>
+    <form id="setup-form" class="login-card form">
+      <h1>Welcome!</h1>
+      <p class="muted">Let's create your login. You'll use this email and password to update your bread.</p>
+      <label>Your name <input id="su-name" autocomplete="name"></label>
+      <label>Email <input type="email" id="su-email" autocomplete="username" required></label>
+      <label>Password <span class="muted">(at least 8 characters)</span><input type="password" id="su-pass" minlength="8" autocomplete="new-password" required></label>
+      <label>Password again <input type="password" id="su-pass2" minlength="8" autocomplete="new-password" required></label>
+      <button class="btn big" type="submit">Create my login</button>
+      <p id="setup-error" class="error" hidden></p>
+    </form>
+  </section>
+
+  <section id="nosetup-view" class="login" hidden>
+    <div class="login-card">
+      <h1>Almost ready</h1>
+      <p class="muted">No login has been created for this website yet. Open the website on the computer it runs on to create one, or create it from the dashboard at <strong>/_/</strong> → <strong>bakers</strong>.</p>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <div id="app-view" hidden>
+    <header class="top">
+      <strong class="logo">Lunoah</strong>
+      <div class="top-links">
+        <a href="/" target="_blank" class="btn ghost small">View website ↗</a>
+        <button id="logout" class="btn ghost small">Log out</button>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="breads">My Breads</button>
+      <button class="tab" data-tab="shop">Shop Info</button>
+      <button class="tab" data-tab="pay">Payments</button>
+    </nav>
+
+    <!-- BREADS -->
+    <main id="tab-breads" class="panel">
+      <button id="add-bread" class="btn big full">＋ Add a new bread</button>
+      <ul id="bread-list" class="bread-list"></ul>
+      <p class="hint">Tip: <strong>Sold out</strong> keeps the bread on the website with a “Sold out” label. Use <strong>Edit → Hide</strong> to take it off the website without deleting it.</p>
+    </main>
+
+    <!-- SHOP -->
+    <main id="tab-shop" class="panel" hidden>
+      <form id="shop-form" class="form">
+        <label>Order text number <span class="muted">(the number customers text their orders to)</span>
+          <input id="s-phone" type="tel" placeholder="(555) 123-4567">
+        </label>
+        <div class="setting-box">
+          <label class="check"><input type="checkbox" id="s-reqpay"> Customers must pay before sending their order</label>
+          <p class="muted small-print">When on, checkout asks them to pay with one of your payment apps and confirm it before they can text you the order. Turn off if you'd rather take payment at pickup.</p>
+        </div>
+        <label>Headline <input id="s-tagline" maxlength="200"></label>
+        <label>About your bread <textarea id="s-about" rows="4" maxlength="2000"></textarea></label>
+        <label>Pickup details <textarea id="s-pickup" rows="3" maxlength="1000"></textarea></label>
+        <label>Ordering note <span class="muted">(e.g. order deadline)</span><textarea id="s-note" rows="2" maxlength="500"></textarea></label>
+        <label>Instagram name <span class="muted">(optional)</span><input id="s-insta" placeholder="@lunoahsourdough"></label>
+        <div class="photo-field">
+          <span class="label">Big photo at the top of the website</span>
+          <div class="photo-box" id="hero-box"><img id="hero-preview" alt=""><span class="photo-empty">No photo yet</span></div>
+          <div class="row">
+            <label class="btn ghost">Choose photo<input type="file" id="hero-file" accept="image/*" hidden></label>
+            <button type="button" id="hero-remove" class="btn ghost danger-text">Remove photo</button>
+          </div>
+        </div>
+        <button class="btn big full" type="submit">Save shop info</button>
+      </form>
+
+      <details class="pw">
+        <summary>Change my password</summary>
+        <form id="pw-form" class="form">
+          <label>Current password <input type="password" id="pw-old" required autocomplete="current-password"></label>
+          <label>New password <span class="muted">(at least 8 characters)</span><input type="password" id="pw-new" minlength="8" required autocomplete="new-password"></label>
+          <label>New password again <input type="password" id="pw-new2" minlength="8" required autocomplete="new-password"></label>
+          <button class="btn" type="submit">Change password</button>
+        </form>
+      </details>
+    </main>
+
+    <!-- PAYMENTS -->
+    <main id="tab-pay" class="panel" hidden>
+      <p class="hint top-hint">These show on your website under <strong>“How to pay”</strong>. Customers tap a logo to see your QR code, username or number.</p>
+      <ul id="pay-list" class="bread-list"></ul>
+      <button id="add-pay" class="btn big full">＋ Add a payment app</button>
+    </main>
+  </div>
+
+  <!-- PICK A PAYMENT APP -->
+  <dialog id="pay-pick-dialog">
+    <form method="dialog" class="form">
+      <h2>Which app?</h2>
+      <div id="pay-pick" class="pay-pick"></div>
+      <button class="btn ghost big" value="cancel">Cancel</button>
+    </form>
+  </dialog>
+
+  <!-- EDIT PAYMENT METHOD -->
+  <dialog id="pay-dialog">
+    <form id="pay-form" class="form">
+      <h2 class="pay-title"><span id="pay-title-logo" class="pay-logo"></span><span id="pay-title">Venmo</span></h2>
+      <label id="pf-label-wrap">Name of this payment method <input id="pf-label" maxlength="60" placeholder="e.g. Cash at pickup"></label>
+      <label id="pf-handle-wrap"><span id="pf-handle-label">Username</span>
+        <div class="prefix-input"><span id="pf-handle-prefix">@</span><input id="pf-handle" maxlength="100" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+      </label>
+      <label id="pf-phone-wrap"><span id="pf-phone-label">Phone number</span><input id="pf-phone" type="tel" maxlength="30"></label>
+      <label id="pf-email-wrap"><span id="pf-email-label">Email</span><input id="pf-email" type="email" maxlength="120" autocapitalize="off"></label>
+      <div class="photo-field">
+        <span class="label">QR code <span class="muted">(optional, a screenshot from the app is fine)</span></span>
+        <label class="photo-box clickable qr-box">
+          <img id="pf-qr-preview" alt="">
+          <span class="photo-empty">📷 Tap to add the QR code</span>
+          <input type="file" id="pf-qr-file" accept="image/*" hidden>
+        </label>
+        <div class="row">
+          <label class="btn ghost small" for="pf-qr-file">Change QR code</label>
+          <button type="button" id="pf-qr-remove" class="btn ghost small danger-text">Remove QR code</button>
+        </div>
+      </div>
+      <label>Note for customers <span class="muted">(optional)</span><input id="pf-note" maxlength="300" placeholder="e.g. Shows as NADIA in your bank's app"></label>
+      <label class="check"><input type="checkbox" id="pf-enabled" checked> Show on website</label>
+      <div class="dialog-actions">
+        <button class="btn big" type="submit" id="pay-save">Save</button>
+        <button class="btn ghost big" type="button" id="pay-cancel">Cancel</button>
+      </div>
+      <button type="button" id="pay-delete" class="link-danger">Remove this payment method</button>
+    </form>
+  </dialog>
+
+  <!-- EDIT BREAD -->
+  <dialog id="edit-dialog">
+    <form id="edit-form" class="form">
+      <h2 id="edit-title">Edit bread</h2>
+      <div class="photo-field">
+        <label class="photo-box clickable" id="photo-box">
+          <img id="photo-preview" alt="">
+          <span class="photo-empty">📷 Tap to add a photo</span>
+          <input type="file" id="photo-file" accept="image/*" hidden>
+        </label>
+        <div class="row">
+          <label class="btn ghost small" for="photo-file">Change photo</label>
+          <button type="button" id="photo-remove" class="btn ghost small danger-text">Remove photo</button>
+        </div>
+      </div>
+      <label>Name of bread <input id="e-name" required maxlength="120" placeholder="e.g. Classic Country Loaf"></label>
+      <label>Price
+        <div class="price-input"><span>$</span><input id="e-price" type="number" inputmode="decimal" min="0" step="0.01" required placeholder="10"></div>
+      </label>
+      <label>Description <textarea id="e-desc" rows="3" maxlength="1000" placeholder="What makes it special?"></textarea></label>
+      <label class="check"><input type="checkbox" id="e-hidden"> Hide from website</label>
+      <div class="dialog-actions">
+        <button class="btn big" type="submit" id="save-btn">Save</button>
+        <button class="btn ghost big" type="button" id="cancel-edit">Cancel</button>
+      </div>
+      <button type="button" id="delete-bread" class="link-danger">Delete this bread forever</button>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+  <script src="/pay-apps.js"></script>
+  <script src="/admin/admin.js"></script>
+</body>
+</html>
