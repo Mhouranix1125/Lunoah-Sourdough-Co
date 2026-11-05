@@ -1,0 +1,19 @@
+# systemd service for the Lunoah website on a Linux server.
+# Copy to /etc/systemd/system/lunoah.service, then:
+#   sudo systemctl enable --now lunoah
+# PocketBase gets a free HTTPS certificate for the domain automatically.
+[Unit]
+Description=Lunoah Sourdough Co. website
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/lunoah
+ExecStart=/opt/lunoah/pocketbase serve lunoahsourdough.com www.lunoahsourdough.com --dir=/opt/lunoah/pb_data --migrationsDir=/opt/lunoah/pb_migrations --publicDir=/opt/lunoah/pb_public --hooksDir=/opt/lunoah/pb_hooks
+Restart=always
+RestartSec=5
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
