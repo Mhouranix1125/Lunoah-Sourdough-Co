@@ -39,7 +39,7 @@ All new collections follow the existing pattern: public read, write restricted t
 - `end_date` text `YYYY-MM-DD`, required (equal to `start_date` for a single day)
 - `all_day` bool
 - `from` / `to` text `HH:MM`, used only when `all_day` is false; applies on each date in the range
-- `note` text, max 200. Private, but readable through the public API. The admin UI labels it "only you see this here" and warns not to put private information in it.
+- `note` text, max 200. Shown only in the admin UI.
 
 **`shop`**: new number fields `lead_days` (default 2), `slot_minutes` (default 30) and
 `book_ahead_days` (default 21).
@@ -72,7 +72,7 @@ It is exported for the browser (a `window.LunoahSlots` global) and for Node (`mo
   - When a date is selected, its time slots show below the calendar as a wrapping row of
     tap-sized buttons (minimum 44px tall), e.g. "9:00 AM".
   - A summary line under the picker reads: "Saturday, Nov 14 at 10:00 AM".
-- "Continue" stays disabled until name, date and time are all chosen.
+- "Continue" stays disabled until a date and time are chosen. The name is still checked when it's tapped, as it is today.
 - If there are no available dates at all, show: "No pickup times are open right now. Please
   check back soon." and keep Continue disabled.
 - The text message line becomes `Pickup: Saturday, Nov 14 at 10:00 AM`.
