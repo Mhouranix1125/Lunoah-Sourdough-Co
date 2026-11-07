@@ -4,6 +4,11 @@
   let breads = [];
   let shop = {};
   let payMethods = [];
+  const S = window.LunoahSlots;
+  let pickupData = null; // { hours, blocks } or null when the picker can't be used
+  let slots = [];         // [{ date, times }] from slots.js
+  let pick = { date: "", time: "" };
+  let calMonth = "";      // "YYYY-MM" shown in the calendar
 
   const money = (n) => {
     n = Number(n) || 0;
@@ -43,6 +48,7 @@
       const p = await fetch("/api/collections/payment_methods/records?perPage=50&sort=sort,created").then((r) => r.json());
       renderPay(p.items || []);
     } catch (_) {}
+    await loadPickup();
   }
 
   // ---------- How to pay ----------
@@ -198,6 +204,90 @@
     $("#bar-summary").textContent = `${count} ${count === 1 ? "loaf" : "loaves"} · ${money(total())}`;
   }
 
+  // ---------- Pickup time picker ----------
+  async function loadPickup() {
+    try {
+      const get = (u) => fetch(u).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+      const [h, b] = await Promise.all([
+        get("/api/collections/pickup_hours/records?perPage=200"),
+        get("/api/collections/pickup_blocks/records?perPage=500"),
+      ]);
+      pickupData = { hours: h.items || [], blocks: b.items || [] };
+    } catch (_) {
+      pickupData = null; // fall back to the free-text box
+    }
+    $("#pickup-picker").hidden = !pickupData;
+    $("#o-day-wrap").hidden = !!pickupData;
+  }
+
+  function computeSlots() {
+    if (!pickupData) return;
+    slots = S.availableSlots({
+      hours: pickupData.hours,
+      blocks: pickupData.blocks,
+      leadDays: shop.lead_days ?? 2,
+      slotMinutes: shop.slot_minutes || 30,
+      bookAheadDays: shop.book_ahead_days || 21,
+      now: new Date(),
+      tz: S.SHOP_TZ,
+    });
+    const day = slots.find((d) => d.date === pick.date);
+    if (!day) pick = { date: slots[0] ? slots[0].date : "", time: "" };
+    else if (!day.times.includes(pick.time)) pick.time = "";
+    calMonth = (pick.date || S.localParts(new Date(), S.SHOP_TZ).date).slice(0, 7);
+  }
+
+  function shiftMonth(n) {
+    const [y, m] = calMonth.split("-").map(Number);
+    const t = new Date(Date.UTC(y, m - 1 + n, 1));
+    calMonth = `${t.getUTCFullYear()}-${String(t.getUTCMonth() + 1).padStart(2, "0")}`;
+    renderCal();
+  }
+
+  const pickupLabel = () => (pick.date && pick.time ? `${S.formatDate(pick.date)} at ${S.formatTime(pick.time)}` : "");
+
+  function renderCal() {
+    const avail = new Map(slots.map((d) => [d.date, d.times]));
+    const [y, m] = calMonth.split("-").map(Number);
+    $("#cal-title").textContent = new Date(Date.UTC(y, m - 1, 1))
+      .toLocaleDateString("en-US", { timeZone: "UTC", month: "long", year: "numeric" });
+    const today = S.localParts(new Date(), S.SHOP_TZ).date;
+    const daysIn = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    const cells = [];
+    for (let i = 0; i < S.weekday(`${calMonth}-01`); i++) cells.push(el("span", { class: "cal-day empty" }));
+    for (let d = 1; d <= daysIn; d++) {
+      const date = `${calMonth}-${String(d).padStart(2, "0")}`;
+      const open = avail.has(date);
+      const cls = "cal-day" + (date === today ? " today" : "") + (date === pick.date ? " selected" : "");
+      const b = el("button", { type: "button", class: cls, "aria-label": S.formatDate(date) + (open ? "" : ", not available") }, String(d));
+      if (open) b.addEventListener("click", () => { pick = { date, time: "" }; renderCal(); });
+      else b.disabled = true;
+      cells.push(b);
+    }
+    $("#cal-days").replaceChildren(...cells);
+
+    const first = slots.length ? slots[0].date.slice(0, 7) : calMonth;
+    const last = slots.length ? slots[slots.length - 1].date.slice(0, 7) : calMonth;
+    $("#cal-prev").disabled = calMonth <= first;
+    $("#cal-next").disabled = calMonth >= last;
+
+    const times = avail.get(pick.date) || [];
+    $("#cal-times").replaceChildren(...times.map((t) => {
+      const b = el("button", { type: "button", class: "time-btn" + (t === pick.time ? " selected" : "") }, S.formatTime(t));
+      b.addEventListener("click", () => { pick.time = t; renderCal(); });
+      return b;
+    }));
+
+    $("#cal-summary").textContent = !slots.length
+      ? "No pickup times are open right now. Please check back soon."
+      : pickupLabel() || (pick.date ? `${S.formatDate(pick.date)}: now choose a time.` : "Choose a day.");
+    $("#cal-summary").classList.toggle("chosen", !!pickupLabel());
+    $("#to-step-2").disabled = !pickupLabel();
+  }
+
+  $("#cal-prev").addEventListener("click", () => shiftMonth(-1));
+  $("#cal-next").addEventListener("click", () => shiftMonth(1));
+
   // ---------- Checkout: 1 order → 2 pay → 3 send ----------
   let step = 1;
   let chosen = null; // payment method picked in step 2
@@ -207,7 +297,7 @@
 
   function orderText() {
     const name = $("#o-name").value.trim();
-    const day = $("#o-day").value.trim();
+    const day = pickupData ? pickupLabel() : $("#o-day").value.trim();
     const notes = $("#o-notes").value.trim();
     let t = `Hi Lunoah! Order ${orderCode}\n`;
     for (const { b, q } of lines()) t += `• ${q} × ${b.name} (${money(q * b.price)})\n`;
@@ -294,6 +384,7 @@
     );
     $("#to-step-2").textContent = needsPay() ? "Continue to payment →" : "Continue →";
     $("#co-paid").checked = false; // a changed cart means a new amount: confirm again
+    if (pickupData) { computeSlots(); renderCal(); }
     goStep(1);
     $("#order-dialog").showModal();
   }
@@ -302,6 +393,7 @@
   $("#close-dialog").addEventListener("click", () => $("#order-dialog").close());
   $("#to-step-2").addEventListener("click", () => {
     if (!$("#o-name").value.trim()) { $("#o-name").focus(); $("#o-name").reportValidity(); return; }
+    if (pickupData && !pickupLabel()) return;
     goStep(2);
   });
   $("#to-step-3").addEventListener("click", () => { if (!$("#to-step-3").disabled) goStep(3); });

@@ -90,7 +90,21 @@
         <h2>Your order</h2>
         <ul id="order-lines" class="order-lines"></ul>
         <label>Your name <input id="o-name" required autocomplete="name"></label>
-        <label>Pickup day <input id="o-day" placeholder="e.g. Saturday morning"></label>
+        <div id="pickup-picker" class="pickup-picker" hidden>
+          <span class="field-label">Pickup time</span>
+          <div class="cal">
+            <div class="cal-head">
+              <button type="button" class="cal-nav" id="cal-prev" aria-label="Previous month">‹</button>
+              <strong id="cal-title"></strong>
+              <button type="button" class="cal-nav" id="cal-next" aria-label="Next month">›</button>
+            </div>
+            <div class="cal-grid cal-dow" aria-hidden="true"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+            <div class="cal-grid" id="cal-days"></div>
+          </div>
+          <div id="cal-times" class="cal-times"></div>
+          <p id="cal-summary" class="cal-summary" aria-live="polite"></p>
+        </div>
+        <label id="o-day-wrap">Pickup day <input id="o-day" placeholder="e.g. Saturday morning"></label>
         <label>Anything else? <textarea id="o-notes" rows="2"></textarea></label>
         <div class="dialog-actions">
           <button type="button" id="to-step-2" class="btn">Continue to payment →</button>
@@ -130,6 +144,7 @@
   </dialog>
 
   <script src="/pay-apps.js"></script>
+  <script src="/slots.js"></script>
   <script src="/site.js"></script>
 </body>
 </html>
