@@ -159,16 +159,18 @@
   document.querySelectorAll(".tab").forEach((t) =>
     t.addEventListener("click", () => {
       document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("active", x === t));
-      for (const name of ["breads", "shop", "pay"]) $("#tab-" + name).hidden = t.dataset.tab !== name;
+      for (const name of ["breads", "shop", "pickup", "pay"]) $("#tab-" + name).hidden = t.dataset.tab !== name;
     })
   );
+
+  const pickupAdmin = window.PickupAdmin({ api, toast, busy });
 
   async function showApp() {
     $("#login-view").hidden = true;
     $("#setup-view").hidden = true;
     $("#nosetup-view").hidden = true;
     $("#app-view").hidden = false;
-    await Promise.all([loadBreads(), loadShop(), loadPay()]);
+    await Promise.all([loadBreads(), loadShop(), loadPay(), pickupAdmin.load().catch((err) => toast(err.message, "bad"))]);
   }
 
   // ---------- payment methods ----------

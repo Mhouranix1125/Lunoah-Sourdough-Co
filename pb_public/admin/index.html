@@ -57,6 +57,7 @@
     <nav class="tabs">
       <button class="tab active" data-tab="breads">My Breads</button>
       <button class="tab" data-tab="shop">Shop Info</button>
+      <button class="tab" data-tab="pickup">Pickup Times</button>
       <button class="tab" data-tab="pay">Payments</button>
     </nav>
 
@@ -102,6 +103,42 @@
           <button class="btn" type="submit">Change password</button>
         </form>
       </details>
+    </main>
+
+    <!-- PICKUP TIMES -->
+    <main id="tab-pickup" class="panel" hidden>
+      <p class="hint top-hint">Customers choose a pickup day and time from these hours, at least <strong id="pk-lead-echo">2</strong> days after they order.</p>
+
+      <section class="pk-section">
+        <h2>Regular hours</h2>
+        <ul id="pk-week" class="pk-week"></ul>
+        <button type="button" id="pk-save-hours" class="btn big full">Save regular hours</button>
+      </section>
+
+      <section class="pk-section">
+        <h2>Time off</h2>
+        <p class="muted small-print">Vacations, days off, or a busy hour. Customers can't pick these times.</p>
+        <ul id="pk-blocks" class="pk-blocks"></ul>
+        <button type="button" id="pk-add-block" class="btn big full">＋ Add time off</button>
+      </section>
+
+      <section class="pk-section">
+        <h2>Settings</h2>
+        <form id="pk-settings" class="form">
+          <label>Minimum notice <span class="muted">(days between ordering and pickup)</span>
+            <input id="pk-lead" type="number" inputmode="numeric" min="0" max="30" required></label>
+          <label>Time slots every
+            <select id="pk-slot"><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">1 hour</option></select></label>
+          <label>Customers can book up to <span class="muted">(days ahead)</span>
+            <input id="pk-ahead" type="number" inputmode="numeric" min="1" max="90" required></label>
+          <button class="btn big full" type="submit">Save settings</button>
+        </form>
+      </section>
+
+      <section class="pk-section">
+        <h2>What customers can pick now</h2>
+        <ul id="pk-preview" class="pk-preview"></ul>
+      </section>
     </main>
 
     <!-- PAYMENTS -->
@@ -182,8 +219,29 @@
     </form>
   </dialog>
 
+  <!-- ADD TIME OFF -->
+  <dialog id="block-dialog">
+    <form id="block-form" class="form">
+      <h2>Add time off</h2>
+      <label>First day <input type="date" id="bk-start" required></label>
+      <label>Last day <input type="date" id="bk-end" required></label>
+      <label class="check"><input type="checkbox" id="bk-allday" checked> All day</label>
+      <div id="bk-times" class="pk-range" hidden>
+        <label>From <input type="time" id="bk-from" step="900"></label>
+        <label>To <input type="time" id="bk-to" step="900"></label>
+      </div>
+      <label>Note <span class="muted">(optional, e.g. Vacation)</span><input id="bk-note" maxlength="200"></label>
+      <div class="dialog-actions">
+        <button class="btn big" type="submit">Save</button>
+        <button class="btn ghost big" type="button" id="bk-cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
   <div id="toast" class="toast" hidden></div>
   <script src="/pay-apps.js"></script>
+  <script src="/slots.js"></script>
+  <script src="/admin/pickup-admin.js"></script>
   <script src="/admin/admin.js"></script>
 </body>
 </html>
