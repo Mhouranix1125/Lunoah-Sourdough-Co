@@ -35,6 +35,21 @@ Use the **▲ ▼** arrows.
 Tap **Shop Info**, make your changes, tap **Save shop info**.
 You can also add a big photo for the top of the website there.
 
+## Set your pickup times and time off
+
+Open **Pickup Times**.
+
+- **Regular hours:** switch on the days you do pickups and set the hours. Tap **＋ add hours**
+  for a second window that day. Tap **Save regular hours**.
+- **Time off:** going away, or need a few days after a trip? Tap **＋ Add time off**, pick the first
+  and last day, and save. For a single busy hour, turn off **All day** and pick the times.
+- **Settings:** *Minimum notice* is how many days ahead people must order (2 = an order on
+  Monday can be picked up Wednesday at the earliest).
+- **What customers can pick now** shows exactly what the website is offering.
+
+Customers pick a day and time on a calendar when they check out. Their text to you says, for example,
+`Pickup: Saturday, Nov 14 at 10:00 AM`.
+
 ## Payment apps (Venmo, Zelle, Cash App…)
 Tap **Payments**. Your website shows each app's logo under **How to pay**. Customers tap a
 logo to see your QR code, username or number.
@@ -47,7 +62,7 @@ logo to see your QR code, username or number.
 
 ## How orders reach you
 Customers tap **+** on the breads they want, then **Checkout**:
-1. **Your order:** their name and pickup day
+1. **Your order:** their name and pickup day & time
 2. **Pay:** they pick Venmo, Zelle, etc., pay the total, and tick "I've sent $__".
    Venmo opens with the amount and the order code already filled in.
 3. **Send order:** their phone opens a text to your order number with everything filled in.
