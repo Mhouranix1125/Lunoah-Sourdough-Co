@@ -150,12 +150,13 @@ dialog form { padding: 24px; }
 .pk-dayname { color: var(--ink); font-weight: 600; font-size: 1rem; min-width: 6.5em; }
 .pk-closed { font-size: .9rem; }
 .pk-ranges { display: flex; flex-direction: column; gap: 8px; flex: 1 1 100%; }
-.pk-range { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pk-range { display: grid; grid-template-columns: 1fr auto 1fr auto; align-items: center; gap: 8px; }
+#bk-times { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+#bk-times label { min-width: 0; }
 .pk-range input[type=time], .form select {
   font: 400 1rem "Inter", sans-serif; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink);
 }
-.pk-range input[type=time] { flex: 1 1 120px; min-width: 0; }
-.pk-range label { flex: 1 1 120px; }
+.pk-range input[type=time] { min-width: 0; width: 100%; box-sizing: border-box; }
 .pk-x { width: 40px; height: 40px; border-radius: 10px; border: 1.5px solid var(--line); background: #fff; color: var(--danger); font-size: 1.3rem; cursor: pointer; }
 .pk-add { align-self: flex-start; background: none; border: 0; color: var(--crust); font: 600 .95rem "Inter", sans-serif; cursor: pointer; padding: 4px 0; }
 .pk-block { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }

@@ -98,16 +98,17 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     const btn = e.currentTarget;
     busy(btn, true);
     try {
-      for (const x of hours) await api(`/api/collections/pickup_hours/records/${x.id}`, { method: "DELETE" });
+      const old = hours.slice();
       for (const [wd, day] of week.entries()) {
         if (!day.on) continue;
         for (const r of day.ranges) {
           await api("/api/collections/pickup_hours/records", { method: "POST", body: { weekday: wd, start: r.start, end: r.end } });
         }
       }
+      for (const x of old) await api(`/api/collections/pickup_hours/records/${x.id}`, { method: "DELETE" });
       toast("Pickup hours saved!");
-    } catch (err) { toast(err.message, "bad"); }
-    finally { busy(btn, false); await load().catch(() => {}); }
+    } catch (err) { toast("Some hours may not have saved. Please check them and tap Save again.", "bad"); }
+    finally { busy(btn, false); await load().catch((err) => toast(err.message, "bad")); }
   });
 
   // ----- Time off -----
@@ -170,7 +171,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     if (!start || !end) return toast("Please choose the first and last day.", "bad");
     if (end < start) return toast("The last day can't be before the first day.", "bad");
     if (!allDay && (!from || !to || to <= from)) return toast("Please choose a start and end time (end after start).", "bad");
-    const btn = e.submitter;
+    const btn = e.submitter || e.target.querySelector('[type=submit]');
     busy(btn, true);
     try {
       await api("/api/collections/pickup_blocks/records", {
@@ -187,12 +188,13 @@ window.PickupAdmin = function ({ api, toast, busy }) {
   // ----- Settings -----
   $("#pk-settings").addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (!shop) return toast("Pickup settings didn't load. Please refresh the page.", "bad");
     const lead = Number($("#pk-lead").value);
     const ahead = Number($("#pk-ahead").value);
     if (!Number.isInteger(lead) || lead < 0 || lead > 30) return toast("Minimum notice must be 0 to 30 days.", "bad");
     if (!Number.isInteger(ahead) || ahead < 1 || ahead > 90) return toast("Booking ahead must be 1 to 90 days.", "bad");
     if (ahead < lead) return toast("Booking ahead must be at least the minimum notice.", "bad");
-    const btn = e.submitter;
+    const btn = e.submitter || e.target.querySelector('[type=submit]');
     busy(btn, true);
     try {
       await api(`/api/collections/shop/records/${shop.id}`, {
@@ -207,6 +209,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
 
   // ----- Preview -----
   function renderPreview() {
+    if (!shop) return;
     const days = S.availableSlots({
       hours, blocks,
       leadDays: shop.lead_days ?? 2,
