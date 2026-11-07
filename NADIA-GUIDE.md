@@ -31,7 +31,7 @@ and customers can't add it to an order. Flip it back when you're baking it again
 ## Change the order breads appear in
 Use the **▲ ▼** arrows.
 
-## Change your phone number, pickup times, or the words on the front page
+## Change your phone number, pickup details, or the words on the front page
 Tap **Shop Info**, make your changes, tap **Save shop info**.
 You can also add a big photo for the top of the website there.
 
@@ -74,7 +74,7 @@ Hi Lunoah! Order LUN-4821
 Total: $24
 Paid: $24 via Venmo (from Sam R)
 Name: Sam Rivera
-Pickup: Saturday
+Pickup: Saturday, Nov 14 at 10:00 AM
 ```
 **Before baking, check the money arrived:** open Venmo or your bank's Zelle and look for a payment
 of that amount from that name, with the order code in the note. The website can't check this for you.
