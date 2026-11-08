@@ -260,3 +260,7 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
 .pickup-notice { background: #fff4e5; color: #7a4a00; border: 1px solid #f0d2a8; }
 .send-error { background: #fdecea; color: #b3261e; border: 1px solid #f3c7c3; }
 #send-text:disabled, #copy-order:disabled { opacity: .6; cursor: wait; }
+
+.order-received { background: #fff; border: 1.5px solid var(--crust); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; margin-top: 12px; }
+.allergy-note { font-size: .85rem; color: var(--muted); margin-top: 18px; max-width: 60ch; }
+.pickup-location a { font-weight: 600; }

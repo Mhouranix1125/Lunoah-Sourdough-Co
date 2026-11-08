@@ -133,6 +133,16 @@
     $("#about").textContent = shop.about || "";
     $("#pickup").textContent = shop.pickup_info || "";
     $("#order-note").textContent = shop.order_note || "";
+    const loc = shop.pickup_location || "";
+    $("#pickup-location-text").textContent = loc;
+    if (loc) $("#pickup-map").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(loc);
+    $("#pickup-location").hidden = !loc;
+    $("#pickup-at").textContent = loc ? `Pickup at ${loc}.` : "";
+    $("#pickup-at").hidden = !loc;
+    for (const id of ["#allergy-note", "#allergy-footer"]) {
+      $(id).textContent = shop.allergy_note || "";
+      $(id).hidden = !shop.allergy_note;
+    }
     if (shop.hero) $("#hero-img").src = fileUrl(shop, "hero", "1600x0");
 
     const phone = digits(shop.phone);
@@ -330,6 +340,7 @@
     }
     if (name) t += `Name: ${name}\n`;
     if (day) t += `Pickup: ${day}\n`;
+    if (shop.pickup_location) t += `Pickup at: ${shop.pickup_location}\n`;
     if (notes) t += `Notes: ${notes}\n`;
     return t.trim();
   }
@@ -338,6 +349,7 @@
     if (n === 2 && !needsPay()) n = step < 2 ? 3 : 1; // skip paying when it's turned off
     step = n;
     $("#sms-fallback").hidden = true;
+    $("#order-received").hidden = true;
     document.querySelectorAll("#order-form .step").forEach((sec) => (sec.hidden = Number(sec.dataset.step) !== n));
     $("#steps-pay").hidden = !needsPay();
     document.querySelectorAll("#steps li").forEach((li) => {
@@ -398,6 +410,11 @@
     $("#to-step-3").disabled = !(chosen && $("#co-paid").checked && $("#co-payer").value.trim());
   }
 
+  function showReceived() {
+    $("#order-received-text").textContent = shop.order_received || "Your order has been received. Nadia will reach out to you shortly.";
+    $("#order-received").hidden = false;
+  }
+
   function openDialog() {
     if (!orderCode) orderCode = "LUN-" + String(Math.floor(1000 + Math.random() * 9000));
     const ul = $("#order-lines");
@@ -411,7 +428,7 @@
     $("#pickup-picker").hidden = !usingPicker;
     $("#o-day-wrap").hidden = usingPicker;
     if (usingPicker) { computeSlots(); renderCal(); }
-    $("#pickup-notice").hidden = true; $("#send-error").hidden = true; $("#sms-fallback").hidden = true;
+    $("#pickup-notice").hidden = true; $("#send-error").hidden = true; $("#sms-fallback").hidden = true; $("#order-received").hidden = true;
     goStep(1);
     $("#order-dialog").showModal();
     refreshTaken();
@@ -487,6 +504,7 @@
   $("#send-text").addEventListener("click", async () => {
     if (needsPay() && !(chosen && $("#co-paid").checked)) return goStep(2); // can't skip paying
     if (!(await reserve())) return;
+    showReceived();
     // "?&body=" works on both iPhone and Android. A real link click is more reliable than
     // setting location.href (which can leave the page stuck on desktop browsers).
     const href = `sms:${digits(shop.phone)}?&body=${encodeURIComponent(orderText())}`;
@@ -502,6 +520,7 @@
   $("#copy-order").addEventListener("click", async (e) => {
     if (needsPay() && !(chosen && $("#co-paid").checked)) return goStep(2);
     if (!(await reserve())) return;
+    showReceived();
     try {
       await navigator.clipboard.writeText(orderText());
       e.target.textContent = "Copied!";

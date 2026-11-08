@@ -516,6 +516,9 @@
     $("#s-about").value = shop.about || "";
     $("#s-pickup").value = shop.pickup_info || "";
     $("#s-note").value = shop.order_note || "";
+    $("#s-location").value = shop.pickup_location || "";
+    $("#s-received").value = shop.order_received || "";
+    $("#s-allergy").value = shop.allergy_note || "";
     $("#s-insta").value = shop.instagram || "";
     $("#s-reqpay").checked = !!shop.require_payment;
     pendingHero = null; removeHero = false;
@@ -549,6 +552,9 @@
     fd.append("about", $("#s-about").value.trim());
     fd.append("pickup_info", $("#s-pickup").value.trim());
     fd.append("order_note", $("#s-note").value.trim());
+    fd.append("pickup_location", $("#s-location").value.trim());
+    fd.append("order_received", $("#s-received").value.trim());
+    fd.append("allergy_note", $("#s-allergy").value.trim());
     fd.append("instagram", $("#s-insta").value.trim());
     fd.append("require_payment", $("#s-reqpay").checked ? "true" : "false");
     if (pendingHero) fd.append("hero", pendingHero);

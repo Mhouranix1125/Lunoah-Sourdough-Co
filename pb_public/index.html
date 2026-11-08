@@ -38,6 +38,7 @@
     <section id="menu" class="menu">
       <h2>This week's bread</h2>
       <div id="grid" class="grid" aria-live="polite"><p class="muted">Loading…</p></div>
+      <p id="allergy-note" class="allergy-note" hidden></p>
     </section>
 
     <section id="order" class="order-info">
@@ -53,7 +54,9 @@
         </div>
         <div>
           <h3>3. Pick up</h3>
+          <p id="pickup-location" class="pickup-location" hidden>📍 <span id="pickup-location-text"></span> · <a id="pickup-map" target="_blank" rel="noopener">Map</a></p>
           <p id="pickup"></p>
+          <p class="muted small">Running late or need to change your pickup? Text Nadia and she'll sort it out with you.</p>
         </div>
       </div>
       <p id="order-note" class="note"></p>
@@ -69,6 +72,7 @@
 
   <footer class="site-footer">
     <p>© <span id="year"></span> Lunoah Sourdough Co. <span id="insta"></span></p>
+    <p id="allergy-footer" class="allergy-footer muted small" hidden></p>
   </footer>
 
   <!-- Sticky order bar -->
@@ -104,6 +108,7 @@
           </div>
           <div id="cal-times" class="cal-times"></div>
           <p id="cal-summary" class="cal-summary" aria-live="polite"></p>
+          <p id="pickup-at" class="muted small" hidden></p>
         </div>
         <label id="o-day-wrap">Pickup day <input id="o-day" placeholder="e.g. Saturday morning"></label>
         <label>Anything else? <textarea id="o-notes" rows="2"></textarea></label>
@@ -138,6 +143,7 @@
         </div>
         <p id="send-error" class="send-error" role="alert" hidden></p>
         <p id="sms-fallback" class="muted small" hidden>Messages didn't open? <a id="sms-link" href="#">Tap here to open it</a>.</p>
+        <div id="order-received" class="order-received" role="status" hidden><strong id="order-received-text"></strong><span>Make sure you pressed send in Messages.</span></div>
         <p class="muted small">This opens your phone's texting app with your order filled in. Just press send.<br>On a computer? Copy the order and text it to <strong class="phone-text"></strong>.</p>
         <button type="button" class="link-back" data-back="2" id="back-to-pay">← Back</button>
       </section>
