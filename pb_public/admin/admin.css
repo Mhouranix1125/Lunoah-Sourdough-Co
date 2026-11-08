@@ -2,6 +2,7 @@
   --paper: #fbf7f0; --cream: #f3eadb; --line: #e4d8c4; --ink: #2a1f16; --muted: #7b6a5a;
   --crust: #8a5428; --crust-dark: #6e411d; --danger: #b3261e; --ok: #2e7d4f;
   --card: #fff; --accent: var(--crust); --on-crust: #fff; --on-ink: #fff;
+  --switch-off: #d8cfc0; --switch-on: var(--ink);
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.5 "Inter", -apple-system, sans-serif; position: relative; min-height: 100vh; }
@@ -62,9 +63,9 @@ h1, h2, .logo { font-family: "Fraunces", Georgia, serif; font-weight: 600; margi
 .move:disabled { opacity: .3; cursor: default; }
 
 .switch { display: flex; align-items: center; gap: 8px; font-size: .88rem; color: var(--muted); cursor: pointer; user-select: none; }
-.switch input { appearance: none; width: 44px; height: 26px; background: #d8cfc0; border-radius: 999px; position: relative; cursor: pointer; margin: 0; transition: background .15s; }
+.switch input { appearance: none; width: 44px; height: 26px; background: var(--switch-off); border-radius: 999px; position: relative; cursor: pointer; margin: 0; transition: background .15s; }
 .switch input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .15s; }
-.switch input:checked { background: var(--ink); }
+.switch input:checked { background: var(--switch-on); }
 .switch input:checked::after { left: 21px; }
 
 /* Forms */

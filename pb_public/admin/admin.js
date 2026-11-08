@@ -90,7 +90,7 @@
   async function showLogin() {
     $("#app-view").hidden = true;
     fetch("/api/collections/shop/records?perPage=1").then((r) => r.json())
-      .then((d) => { if (d.items && d.items[0]) LunoahTheme.apply(d.items[0].theme); }).catch(() => {});
+      .then((d) => { if (d.items && d.items[0] && window.LunoahTheme) window.LunoahTheme.apply(d.items[0].theme); }).catch(() => {});
     let status = { needsSetup: false };
     try { status = await fetch("/api/lunoah/status").then((r) => r.json()); } catch (_) {}
     $("#login-view").hidden = status.needsSetup;
@@ -520,7 +520,7 @@
     const r = await api("/api/collections/shop/records?perPage=1");
     shop = r.items[0];
     if (!shop) return;
-    $("#s-theme").value = LunoahTheme.apply(shop.theme);
+    $("#s-theme").value = (window.LunoahTheme && window.LunoahTheme.apply(shop.theme)) || shop.theme || "basic";
     markSwatch();
     $("#s-phone").value = shop.phone || "";
     $("#s-tagline").value = shop.tagline || "";
@@ -576,7 +576,7 @@
       await api(`/api/collections/shop/records/${shop.id}`, { method: "PATCH", body: fd });
       toast("Shop info saved!");
       await loadShop();
-      LunoahTheme.apply($("#s-theme").value);
+      window.LunoahTheme && window.LunoahTheme.apply($("#s-theme").value);
     } catch (err) { toast(err.message, "bad"); }
     finally { busy(btn, false); }
   });

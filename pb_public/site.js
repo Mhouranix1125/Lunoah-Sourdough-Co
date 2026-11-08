@@ -129,7 +129,7 @@
   }
 
   function renderShop() {
-    window.LunoahTheme.apply(shop.theme);
+    window.LunoahTheme && window.LunoahTheme.apply(shop.theme);
     if (shop.tagline) $("#tagline").textContent = shop.tagline;
     $("#about").textContent = shop.about || "";
     $("#pickup").textContent = shop.pickup_info || "";

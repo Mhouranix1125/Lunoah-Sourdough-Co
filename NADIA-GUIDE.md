@@ -33,6 +33,7 @@ Use the **▲ ▼** arrows.
 
 ## Change your phone number, pickup details, or the words on the front page
 Tap **Shop Info**, make your changes, tap **Save shop info**.
+Here you can also set the **Pickup location** (shown to customers with a map link), the **Message after ordering**, and the **Allergy note** (shown under your breads).
 You can also add a big photo for the top of the website there.
 
 ## Set your pickup times and time off
@@ -54,6 +55,7 @@ Open **Pickup Times**.
 - **What customers can pick now** shows exactly what the website is offering.
 - If you change your hours or notice, also update **Pickup details** and **Ordering note** in
   **Shop Info** so those words match your pickup times.
+  If your pickup spot changes, keep **Pickup location** in **Shop Info** current too.
 
 Customers pick a day and time on a calendar when they check out. Their text to you says, for example,
 `Pickup: Saturday, Nov 14 at 10:00 AM`.

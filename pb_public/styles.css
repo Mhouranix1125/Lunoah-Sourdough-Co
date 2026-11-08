@@ -245,7 +245,7 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
 .cal-dow span { text-align: center; font-size: .72rem; font-weight: 600; color: var(--muted); padding: 2px 0; }
 .cal-day { min-height: 40px; border: 0; border-radius: 10px; background: var(--card); font: 600 .95rem var(--sans); color: var(--ink); cursor: pointer; }
 .cal-day.empty { background: none; }
-.cal-day:disabled { background: none; color: #c9bba8; font-weight: 400; cursor: default; }
+.cal-day:disabled { background: none; color: var(--day-off, #c9bba8); font-weight: 400; cursor: default; }
 .cal-day.today { box-shadow: inset 0 0 0 1.5px var(--line); }
 .cal-day:not(:disabled):hover { box-shadow: inset 0 0 0 1.5px var(--crust); }
 .cal-day.selected, .cal-day.selected:hover { background: var(--crust); color: var(--on-crust); box-shadow: none; }

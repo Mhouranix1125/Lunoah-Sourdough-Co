@@ -8,6 +8,7 @@ html[data-theme="halloween"] {
   --ink: #f4ece1; --muted: #b8aec4;
   --crust: #e8731a; --crust-dark: #ff9340; --accent: #8e5bd6;
   --on-crust: #1c1a1f; --on-ink: #1c1a1f;
+  --switch-on: var(--crust); --switch-off: #473f52; --day-off: #5a5163;
   --order-info-bg: rgba(37, 33, 43, .8);
   --notice-bg: #3a2a14; --notice-fg: #ffd9a3; --notice-line: #6b4a1e;
   --error-bg: #3d1d1b; --error-fg: #ffb4ab; --error-line: #6e302c;
@@ -18,7 +19,7 @@ html[data-theme="halloween"] {
 html[data-theme="thanksgiving"] {
   --paper: #fbf3e6; --card: #fffaf2; --cream: #f4e2bf; --line: #e3cfa6;
   --ink: #3a2414; --muted: #7d5a3c;
-  --crust: #b0501a; --crust-dark: #8f3f10; --accent: #8c2f39;
+  --crust: #a04818; --crust-dark: #843a0f; --accent: #8c2f39;
   --on-crust: #ffffff; --on-ink: #ffffff;
   --order-info-bg: rgba(244, 226, 191, .75);
   --theme-icon: "🍂";

@@ -273,6 +273,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
   }
   function refreshAddOptions() {
     const prevDay = $("#bk2-day").value;
+    const prevTime = $("#bk2-time").value;
     openDays = S.availableSlots({
       hours, blocks, leadDays: 0,
       slotMinutes: shop.slot_minutes || 15,
@@ -287,6 +288,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     }));
     if (openDays.some((d) => d.date === prevDay)) $("#bk2-day").value = prevDay;
     fillTimes();
+    if (prevTime && [...$("#bk2-time").options].some((o) => o.value === prevTime)) $("#bk2-time").value = prevTime;
     $("#bk2-empty").hidden = openDays.length > 0;
     $("#bk2-save").disabled = openDays.length === 0;
   }
