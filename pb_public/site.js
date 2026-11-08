@@ -209,17 +209,20 @@
   }
 
   // ---------- Pickup time picker ----------
+  const takenUrl = () => `/api/lunoah/taken?from=${S.localParts(new Date(), S.SHOP_TZ).date}`;
+
   async function loadPickup() {
     const today = S.localParts(new Date(), S.SHOP_TZ).date;
     const blocksUrl = "/api/collections/pickup_blocks/records?perPage=500&sort=start_date" +
       `&fields=start_date,end_date,all_day,from,to&filter=${encodeURIComponent(`end_date >= '${today}'`)}`;
     try {
       const get = (u) => fetch(u).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
-      const [h, b] = await Promise.all([
+      const [h, b, t] = await Promise.all([
         get("/api/collections/pickup_hours/records?perPage=200"),
         get(blocksUrl),
+        get(takenUrl()),
       ]);
-      pickupData = { hours: h.items || [], blocks: b.items || [] };
+      pickupData = { hours: h.items || [], blocks: b.items || [], taken: t.taken || [] };
     } catch (_) {
       pickupData = null; // fall back to the free-text box
     }
@@ -231,7 +234,8 @@
       hours: pickupData.hours,
       blocks: pickupData.blocks,
       leadDays: shop.lead_days ?? 2,
-      slotMinutes: shop.slot_minutes || 30,
+      taken: pickupData.taken,
+      slotMinutes: shop.slot_minutes || 15,
       bookAheadDays: shop.book_ahead_days || 21,
       now: new Date(),
       tz: S.SHOP_TZ,
@@ -240,6 +244,17 @@
     if (!day) pick = { date: slots[0] ? slots[0].date : "", time: "" };
     else if (!day.times.includes(pick.time)) pick.time = "";
     calMonth = (pick.date || S.localParts(new Date(), S.SHOP_TZ).date).slice(0, 7);
+  }
+
+  // Re-check which times are booked each time checkout opens (another customer may have just booked).
+  async function refreshTaken() {
+    if (!pickupData) return;
+    try {
+      const r = await fetch(takenUrl());
+      if (!r.ok) return;
+      pickupData.taken = (await r.json()).taken || [];
+    } catch (_) { return; } // keep the last known list
+    if (usingPicker && step === 1) { computeSlots(); renderCal(); }
   }
 
   function shiftMonth(n) {
@@ -279,7 +294,7 @@
     const times = avail.get(pick.date) || [];
     $("#cal-times").replaceChildren(...times.map((t) => {
       const b = el("button", { type: "button", class: "time-btn" + (t === pick.time ? " selected" : "") }, S.formatTime(t));
-      b.addEventListener("click", () => { pick.time = t; renderCal(); });
+      b.addEventListener("click", () => { pick.time = t; $("#pickup-notice").hidden = true; renderCal(); });
       return b;
     }));
 
@@ -393,8 +408,10 @@
     $("#pickup-picker").hidden = !usingPicker;
     $("#o-day-wrap").hidden = usingPicker;
     if (usingPicker) { computeSlots(); renderCal(); }
+    $("#pickup-notice").hidden = true; $("#send-error").hidden = true; $("#sms-fallback").hidden = true;
     goStep(1);
     $("#order-dialog").showModal();
+    refreshTaken();
   }
 
   $("#bar-btn").addEventListener("click", openDialog);
@@ -409,17 +426,80 @@
   $("#co-paid").addEventListener("change", updateContinue);
   $("#co-payer").addEventListener("input", updateContinue);
 
-  $("#send-text").addEventListener("click", () => {
+  // ---------- Booking the pickup time ----------
+  let bookedKey = ""; // "<orderCode> <date> <time>" already booked during this visit
+  const BTN_SEND = "Open Messages";
+
+  function setSending(on) {
+    $("#send-text").disabled = on;
+    $("#copy-order").disabled = on;
+    $("#send-text").textContent = on ? "Saving your pickup time…" : BTN_SEND;
+  }
+
+  // Saves the booking. Returns true when the order may be sent.
+  async function reserve() {
+    if (!usingPicker) return true; // free-text fallback: nothing to book
+    const key = `${orderCode} ${pick.date} ${pick.time}`;
+    if (bookedKey === key) return true;
+    $("#send-error").hidden = true;
+    setSending(true);
+    try {
+      const res = await fetch("/api/collections/bookings/records", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: pick.date,
+          time: pick.time,
+          name: $("#o-name").value.trim(),
+          items: lines().map(({ b, q }) => `${q} × ${b.name}`).join(", "),
+          total: total(),
+          order_code: orderCode,
+        }),
+      });
+      if (res.ok) { bookedKey = key; return true; }
+      const body = await res.json().catch(() => ({}));
+      const d = body.data || {};
+      const isTaken = res.status === 400 && [d.date, d.time].some((x) => x && /not_unique/.test(x.code || ""));
+      if (isTaken) {
+        const lost = S.formatTime(pick.time);
+        pickupData.taken.push({ date: pick.date, time: pick.time });
+        pick.time = "";
+        goStep(1);
+        computeSlots();
+        renderCal();
+        $("#pickup-notice").textContent = `Sorry, ${lost} was just taken. Please pick another time.`;
+        $("#pickup-notice").hidden = false;
+        refreshTaken();
+        return false;
+      }
+      throw new Error(String(res.status));
+    } catch (_) {
+      $("#send-error").textContent = "We couldn't save your pickup time. Please check your connection and try again.";
+      $("#send-error").hidden = false;
+      return false;
+    } finally {
+      setSending(false);
+    }
+  }
+
+  $("#send-text").addEventListener("click", async () => {
     if (needsPay() && !(chosen && $("#co-paid").checked)) return goStep(2); // can't skip paying
+    if (!(await reserve())) return;
     // "?&body=" works on both iPhone and Android. A real link click is more reliable than
     // setting location.href (which can leave the page stuck on desktop browsers).
-    const a = el("a", { href: `sms:${digits(shop.phone)}?&body=${encodeURIComponent(orderText())}`, hidden: "" });
+    const href = `sms:${digits(shop.phone)}?&body=${encodeURIComponent(orderText())}`;
+    const a = el("a", { href, hidden: "" });
     document.body.append(a);
     a.click();
     a.remove();
+    // Saving the booking took a moment, and some phones then refuse to open Messages
+    // automatically, so offer a real link the customer can tap.
+    $("#sms-link").href = href;
+    $("#sms-fallback").hidden = false;
   });
   $("#copy-order").addEventListener("click", async (e) => {
     if (needsPay() && !(chosen && $("#co-paid").checked)) return goStep(2);
+    if (!(await reserve())) return;
     try {
       await navigator.clipboard.writeText(orderText());
       e.target.textContent = "Copied!";

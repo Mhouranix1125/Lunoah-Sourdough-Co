@@ -254,3 +254,9 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
   .cal { padding: 6px 2px; }
   .cal-grid { gap: 1px; }
 }
+
+/* ---------- Booking notices ---------- */
+.pickup-notice, .send-error { margin: 0; padding: 10px 12px; border-radius: 10px; font-size: .92rem; font-weight: 600; }
+.pickup-notice { background: #fff4e5; color: #7a4a00; border: 1px solid #f0d2a8; }
+.send-error { background: #fdecea; color: #b3261e; border: 1px solid #f3c7c3; }
+#send-text:disabled, #copy-order:disabled { opacity: .6; cursor: wait; }
