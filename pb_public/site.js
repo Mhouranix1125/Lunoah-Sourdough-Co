@@ -144,11 +144,25 @@
       $(id).textContent = shop.allergy_note || "";
       $(id).hidden = !shop.allergy_note;
     }
-    if (shop.hero) {
-      const img = $("#hero-img");
-      img.src = fileUrl(shop, "hero", "1600x0");
-      img.alt = "Fresh bread from Lunoah Sourdough Co.";
-      img.classList.remove("is-logo"); // Nadia's own photo replaces the logo
+    // Nadia's own top photo, if she added one; otherwise the hero text stands alone
+    $("#hero-wrap").hidden = !shop.hero;
+    document.querySelector(".hero").classList.toggle("no-photo", !shop.hero);
+    if (shop.hero) $("#hero-img").src = fileUrl(shop, "hero", "1600x0");
+
+    // "Meet Nadia" section: only when she has written a story
+    const story = (shop.nadia_story || "").trim();
+    $("#nadia").hidden = !story;
+    if (story) {
+      $("#nadia-title").textContent = (shop.nadia_title || "").trim() || "Meet Nadia";
+      $("#nadia-story").replaceChildren(...story.split(/\n\s*\n/).filter((t) => t.trim()).map((para) => {
+        const p = el("p");
+        para.trim().split("\n").forEach((line, i) => { if (i) p.append(el("br")); p.append(line); });
+        return p;
+      }));
+      const ph = $("#nadia-photo");
+      ph.hidden = !shop.nadia_photo;
+      if (shop.nadia_photo) ph.src = fileUrl(shop, "nadia_photo", "600x600");
+      $(".nadia-photo-wrap").hidden = !shop.nadia_photo;
     }
 
     const phone = digits(shop.phone);

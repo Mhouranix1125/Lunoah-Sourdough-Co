@@ -35,6 +35,7 @@ Use the **▲ ▼** arrows.
 Tap **Shop Info**, make your changes, tap **Save shop info**.
 Here you can also set the **Pickup location** (shown to customers with a map link), the **Message after ordering**, and the **Allergy note** (shown under your breads).
 You can also add a big photo for the top of the website there.
+**About Nadia**: write your story and add a photo; it appears under the headline on the website (hidden until you write something).
 
 ## Set your pickup times and time off
 

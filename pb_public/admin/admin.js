@@ -10,6 +10,8 @@
   let removePhoto = false;
   let pendingHero = null;
   let removeHero = false;
+  let pendingNadia = null;
+  let removeNadia = false;
 
   // ---------- helpers ----------
   const money = (n) => "$" + (Number.isInteger(Number(n)) ? Number(n) : Number(n).toFixed(2));
@@ -535,7 +537,29 @@
     pendingHero = null; removeHero = false;
     setPreview($("#hero-preview"), shop.hero ? fileUrl(shop, "hero", "1600x0") : "");
     $("#hero-remove").hidden = !shop.hero;
+    $("#s-nadia-title").value = shop.nadia_title || "";
+    $("#s-nadia-story").value = shop.nadia_story || "";
+    pendingNadia = null; removeNadia = false;
+    setPreview($("#nadia-preview"), shop.nadia_photo ? fileUrl(shop, "nadia_photo", "600x600") : "");
+    $("#nadia-remove").hidden = !shop.nadia_photo;
   }
+
+  $("#nadia-file").addEventListener("change", async (e) => {
+    const f = e.target.files[0];
+    e.target.value = "";
+    if (!f) return;
+    try {
+      pendingNadia = await shrinkPhoto(f);
+      removeNadia = false;
+      setPreview($("#nadia-preview"), URL.createObjectURL(pendingNadia));
+      $("#nadia-remove").hidden = false;
+    } catch (err) { toast(err.message, "bad"); }
+  });
+  $("#nadia-remove").addEventListener("click", () => {
+    pendingNadia = null; removeNadia = true;
+    setPreview($("#nadia-preview"), "");
+    $("#nadia-remove").hidden = true;
+  });
 
   $("#hero-file").addEventListener("change", async (e) => {
     const f = e.target.files[0];
@@ -571,6 +595,10 @@
     fd.append("require_payment", $("#s-reqpay").checked ? "true" : "false");
     if (pendingHero) fd.append("hero", pendingHero);
     else if (removeHero) fd.append("hero", "");
+    fd.append("nadia_title", $("#s-nadia-title").value.trim());
+    fd.append("nadia_story", $("#s-nadia-story").value.trim());
+    if (pendingNadia) fd.append("nadia_photo", pendingNadia);
+    else if (removeNadia) fd.append("nadia_photo", "");
     busy(btn, true);
     try {
       await api(`/api/collections/shop/records/${shop.id}`, { method: "PATCH", body: fd });

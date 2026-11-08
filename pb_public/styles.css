@@ -87,8 +87,26 @@ h2 { font-size: clamp(1.7rem, 3.5vw, 2.3rem); }
 .hero h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); }
 .lead { font-size: 1.1rem; color: var(--muted); max-width: 34em; margin: 0 0 28px; }
 .hero-img img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 24px; background: var(--cream); }
-/* Default top image: the round Lunoah logo (until Nadia uploads her own photo) */
-.hero-img img.is-logo { aspect-ratio: 1; object-fit: contain; border-radius: 50%; background: none; max-width: 420px; margin: 0 auto; display: block; box-shadow: 0 18px 40px rgba(0,0,0,.18); }
+/* No top photo: the text takes the full width */
+.hero.no-photo { grid-template-columns: 1fr; }
+.hero.no-photo .hero-text { max-width: 40em; }
+
+/* Logo band: a soft dark signboard that melts into the banner above and the page below */
+.logo-band {
+  position: relative; height: 300px; display: grid; place-items: center; margin-top: -8px;
+  /* eased (gaussian-like) falloff: darkest behind the emblem, fully clear at every edge */
+  background: radial-gradient(ellipse 50% 50% at 50% 50%,
+    rgba(10,6,4,.72) 0%, rgba(10,6,4,.66) 18%, rgba(10,6,4,.50) 38%, rgba(10,6,4,.28) 58%, rgba(10,6,4,.10) 78%, rgba(10,6,4,0) 100%);
+}
+.logo-band-img { height: 240px; width: 240px; max-width: none; object-fit: contain; filter: drop-shadow(0 0 22px rgba(255,255,255,.12)); }
+
+/* Meet Nadia */
+.nadia { max-width: 1120px; margin: 0 auto; padding: 8px 20px 64px; display: grid; grid-template-columns: 280px 1fr; gap: 44px; align-items: center; }
+.nadia[hidden], .nadia-photo-wrap[hidden], .hero-img[hidden] { display: none; }
+.nadia-photo-wrap img { width: 280px; height: 280px; object-fit: cover; border-radius: 50%; border: 1px solid var(--line); background: var(--cream); box-shadow: 0 10px 28px rgba(0,0,0,.12); }
+.nadia-text { text-shadow: 0 0 2px var(--paper), 0 0 8px var(--paper), 0 0 14px var(--paper); }
+.nadia-text p { color: var(--ink); margin: 0 0 1em; max-width: 38em; font-size: 1.05rem; line-height: 1.65; }
+.nadia:not(:has(.nadia-photo-wrap:not([hidden]))) { grid-template-columns: 1fr; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -195,7 +213,10 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
 @media (max-width: 760px) {
   .hero { grid-template-columns: 1fr; gap: 28px; padding-top: 8px; }
   .hero-img { order: -1; }
-  .hero-img img.is-logo { max-width: 280px; }
+  .logo-band { height: 230px; }
+  .logo-band-img { height: 190px; width: 190px; }
+  .nadia { grid-template-columns: 1fr; gap: 20px; padding-top: 0; text-align: left; }
+  .nadia-photo-wrap img { width: 180px; height: 180px; margin: 0 auto; }
   .order-cols { grid-template-columns: 1fr; gap: 22px; }
   .site-header nav { gap: 14px; }
   .pay-panel { flex-direction: column; gap: 20px; padding: 18px; }
@@ -207,6 +228,7 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
 }
 @media (max-width: 360px) {
   .brand-name { font-size: 1rem; letter-spacing: .04em; }
+  .logo-band-img { height: 170px; width: 170px; }
 }
 
 /* ---------- Checkout (order → pay → send) ---------- */

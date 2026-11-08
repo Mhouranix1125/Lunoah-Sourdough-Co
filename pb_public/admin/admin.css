@@ -175,3 +175,4 @@ dialog form { padding: 24px; }
 .pk-day-head { font-family: "Inter", sans-serif; font-size: .95rem; font-weight: 700; margin: 14px 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .pk-bookings .pk-day-head:first-child { margin-top: 0; }
 .pk-booking .name { font-weight: 600; }
+#nadia-box { aspect-ratio: 1; max-width: 240px; }
