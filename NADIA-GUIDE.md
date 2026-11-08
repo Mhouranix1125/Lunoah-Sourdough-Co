@@ -46,6 +46,8 @@ Open **Pickup Times**.
 - **Settings:** *Minimum notice* is how many days ahead people must order (2 = an order on
   Monday can be picked up Wednesday at the earliest).
 - **What customers can pick now** shows exactly what the website is offering.
+- If you change your hours or notice, also update **Pickup details** and **Ordering note** in
+  **Shop Info** so those words match your pickup times.
 
 Customers pick a day and time on a calendar when they check out. Their text to you says, for example,
 `Pickup: Saturday, Nov 14 at 10:00 AM`.

@@ -232,7 +232,7 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
 .cal-head strong { font-family: var(--serif); font-weight: 600; font-size: 1.05rem; }
 .cal-nav { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; font-size: 1.3rem; line-height: 1; color: var(--ink); cursor: pointer; }
 .cal-nav:disabled { opacity: .3; cursor: default; }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
 .cal-dow span { text-align: center; font-size: .72rem; font-weight: 600; color: var(--muted); padding: 2px 0; }
 .cal-day { min-height: 40px; border: 0; border-radius: 10px; background: #fff; font: 600 .95rem var(--sans); color: var(--ink); cursor: pointer; }
 .cal-day.empty { background: none; }
@@ -247,3 +247,10 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
 .time-btn.selected { background: var(--crust); border-color: var(--crust); color: #fff; }
 .cal-summary { margin: 0; font-size: .92rem; color: var(--muted); }
 .cal-summary.chosen { color: var(--ink); font-weight: 600; }
+
+@media (max-width: 400px) {
+  #order-dialog { width: calc(100% - 8px); max-width: none; }
+  #order-dialog form { padding: 14px 8px; }
+  .cal { padding: 6px 2px; }
+  .cal-grid { gap: 1px; }
+}

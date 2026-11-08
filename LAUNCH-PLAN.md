@@ -71,7 +71,7 @@ HTTPS certificate on its own, so no extra web server is needed.
 
 **Backups:** In the dashboard (`/_/` → Settings → Backups) turn on automatic daily backups.
 
-**Updating the site design later:** edit files in `pb_public/` locally, then `scp -r pb_public root@SERVER_IP:/opt/lunoah/`. No restart needed.
+**Updating the site design later:** edit files in `pb_public/` locally, then `scp -r pb_public root@SERVER_IP:/opt/lunoah/`. No restart needed. If `pb_migrations` (or `pb_hooks`) changed too, copy those folders as well and restart: `sudo systemctl restart lunoah`.
 
 ### Simpler (less control) alternative
 **PocketHost.io** is managed PocketBase hosting: no server to look after. Upload `pb_public` and

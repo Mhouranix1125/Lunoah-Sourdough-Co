@@ -16,11 +16,23 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     return e;
   }
 
+  const getBlocks = () => api(`/api/collections/pickup_blocks/records?perPage=500&sort=start_date&filter=${encodeURIComponent(`end_date >= '${today()}'`)}`);
+  const getShop = () => api("/api/collections/shop/records?perPage=1");
+
+  function showShop() {
+    $("#pk-lead").value = shop.lead_days ?? 2;
+    $("#pk-slot").value = String(shop.slot_minutes || 30);
+    $("#pk-ahead").value = shop.book_ahead_days || 21;
+    const n = shop.lead_days ?? 2;
+    $("#pk-lead-echo").textContent = `${n} ${n === 1 ? "day" : "days"}`;
+  }
+
+  // Full load: rebuilds the editable week from the server (initial load and after saving hours).
   async function load() {
     const [hr, br, sr] = await Promise.all([
       api("/api/collections/pickup_hours/records?perPage=200&sort=weekday,start"),
-      api(`/api/collections/pickup_blocks/records?perPage=500&sort=start_date&filter=${encodeURIComponent(`end_date >= '${today()}'`)}`),
-      api("/api/collections/shop/records?perPage=1"),
+      getBlocks(),
+      getShop(),
     ]);
     hours = hr.items;
     blocks = br.items;
@@ -29,12 +41,23 @@ window.PickupAdmin = function ({ api, toast, busy }) {
       const ranges = hours.filter((x) => x.weekday === wd).map((x) => ({ start: x.start, end: x.end }));
       return { on: ranges.length > 0, ranges: ranges.length ? ranges : [{ start: "09:00", end: "13:00" }] };
     });
-    $("#pk-lead").value = shop.lead_days ?? 2;
-    $("#pk-slot").value = String(shop.slot_minutes || 30);
-    $("#pk-ahead").value = shop.book_ahead_days || 21;
-    $("#pk-lead-echo").textContent = shop.lead_days ?? 2;
+    showShop();
     renderWeek();
     renderBlocks();
+    renderPreview();
+  }
+
+  // Time off changed: refresh only the time-off list (keeps unsaved hours edits).
+  async function reloadBlocks() {
+    blocks = (await getBlocks()).items;
+    renderBlocks();
+    renderPreview();
+  }
+
+  // Settings changed: refresh only the settings (keeps unsaved hours edits).
+  async function reloadShop() {
+    shop = (await getShop()).items[0];
+    showShop();
     renderPreview();
   }
 
@@ -44,6 +67,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     i.type = "time";
     i.step = 900;
     i.value = value;
+    i.addEventListener("input", () => onChange(i.value));
     i.addEventListener("change", () => onChange(i.value));
     return i;
   }
@@ -137,7 +161,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
         try {
           await api(`/api/collections/pickup_blocks/records/${b.id}`, { method: "DELETE" });
           toast("Time off deleted");
-          await load();
+          await reloadBlocks();
         } catch (err) { toast(err.message, "bad"); }
       });
       li.append(info, del);
@@ -180,7 +204,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
       });
       $("#block-dialog").close();
       toast("Time off added");
-      await load();
+      await reloadBlocks();
     } catch (err) { toast(err.message, "bad"); }
     finally { busy(btn, false); }
   });
@@ -202,7 +226,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
         body: { lead_days: lead, slot_minutes: Number($("#pk-slot").value), book_ahead_days: ahead },
       });
       toast("Settings saved!");
-      await load();
+      await reloadShop();
     } catch (err) { toast(err.message, "bad"); }
     finally { busy(btn, false); }
   });

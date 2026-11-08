@@ -29,8 +29,12 @@
     return e;
   }
 
+  let pickupReady = null; // promise for the pickup fetch, started in parallel with the rest
+  let usingPicker = false; // which pickup input the current checkout session shows
+
   async function load() {
     $("#year").textContent = new Date().getFullYear();
+    pickupReady = loadPickup();
     try {
       const [s, b] = await Promise.all([
         fetch("/api/collections/shop/records?perPage=1").then((r) => r.json()),
@@ -48,7 +52,7 @@
       const p = await fetch("/api/collections/payment_methods/records?perPage=50&sort=sort,created").then((r) => r.json());
       renderPay(p.items || []);
     } catch (_) {}
-    await loadPickup();
+    await pickupReady;
   }
 
   // ---------- How to pay ----------
@@ -206,18 +210,19 @@
 
   // ---------- Pickup time picker ----------
   async function loadPickup() {
+    const today = S.localParts(new Date(), S.SHOP_TZ).date;
+    const blocksUrl = "/api/collections/pickup_blocks/records?perPage=500&sort=start_date" +
+      `&fields=start_date,end_date,all_day,from,to&filter=${encodeURIComponent(`end_date >= '${today}'`)}`;
     try {
       const get = (u) => fetch(u).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
       const [h, b] = await Promise.all([
         get("/api/collections/pickup_hours/records?perPage=200"),
-        get("/api/collections/pickup_blocks/records?perPage=500"),
+        get(blocksUrl),
       ]);
       pickupData = { hours: h.items || [], blocks: b.items || [] };
     } catch (_) {
       pickupData = null; // fall back to the free-text box
     }
-    $("#pickup-picker").hidden = !pickupData;
-    $("#o-day-wrap").hidden = !!pickupData;
   }
 
   function computeSlots() {
@@ -297,7 +302,7 @@
 
   function orderText() {
     const name = $("#o-name").value.trim();
-    const day = pickupData ? pickupLabel() : $("#o-day").value.trim();
+    const day = usingPicker ? pickupLabel() : $("#o-day").value.trim();
     const notes = $("#o-notes").value.trim();
     let t = `Hi Lunoah! Order ${orderCode}\n`;
     for (const { b, q } of lines()) t += `• ${q} × ${b.name} (${money(q * b.price)})\n`;
@@ -384,7 +389,10 @@
     );
     $("#to-step-2").textContent = needsPay() ? "Continue to payment →" : "Continue →";
     $("#co-paid").checked = false; // a changed cart means a new amount: confirm again
-    if (pickupData) { computeSlots(); renderCal(); }
+    usingPicker = !!pickupData; // fixed for this dialog session, even if the data arrives late
+    $("#pickup-picker").hidden = !usingPicker;
+    $("#o-day-wrap").hidden = usingPicker;
+    if (usingPicker) { computeSlots(); renderCal(); }
     goStep(1);
     $("#order-dialog").showModal();
   }
@@ -393,7 +401,7 @@
   $("#close-dialog").addEventListener("click", () => $("#order-dialog").close());
   $("#to-step-2").addEventListener("click", () => {
     if (!$("#o-name").value.trim()) { $("#o-name").focus(); $("#o-name").reportValidity(); return; }
-    if (pickupData && !pickupLabel()) return;
+    if (usingPicker && !pickupLabel()) return;
     goStep(2);
   });
   $("#to-step-3").addEventListener("click", () => { if (!$("#to-step-3").disabled) goStep(3); });
