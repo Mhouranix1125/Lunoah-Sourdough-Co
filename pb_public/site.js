@@ -144,7 +144,12 @@
       $(id).textContent = shop.allergy_note || "";
       $(id).hidden = !shop.allergy_note;
     }
-    if (shop.hero) $("#hero-img").src = fileUrl(shop, "hero", "1600x0");
+    if (shop.hero) {
+      const img = $("#hero-img");
+      img.src = fileUrl(shop, "hero", "1600x0");
+      img.alt = "Fresh bread from Lunoah Sourdough Co.";
+      img.classList.remove("is-logo"); // Nadia's own photo replaces the logo
+    }
 
     const phone = digits(shop.phone);
     if (phone) {

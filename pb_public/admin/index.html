@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <title>Lunoah · My Bakery</title>
-  <link rel="icon" href="/img/loaf.svg" type="image/svg+xml">
+  <link rel="icon" href="/img/logo/lunoah-logo-64.png" type="image/png" sizes="64x64">
+  <link rel="icon" href="/img/logo/lunoah-logo-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/img/logo/lunoah-logo-180.png">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="/theme.js"></script>
   <link rel="stylesheet" href="/admin/admin.css">
@@ -15,6 +17,7 @@
   <!-- LOGIN -->
   <section id="login-view" class="login" hidden>
     <form id="login-form" class="login-card form">
+      <img class="login-logo" src="/img/logo/lunoah-logo-512.png" width="120" height="120" alt="Lunoah Sourdough Co.">
       <h1>Lunoah</h1>
       <p class="muted">Log in to update your bread.</p>
       <label>Email <input type="email" id="l-email" autocomplete="username" required></label>
@@ -49,7 +52,7 @@
   <!-- APP -->
   <div id="app-view" hidden>
     <header class="top">
-      <strong class="logo">Lunoah</strong>
+      <strong class="logo"><img class="logo-img" src="/img/logo/lunoah-logo-64.png" width="32" height="32" alt="">Lunoah</strong>
       <div class="top-links">
         <a href="/" target="_blank" class="btn ghost small">View website ↗</a>
         <button id="logout" class="btn ghost small">Log out</button>
