@@ -1,0 +1,18 @@
+{
+  // Start the Lunoah website from VS Code: press Cmd+Shift+B (or Terminal → Run Build Task).
+  // It runs the same script as "Start Website.command" and opens the admin page in your browser.
+  // To stop it: click in the "Start Website" terminal panel and press Ctrl+C (or click the trash icon).
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Website",
+      "type": "shell",
+      "command": "./Start\\ Website.command",
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
+    }
+  ]
+}
