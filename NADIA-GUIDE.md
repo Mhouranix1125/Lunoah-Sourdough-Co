@@ -43,6 +43,9 @@ Open **Pickup Times**.
   for a second window that day. Tap **Save regular hours**.
 - **Time off:** going away, or need a few days after a trip? Tap **＋ Add time off**, pick the first
   and last day, and save. For a single busy hour, turn off **All day** and pick the times.
+- **Upcoming pickups:** each pickup time can be booked by **one** customer. When someone sends
+  their order, their time is saved here and disappears from the website for everyone else.
+  Tap **Cancel** to free a time (for example if they never texted you, or changed their mind).
 - **Settings:** *Minimum notice* is how many days ahead people must order (2 = an order on
   Monday can be picked up Wednesday at the earliest).
 - **What customers can pick now** shows exactly what the website is offering.

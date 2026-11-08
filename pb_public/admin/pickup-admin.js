@@ -5,6 +5,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
   const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   let hours = [];
   let blocks = [];
+  let bookings = [];
   let shop = null;
   let week = []; // 7 × { on, ranges: [{ start, end }] } — what Nadia is editing
 
@@ -17,11 +18,12 @@ window.PickupAdmin = function ({ api, toast, busy }) {
   }
 
   const getBlocks = () => api(`/api/collections/pickup_blocks/records?perPage=500&sort=start_date&filter=${encodeURIComponent(`end_date >= '${today()}'`)}`);
-  const getShop = () => api("/api/collections/shop/records?perPage=1");
+  const getBookings = () => api(`/api/collections/bookings/records?perPage=500&sort=date,time&filter=${encodeURIComponent(`date >= '${today()}'`)}`);
+  const getShop =() => api("/api/collections/shop/records?perPage=1");
 
   function showShop() {
     $("#pk-lead").value = shop.lead_days ?? 2;
-    $("#pk-slot").value = String(shop.slot_minutes || 30);
+    $("#pk-slot").value = String(shop.slot_minutes || 15);
     $("#pk-ahead").value = shop.book_ahead_days || 21;
     const n = shop.lead_days ?? 2;
     $("#pk-lead-echo").textContent = `${n} ${n === 1 ? "day" : "days"}`;
@@ -29,14 +31,16 @@ window.PickupAdmin = function ({ api, toast, busy }) {
 
   // Full load: rebuilds the editable week from the server (initial load and after saving hours).
   async function load() {
-    const [hr, br, sr] = await Promise.all([
+    const [hr, br, sr, bk] = await Promise.all([
       api("/api/collections/pickup_hours/records?perPage=200&sort=weekday,start"),
       getBlocks(),
       getShop(),
+      getBookings(),
     ]);
     hours = hr.items;
     blocks = br.items;
     shop = sr.items[0];
+    bookings = bk.items;
     week = DAYS.map((_, wd) => {
       const ranges = hours.filter((x) => x.weekday === wd).map((x) => ({ start: x.start, end: x.end }));
       return { on: ranges.length > 0, ranges: ranges.length ? ranges : [{ start: "09:00", end: "13:00" }] };
@@ -44,6 +48,14 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     showShop();
     renderWeek();
     renderBlocks();
+    renderBookings();
+    renderPreview();
+  }
+
+  // A booking was cancelled: refresh the list and the preview (keeps unsaved hours edits).
+  async function reloadBookings() {
+    bookings = (await getBookings()).items;
+    renderBookings();
     renderPreview();
   }
 
@@ -59,6 +71,45 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     shop = (await getShop()).items[0];
     showShop();
     renderPreview();
+  }
+
+  // ----- Upcoming pickups -----
+  function renderBookings() {
+    const box = $("#pk-bookings");
+    if (!bookings.length) {
+      box.replaceChildren(h("p", "hint", "No upcoming pickups yet."));
+      return;
+    }
+    const parts = [];
+    let day = "";
+    let ul = null;
+    for (const b of bookings) {
+      if (b.date !== day) {
+        day = b.date;
+        parts.push(h("h3", "pk-day-head", S.formatDate(b.date, "short")));
+        ul = h("ul", "pk-blocks");
+        parts.push(ul);
+      }
+      const li = h("li", "pk-block pk-booking");
+      const info = h("div");
+      info.append(h("div", "name", `${S.formatTime(b.time)} · ${b.name}`));
+      const meta = [b.items, b.total ? `$${Number(b.total).toFixed(2).replace(/\.00$/, "")}` : "", b.order_code].filter(Boolean).join(" · ");
+      if (meta) info.append(h("div", "muted small-print", meta));
+      const cancel = h("button", "btn ghost small danger-text", "Cancel");
+      cancel.type = "button";
+      cancel.addEventListener("click", async () => {
+        const when = `${S.formatTime(b.time)} pickup on ${S.formatDate(b.date, "short")}`;
+        if (!confirm(`Cancel ${b.name}'s ${when}? That time will open up for other customers.`)) return;
+        try {
+          await api(`/api/collections/bookings/records/${b.id}`, { method: "DELETE" });
+          toast(`Pickup cancelled. ${S.formatTime(b.time)} is open again.`);
+          await reloadBookings();
+        } catch (err) { toast(err.message, "bad"); }
+      });
+      li.append(info, cancel);
+      ul.append(li);
+    }
+    box.replaceChildren(...parts);
   }
 
   // ----- Regular hours -----
@@ -237,9 +288,10 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     const days = S.availableSlots({
       hours, blocks,
       leadDays: shop.lead_days ?? 2,
-      slotMinutes: shop.slot_minutes || 30,
+      slotMinutes: shop.slot_minutes || 15,
       bookAheadDays: shop.book_ahead_days || 21,
       now: new Date(),
+      taken: bookings.map((b) => ({ date: b.date, time: b.time })),
       tz: S.SHOP_TZ,
     });
     const ul = $("#pk-preview");
