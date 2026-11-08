@@ -91,14 +91,17 @@ h2 { font-size: clamp(1.7rem, 3.5vw, 2.3rem); }
 .hero.no-photo { grid-template-columns: 1fr; }
 .hero.no-photo .hero-text { max-width: 40em; }
 
-/* Logo band: a soft dark signboard that melts into the banner above and the page below */
-.logo-band {
-  position: relative; height: 300px; display: grid; place-items: center; margin-top: -8px;
-  /* eased (gaussian-like) falloff: darkest behind the emblem, fully clear at every edge */
-  background: radial-gradient(ellipse 50% 50% at 50% 50%,
-    rgba(10,6,4,.72) 0%, rgba(10,6,4,.66) 18%, rgba(10,6,4,.50) 38%, rgba(10,6,4,.28) 58%, rgba(10,6,4,.10) 78%, rgba(10,6,4,0) 100%);
+/* Logo band: a theme-coloured glow that melts into the banner above and the page below */
+.logo-band { position: relative; height: 300px; display: grid; place-items: center; margin-top: -8px; }
+/* soft glow in the theme's own banner colours; fades out at every edge, behind the emblem */
+.logo-band::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 62% 50% at 50% 50%, var(--banner-a) 0%, var(--banner-b) 45%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 75%, transparent);
+          mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 75%, transparent);
 }
-.logo-band-img { height: 240px; width: 240px; max-width: none; object-fit: contain; filter: drop-shadow(0 0 22px rgba(255,255,255,.12)); }
+.logo-band-img { position: relative; height: 240px; width: 240px; max-width: none; object-fit: contain; filter: drop-shadow(0 10px 22px rgba(0,0,0,.22)); }
 
 /* Meet Nadia */
 .nadia { max-width: 1120px; margin: 0 auto; padding: 8px 20px 64px; display: grid; grid-template-columns: 280px 1fr; gap: 44px; align-items: center; }
