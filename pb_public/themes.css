@@ -1,0 +1,33 @@
+/* Seasonal themes. Basic is the default :root in styles.css / admin.css, so it needs no block here.
+   Variables: --paper --cream --line --ink --muted --crust (buttons) --crust-dark --card --accent
+   --on-crust (text on crust) --on-ink (text on ink-coloured chips) --pattern-filter --theme-icon */
+
+html[data-theme="halloween"] {
+  color-scheme: dark;
+  --paper: #1c1a1f; --card: #2a2630; --cream: #25212b; --line: #473f52;
+  --ink: #f4ece1; --muted: #b8aec4;
+  --crust: #e8731a; --crust-dark: #ff9340; --accent: #8e5bd6;
+  --on-crust: #1c1a1f; --on-ink: #1c1a1f;
+  --order-info-bg: rgba(37, 33, 43, .8);
+  --notice-bg: #3a2a14; --notice-fg: #ffd9a3; --notice-line: #6b4a1e;
+  --error-bg: #3d1d1b; --error-fg: #ffb4ab; --error-line: #6e302c;
+  --danger: #ff8a80; --ok: #6fcf97;
+  --pattern-filter: invert(1); --pattern-strength: .07;
+  --theme-icon: "🎃";
+}
+html[data-theme="thanksgiving"] {
+  --paper: #fbf3e6; --card: #fffaf2; --cream: #f4e2bf; --line: #e3cfa6;
+  --ink: #3a2414; --muted: #7d5a3c;
+  --crust: #b0501a; --crust-dark: #8f3f10; --accent: #8c2f39;
+  --on-crust: #ffffff; --on-ink: #ffffff;
+  --order-info-bg: rgba(244, 226, 191, .75);
+  --theme-icon: "🍂";
+}
+html[data-theme="christmas"] {
+  --paper: #fbfbf8; --card: #ffffff; --cream: #e9f0e8; --line: #e7dcc0;
+  --ink: #1f2a24; --muted: #5f6e66;
+  --crust: #1f6b45; --crust-dark: #154e32; --accent: #b3202f;
+  --on-crust: #ffffff; --on-ink: #ffffff;
+  --order-info-bg: rgba(233, 240, 232, .8);
+  --theme-icon: "🎄";
+}

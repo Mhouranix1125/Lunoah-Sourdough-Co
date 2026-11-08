@@ -129,6 +129,7 @@
   }
 
   function renderShop() {
+    window.LunoahTheme.apply(shop.theme);
     if (shop.tagline) $("#tagline").textContent = shop.tagline;
     $("#about").textContent = shop.about || "";
     $("#pickup").textContent = shop.pickup_info || "";
@@ -340,7 +341,7 @@
     }
     if (name) t += `Name: ${name}\n`;
     if (day) t += `Pickup: ${day}\n`;
-    if (shop.pickup_location) t += `Pickup at: ${shop.pickup_location}\n`;
+    if (day && shop.pickup_location) t += `Pickup at: ${shop.pickup_location}\n`;
     if (notes) t += `Notes: ${notes}\n`;
     return t.trim();
   }
