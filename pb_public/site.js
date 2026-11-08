@@ -228,13 +228,15 @@
     }
   }
 
+  const myBookings = new Set(); // "date time" pairs this page has booked (orderCode is fixed per page)
+
   function computeSlots() {
     if (!pickupData) return;
     slots = S.availableSlots({
       hours: pickupData.hours,
       blocks: pickupData.blocks,
       leadDays: shop.lead_days ?? 2,
-      taken: pickupData.taken,
+      taken: pickupData.taken.filter((t) => !myBookings.has(`${t.date} ${t.time}`)),
       slotMinutes: shop.slot_minutes || 15,
       bookAheadDays: shop.book_ahead_days || 21,
       now: new Date(),
@@ -335,6 +337,7 @@
   function goStep(n) {
     if (n === 2 && !needsPay()) n = step < 2 ? 3 : 1; // skip paying when it's turned off
     step = n;
+    $("#sms-fallback").hidden = true;
     document.querySelectorAll("#order-form .step").forEach((sec) => (sec.hidden = Number(sec.dataset.step) !== n));
     $("#steps-pay").hidden = !needsPay();
     document.querySelectorAll("#steps li").forEach((li) => {
@@ -427,7 +430,6 @@
   $("#co-payer").addEventListener("input", updateContinue);
 
   // ---------- Booking the pickup time ----------
-  let bookedKey = ""; // "<orderCode> <date> <time>" already booked during this visit
   const BTN_SEND = "Open Messages";
 
   function setSending(on) {
@@ -439,8 +441,8 @@
   // Saves the booking. Returns true when the order may be sent.
   async function reserve() {
     if (!usingPicker) return true; // free-text fallback: nothing to book
-    const key = `${orderCode} ${pick.date} ${pick.time}`;
-    if (bookedKey === key) return true;
+    const key = `${pick.date} ${pick.time}`;
+    if (myBookings.has(key)) return true;
     $("#send-error").hidden = true;
     setSending(true);
     try {
@@ -456,7 +458,7 @@
           order_code: orderCode,
         }),
       });
-      if (res.ok) { bookedKey = key; return true; }
+      if (res.ok) { myBookings.add(key); return true; }
       const body = await res.json().catch(() => ({}));
       const d = body.data || {};
       const isTaken = res.status === 400 && [d.date, d.time].some((x) => x && /not_unique/.test(x.code || ""));

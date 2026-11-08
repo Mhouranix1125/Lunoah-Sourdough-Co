@@ -39,15 +39,17 @@ You can also add a big photo for the top of the website there.
 
 Open **Pickup Times**.
 
+- **Upcoming pickups:** each pickup time can be booked by **one** customer. When someone taps **Open Messages** or **Copy order** at checkout,
+  their time is saved here and disappears from the website for everyone else.
+  Tap **Cancel** to free a time (for example if they never texted you, or changed their mind).
+  If you see the same order code twice, the customer changed their time — cancel the one that isn't in their text.
 - **Regular hours:** switch on the days you do pickups and set the hours. Tap **＋ add hours**
   for a second window that day. Tap **Save regular hours**.
 - **Time off:** going away, or need a few days after a trip? Tap **＋ Add time off**, pick the first
   and last day, and save. For a single busy hour, turn off **All day** and pick the times.
-- **Upcoming pickups:** each pickup time can be booked by **one** customer. When someone sends
-  their order, their time is saved here and disappears from the website for everyone else.
-  Tap **Cancel** to free a time (for example if they never texted you, or changed their mind).
 - **Settings:** *Minimum notice* is how many days ahead people must order (2 = an order on
-  Monday can be picked up Wednesday at the earliest).
+  Monday can be picked up Wednesday at the earliest). Change the slot length only when you have no
+  upcoming pickups, so times don't overlap.
 - **What customers can pick now** shows exactly what the website is offering.
 - If you change your hours or notice, also update **Pickup details** and **Ordering note** in
   **Shop Info** so those words match your pickup times.

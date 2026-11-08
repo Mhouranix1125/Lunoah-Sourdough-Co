@@ -19,7 +19,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
 
   const getBlocks = () => api(`/api/collections/pickup_blocks/records?perPage=500&sort=start_date&filter=${encodeURIComponent(`end_date >= '${today()}'`)}`);
   const getBookings = () => api(`/api/collections/bookings/records?perPage=500&sort=date,time&filter=${encodeURIComponent(`date >= '${today()}'`)}`);
-  const getShop =() => api("/api/collections/shop/records?perPage=1");
+  const getShop = () => api("/api/collections/shop/records?perPage=1");
 
   function showShop() {
     $("#pk-lead").value = shop.lead_days ?? 2;
@@ -97,6 +97,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
       if (meta) info.append(h("div", "muted small-print", meta));
       const cancel = h("button", "btn ghost small danger-text", "Cancel");
       cancel.type = "button";
+      cancel.setAttribute("aria-label", `Cancel ${b.name}'s ${S.formatTime(b.time)} pickup`);
       cancel.addEventListener("click", async () => {
         const when = `${S.formatTime(b.time)} pickup on ${S.formatDate(b.date, "short")}`;
         if (!confirm(`Cancel ${b.name}'s ${when}? That time will open up for other customers.`)) return;

@@ -74,8 +74,8 @@ HTTPS certificate on its own, so no extra web server is needed.
 **Updating the site design later:** edit files in `pb_public/` locally, then `scp -r pb_public root@SERVER_IP:/opt/lunoah/`. No restart needed. If `pb_migrations` (or `pb_hooks`) changed too, copy those folders as well and restart: `sudo systemctl restart lunoah`.
 
 ### Simpler (less control) alternative
-**PocketHost.io** is managed PocketBase hosting: no server to look after. Upload `pb_public` and
-`pb_migrations` through their dashboard. Check their current pricing and custom-domain support before choosing it.
+**PocketHost.io** is managed PocketBase hosting: no server to look after. Upload `pb_public`, `pb_migrations` and
+`pb_hooks` (the pickup calendar needs it) through their dashboard. Check their current pricing and custom-domain support before choosing it.
 
 ## 4. Launch checklist
 - [ ] Google Voice number set up and entered in Shop Info
@@ -84,4 +84,5 @@ HTTPS certificate on its own, so no extra web server is needed.
 - [ ] Nadia's login created, she's changed her password (Shop Info → Change my password)
 - [ ] Sample breads replaced with real ones and real photos
 - [ ] Test order: add loaves on your phone → Text my order → arrives in Google Voice
+- [ ] Protect bookings from spam before going public: in the dashboard (/_/ → Settings → Rate limits) enable rate limiting for creating bookings (e.g. a few per minute per visitor), or add a captcha / deposit.
 - [ ] Automatic backups on
