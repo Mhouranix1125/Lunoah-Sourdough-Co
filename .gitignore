@@ -6,3 +6,6 @@ pb_data/
 
 # PocketBase binary (installed via Homebrew / downloaded on the server)
 pocketbase
+
+# Local scratch: agent workspaces and DB backups
+.superpowers/
