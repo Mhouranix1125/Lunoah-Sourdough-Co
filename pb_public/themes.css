@@ -17,12 +17,14 @@ html[data-theme="halloween"] {
   --theme-icon: "🎃";
 }
 html[data-theme="thanksgiving"] {
-  --paper: #fbf3e6; --card: #fffaf2; --cream: #f4e2bf; --line: #e3cfa6;
-  --ink: #3a2414; --muted: #7d5a3c;
-  --crust: #a04818; --crust-dark: #843a0f; --accent: #8c2f39;
+  --paper: #f3cf7a; --card: #fff6dc; --cream: #ebc766; --line: #c9a24a;
+  --ink: #34190d; --muted: #6a3f1c;
+  --crust: #8c1d2c; --crust-dark: #6e1422; --accent: #5b6b2a;
   --on-crust: #ffffff; --on-ink: #ffffff;
-  --order-info-bg: rgba(244, 226, 191, .75);
-  --theme-icon: "🍂";
+  --switch-on: var(--ink); --switch-off: #b99a55; --day-off: #a8905a;
+  --order-info-bg: rgba(255, 246, 220, .7);
+  --pattern-strength: .1;
+  --theme-icon: "🦃";
 }
 html[data-theme="christmas"] {
   --paper: #fbfbf8; --card: #ffffff; --cream: #e9f0e8; --line: #e7dcc0;
@@ -31,4 +33,31 @@ html[data-theme="christmas"] {
   --on-crust: #ffffff; --on-ink: #ffffff;
   --order-info-bg: rgba(233, 240, 232, .8);
   --theme-icon: "🎄";
+}
+html[data-theme="valentines"] {
+  --paper: #fde4ec; --card: #fff8fa; --cream: #f8c9d9; --line: #eba9bf;
+  --ink: #3b1522; --muted: #7a3350;
+  --crust: #b3164f; --crust-dark: #8f0f3e; --accent: #d6293e;
+  --on-crust: #ffffff; --on-ink: #ffffff;
+  --switch-on: var(--crust); --switch-off: #d9a9ba; --day-off: #c9a3b1;
+  --order-info-bg: rgba(255, 248, 250, .7);
+  --theme-icon: "💝";
+}
+html[data-theme="spring"] {
+  --paper: #e9f7ee; --card: #fbfffc; --cream: #cdeed9; --line: #a8d8b9;
+  --ink: #271c3d; --muted: #59467a;
+  --crust: #6f4aa8; --crust-dark: #573588; --accent: #f5d547;
+  --on-crust: #ffffff; --on-ink: #ffffff;
+  --switch-on: var(--crust); --switch-off: #aecbb8; --day-off: #a9bfb1;
+  --order-info-bg: rgba(251, 255, 252, .7);
+  --theme-icon: "🌷";
+}
+html[data-theme="summer"] {
+  --paper: #e3f5f8; --card: #fcffff; --cream: #c2e8ee; --line: #8fcfd9;
+  --ink: #0f2f3a; --muted: #37626e;
+  --crust: #c0391f; --crust-dark: #9e2c16; --accent: #0e7f8c;
+  --on-crust: #ffffff; --on-ink: #ffffff;
+  --switch-on: var(--ink); --switch-off: #a6ccd3; --day-off: #9dc0c8;
+  --order-info-bg: rgba(252, 255, 255, .7);
+  --theme-icon: "☀️";
 }

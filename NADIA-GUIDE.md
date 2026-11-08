@@ -62,7 +62,7 @@ Customers pick a day and time on a calendar when they check out. Their text to y
 
 ## Seasonal themes
 
-Go to **Shop Info → Website theme**, pick Basic, Halloween, Thanksgiving or Christmas, then tap **Save shop info**. Both the website and this admin page change to match.
+Go to **Shop Info → Website theme**, pick Basic, Halloween, Thanksgiving, Christmas, Valentine's Day, Spring or Summer, then tap **Save shop info**. Both the website and this admin page change to match.
 
 ## Payment apps (Venmo, Zelle, Cash App…)
 Tap **Payments**. Your website shows each app's logo under **How to pay**. Customers tap a
