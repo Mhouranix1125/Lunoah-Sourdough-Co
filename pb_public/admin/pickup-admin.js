@@ -320,7 +320,10 @@ window.PickupAdmin = function ({ api, toast, busy }) {
         toast("That time was just taken. Please pick another.", "bad");
         try { await reloadBookings(); refreshAddOptions(); } catch (e2) { toast(e2.message, "bad"); }
       } else toast(err.message, "bad");
-    } finally { busy(btn, false); }
+    } finally {
+      busy(btn, false);
+      $("#bk2-save").disabled = openDays.length === 0;
+    }
   });
 
   // ----- Settings -----
