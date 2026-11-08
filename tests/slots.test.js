@@ -117,3 +117,31 @@ test("DST: the Saturday after clocks fall back still has normal slots", () => {
 test("no hours means no dates", () => {
   assert.deepEqual(S.availableSlots(base({ hours: [], now: est("2026-11-09") })), []);
 });
+
+test("taken: a booked slot is removed", () => {
+  const taken = [{ date: "2026-11-13", time: "09:30" }];
+  const r = S.availableSlots(base({ taken, now: est("2026-11-09") }));
+  assert.equal(r[0].date, "2026-11-13");
+  assert.deepEqual(r[0].times, ["09:00", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30"]);
+});
+
+test("taken: a fully booked day disappears", () => {
+  const times = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30"];
+  const taken = times.map((time) => ({ date: "2026-11-13", time }));
+  const r = S.availableSlots(base({ taken, now: est("2026-11-09") }));
+  assert.equal(r[0].date, "2026-11-14");
+});
+
+test("taken: bookings on another date don't affect a day", () => {
+  const taken = [{ date: "2026-11-14", time: "09:00" }];
+  const r = S.availableSlots(base({ taken, now: est("2026-11-09") }));
+  assert.equal(r[0].times.length, 8);
+  assert.equal(r[1].times[0], "09:30");
+});
+
+test("taken: works with 15-minute slots", () => {
+  const taken = [{ date: "2026-11-13", time: "09:15" }];
+  const r = S.availableSlots(base({ slotMinutes: 15, taken, now: est("2026-11-09") }));
+  assert.deepEqual(r[0].times.slice(0, 3), ["09:00", "09:30", "09:45"]);
+  assert.equal(r[0].times.length, 15);
+});

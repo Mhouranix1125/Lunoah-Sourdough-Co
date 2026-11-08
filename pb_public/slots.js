@@ -45,11 +45,12 @@
 
   function availableSlots({
     hours = [], blocks = [], leadDays = 2, slotMinutes = 30, bookAheadDays = 21,
-    now = new Date(), tz = SHOP_TZ,
+    now = new Date(), tz = SHOP_TZ, taken = [],
   } = {}) {
     const today = localParts(now, tz);
     const len = Number(slotMinutes) || 30;
     const out = [];
+    const takenSet = new Set(taken.map((t) => `${t.date} ${t.time}`));
     for (let i = Number(leadDays) || 0; i <= Number(bookAheadDays); i++) {
       const date = addDays(today.date, i);
       const wd = weekday(date);
@@ -62,6 +63,7 @@
         for (let s = toMin(h.start); s + len <= end; s += len) {
           if (date === today.date && s < today.minutes) continue;
           if (dayBlocks.some((b) => s < toMin(b.to) && toMin(b.from) < s + len)) continue;
+          if (takenSet.has(`${date} ${toHM(s)}`)) continue;
           starts.add(s);
         }
       }
