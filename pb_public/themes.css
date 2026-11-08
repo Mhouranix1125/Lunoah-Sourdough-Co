@@ -3,6 +3,7 @@
    --on-crust (text on crust) --on-ink (text on ink-coloured chips) --pattern-filter --theme-icon */
 
 html[data-theme="halloween"] {
+  --banner-a: rgba(232, 115, 26, .30); --banner-b: rgba(142, 91, 214, .24);
   color-scheme: dark;
   --paper: #1c1a1f; --card: #2a2630; --cream: #25212b; --line: #473f52;
   --ink: #f4ece1; --muted: #b8aec4;
@@ -17,6 +18,7 @@ html[data-theme="halloween"] {
   --theme-icon: "🎃";
 }
 html[data-theme="thanksgiving"] {
+  --banner-a: rgba(140, 29, 44, .26); --banner-b: rgba(91, 107, 42, .22);
   --paper: #f3cf7a; --card: #fff6dc; --cream: #ebc766; --line: #c9a24a;
   --ink: #34190d; --muted: #6a3f1c;
   --crust: #8c1d2c; --crust-dark: #6e1422; --accent: #5b6b2a;
@@ -27,6 +29,7 @@ html[data-theme="thanksgiving"] {
   --theme-icon: "🦃";
 }
 html[data-theme="christmas"] {
+  --banner-a: rgba(31, 107, 69, .24); --banner-b: rgba(179, 32, 47, .16);
   --paper: #fbfbf8; --card: #ffffff; --cream: #e9f0e8; --line: #e7dcc0;
   --ink: #1f2a24; --muted: #5f6e66;
   --crust: #1f6b45; --crust-dark: #154e32; --accent: #b3202f;
@@ -35,6 +38,7 @@ html[data-theme="christmas"] {
   --theme-icon: "🎄";
 }
 html[data-theme="valentines"] {
+  --banner-a: rgba(179, 22, 79, .22); --banner-b: rgba(214, 41, 62, .12);
   --paper: #fde4ec; --card: #fff8fa; --cream: #f8c9d9; --line: #eba9bf;
   --ink: #3b1522; --muted: #7a3350;
   --crust: #b3164f; --crust-dark: #8f0f3e; --accent: #d6293e;
@@ -44,6 +48,7 @@ html[data-theme="valentines"] {
   --theme-icon: "💝";
 }
 html[data-theme="spring"] {
+  --banner-a: rgba(111, 74, 168, .22); --banner-b: rgba(245, 213, 71, .30);
   --paper: #e9f7ee; --card: #fbfffc; --cream: #cdeed9; --line: #a8d8b9;
   --ink: #271c3d; --muted: #59467a;
   --crust: #6f4aa8; --crust-dark: #573588; --accent: #f5d547;
@@ -53,6 +58,7 @@ html[data-theme="spring"] {
   --theme-icon: "🌷";
 }
 html[data-theme="summer"] {
+  --banner-a: rgba(192, 57, 31, .22); --banner-b: rgba(14, 127, 140, .24);
   --paper: #e3f5f8; --card: #fcffff; --cream: #c2e8ee; --line: #8fcfd9;
   --ink: #0f2f3a; --muted: #37626e;
   --crust: #c0391f; --crust-dark: #9e2c16; --accent: #0e7f8c;

@@ -7,6 +7,7 @@
   --crust: #8a5428;
   --crust-dark: #6e411d;
   --card: #fff;
+  --banner-a: rgba(138, 84, 40, .24); --banner-b: rgba(196, 150, 104, .16);
   --accent: var(--crust);
   --on-crust: #fff;
   --on-ink: #fff;
@@ -57,15 +58,22 @@ h2 { font-size: clamp(1.7rem, 3.5vw, 2.3rem); }
 .small { font-size: .875rem; }
 
 /* Header */
-.site-header {
-  display: flex; align-items: center; justify-content: space-between;
-  max-width: 1120px; margin: 0 auto; padding: 22px 20px;
+/* Full-width banner behind the logo, name and menu; colours come from the theme, fades out at the bottom */
+.site-header { position: relative; }
+.site-header::before {
+  content: ""; position: absolute; inset: 0 0 -28px 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(90deg, var(--banner-a), var(--banner-b));
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+          mask-image: linear-gradient(to bottom, #000 55%, transparent);
+}
+.site-header-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  max-width: 1120px; margin: 0 auto; padding: 20px 20px;
 }
 .brand { text-decoration: none; color: var(--ink); display: flex; align-items: center; gap: 10px; }
 .brand-logo { width: 44px; height: 44px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px var(--line); }
-.brand-name { font-family: var(--serif); font-size: 1.6rem; font-weight: 600; letter-spacing: .01em; white-space: nowrap; }
-.brand-name::after { content: var(--theme-icon, ""); margin-left: .25em; }
-.brand-sub { font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.brand-name { font-family: "Cinzel", var(--serif); font-size: 1.35rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.brand-name::after { content: var(--theme-icon, ""); margin-left: .4em; letter-spacing: 0; }
 .site-header nav { display: flex; gap: 22px; }
 .site-header nav a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: .95rem; white-space: nowrap; }
 .site-header nav a:hover { color: var(--crust); }
@@ -196,14 +204,9 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
   .pay-label { flex-basis: 100%; margin-bottom: -6px; }
   .pay-value { overflow-wrap: normal; }
   .pay-logo { width: 38px; height: 38px; }
-  .brand-sub { display: none; }
 }
 @media (max-width: 360px) {
-  .site-header { padding: 18px 16px; gap: 12px; }
-  .brand-name { display: none; } /* tiny phones: the round logo is the brand */
-  .brand-logo { width: 40px; height: 40px; }
-  .site-header nav { gap: 12px; }
-  .site-header nav a { font-size: .88rem; }
+  .brand-name { font-size: 1rem; letter-spacing: .04em; }
 }
 
 /* ---------- Checkout (order → pay → send) ---------- */
@@ -280,12 +283,19 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
 .pickup-late { margin-top: .5em; }
 .pickup-location a { font-weight: 600; }
 
-/* Phones: keep logo, name and menu on one line */
-@media (max-width: 480px) {
-  .site-header { gap: 10px; }
+/* Phones: banner gets two rows — logo + name on top, menu centred underneath */
+@media (max-width: 760px) {
+  .site-header-inner { flex-direction: column; gap: 10px; padding: 16px 16px 14px; }
+  .brand-logo { width: 40px; height: 40px; }
+  .brand-name { font-size: 1.15rem; }
+  .site-header nav { gap: 20px; justify-content: center; }
+}
+@media (max-width: 400px) {
   .brand { gap: 8px; }
-  .brand-logo { width: 38px; height: 38px; }
-  .brand-name { font-size: 1.3rem; }
-  .site-header nav { gap: 12px; }
-  .site-header nav a { font-size: .88rem; }
+  .brand-logo { width: 34px; height: 34px; }
+  .brand-name { font-size: 1rem; letter-spacing: .04em; }
+}
+@media (max-width: 340px) {
+  .brand-name { font-size: .9rem; letter-spacing: .02em; }
+  .site-header nav { gap: 16px; }
 }
