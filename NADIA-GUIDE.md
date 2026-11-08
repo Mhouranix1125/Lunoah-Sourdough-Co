@@ -43,6 +43,7 @@ Open **Pickup Times**.
   their time is saved here and disappears from the website for everyone else.
   Tap **Cancel** to free a time (for example if they never texted you, or changed their mind).
   If you see the same order code twice, the customer changed their time — cancel the one that isn't in their text.
+  Took an order by phone or in person? Tap **＋ Add pickup**, choose the day and time and their name, so nobody else can book that time.
 - **Regular hours:** switch on the days you do pickups and set the hours. Tap **＋ add hours**
   for a second window that day. Tap **Save regular hours**.
 - **Time off:** going away, or need a few days after a trip? Tap **＋ Add time off**, pick the first
@@ -56,6 +57,10 @@ Open **Pickup Times**.
 
 Customers pick a day and time on a calendar when they check out. Their text to you says, for example,
 `Pickup: Saturday, Nov 14 at 10:00 AM`.
+
+## Seasonal themes
+
+Go to **Shop Info → Website theme**, pick Basic, Halloween, Thanksgiving or Christmas, then tap **Save shop info**. Both the website and this admin page change to match.
 
 ## Payment apps (Venmo, Zelle, Cash App…)
 Tap **Payments**. Your website shows each app's logo under **How to pay**. Customers tap a

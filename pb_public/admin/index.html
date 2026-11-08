@@ -126,6 +126,7 @@
       <section class="pk-section">
         <h2>Upcoming pickups</h2>
         <div id="pk-bookings" class="pk-bookings"></div>
+        <button type="button" id="pk-add-booking" class="btn big full">＋ Add pickup</button>
       </section>
 
       <section class="pk-section">
@@ -235,6 +236,22 @@
         <button class="btn ghost big" type="button" id="cancel-edit">Cancel</button>
       </div>
       <button type="button" id="delete-bread" class="link-danger">Delete this bread forever</button>
+    </form>
+  </dialog>
+
+  <!-- ADD PICKUP -->
+  <dialog id="booking-dialog">
+    <form id="booking-form" class="form">
+      <h2>Add a pickup</h2>
+      <label>Day <select id="bk2-day"></select></label>
+      <label>Time <select id="bk2-time"></select></label>
+      <label>Name <input id="bk2-name" maxlength="100" required></label>
+      <label>Note <span class="muted">(optional, e.g. 2 country loaves, phone order)</span><input id="bk2-note" maxlength="1000"></label>
+      <p id="bk2-empty" class="hint" hidden>No open pickup times right now.</p>
+      <div class="dialog-actions">
+        <button class="btn big" type="submit" id="bk2-save">Save</button>
+        <button class="btn ghost big" type="button" id="bk2-cancel">Cancel</button>
+      </div>
     </form>
   </dialog>
 

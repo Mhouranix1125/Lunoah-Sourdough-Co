@@ -261,6 +261,68 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     finally { busy(btn, false); }
   });
 
+  // ----- Add a pickup (phone / in-person orders) -----
+  let openDays = [];
+  function fillTimes() {
+    const d = openDays.find((x) => x.date === $("#bk2-day").value);
+    $("#bk2-time").replaceChildren(...(d ? d.times : []).map((t) => {
+      const o = h("option", null, S.formatTime(t));
+      o.value = t;
+      return o;
+    }));
+  }
+  function refreshAddOptions() {
+    const prevDay = $("#bk2-day").value;
+    openDays = S.availableSlots({
+      hours, blocks, leadDays: 0,
+      slotMinutes: shop.slot_minutes || 15,
+      bookAheadDays: shop.book_ahead_days || 21,
+      now: new Date(), tz: S.SHOP_TZ,
+      taken: bookings.map((b) => ({ date: b.date, time: b.time })),
+    });
+    $("#bk2-day").replaceChildren(...openDays.map((d) => {
+      const o = h("option", null, S.formatDate(d.date, "short"));
+      o.value = d.date;
+      return o;
+    }));
+    if (openDays.some((d) => d.date === prevDay)) $("#bk2-day").value = prevDay;
+    fillTimes();
+    $("#bk2-empty").hidden = openDays.length > 0;
+    $("#bk2-save").disabled = openDays.length === 0;
+  }
+  $("#pk-add-booking").addEventListener("click", () => {
+    if (!shop) return toast("Pickup settings didn't load. Please refresh the page.", "bad");
+    $("#booking-form").reset();
+    refreshAddOptions();
+    $("#booking-dialog").showModal();
+  });
+  $("#bk2-day").addEventListener("change", fillTimes);
+  $("#bk2-cancel").addEventListener("click", () => $("#booking-dialog").close());
+  $("#booking-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const date = $("#bk2-day").value;
+    const time = $("#bk2-time").value;
+    const name = $("#bk2-name").value.trim();
+    if (!date || !time) return toast("Please choose a day and time.", "bad");
+    if (!name) return toast("Please enter a name.", "bad");
+    const btn = e.submitter || $("#bk2-save");
+    busy(btn, true);
+    try {
+      await api("/api/collections/bookings/records", {
+        method: "POST",
+        body: { date, time, name, items: $("#bk2-note").value.trim(), total: 0, order_code: "PHONE" },
+      });
+      $("#booking-dialog").close();
+      toast("Pickup added.");
+      await reloadBookings();
+    } catch (err) {
+      if (/unique/i.test(err.message || "")) {
+        toast("That time was just taken. Please pick another.", "bad");
+        try { await reloadBookings(); refreshAddOptions(); } catch (e2) { toast(e2.message, "bad"); }
+      } else toast(err.message, "bad");
+    } finally { busy(btn, false); }
+  });
+
   // ----- Settings -----
   $("#pk-settings").addEventListener("submit", async (e) => {
     e.preventDefault();

@@ -54,7 +54,7 @@ h1, h2, .logo { font-family: "Fraunces", Georgia, serif; font-weight: 600; margi
 .bread .name { font-weight: 600; font-size: 1.05rem; }
 .bread .meta { color: var(--muted); font-size: .92rem; }
 .tag { display: inline-block; font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-left: 6px; vertical-align: 2px; }
-.tag.hidden { background: #eee; color: #555; }
+.tag.hidden { background: var(--cream); color: var(--muted); }
 .tag.sold { background: var(--ink); color: var(--on-ink); }
 .bread-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
 .bread-actions .row { display: flex; gap: 6px; }
