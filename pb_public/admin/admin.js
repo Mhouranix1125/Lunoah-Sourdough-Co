@@ -533,7 +533,10 @@
     $("#s-received").value = shop.order_received || "";
     $("#s-allergy").value = shop.allergy_note || "";
     $("#s-insta").value = shop.instagram || "";
-    $("#s-reqpay").checked = !!shop.require_payment;
+    $("#s-notify").value = shop.notify_email || "";
+    fetch("/api/lunoah/checkout-config").then((r) => r.json())
+      .then((c) => ($("#s-stripe").textContent = c.online ? "On" : "Not set up yet"))
+      .catch(() => ($("#s-stripe").textContent = "Unknown"));
     pendingHero = null; removeHero = false;
     setPreview($("#hero-preview"), shop.hero ? fileUrl(shop, "hero", "1600x0") : "");
     $("#hero-remove").hidden = !shop.hero;
@@ -592,7 +595,7 @@
     fd.append("order_received", $("#s-received").value.trim());
     fd.append("allergy_note", $("#s-allergy").value.trim());
     fd.append("instagram", $("#s-insta").value.trim());
-    fd.append("require_payment", $("#s-reqpay").checked ? "true" : "false");
+    fd.append("notify_email", $("#s-notify").value.trim());
     if (pendingHero) fd.append("hero", pendingHero);
     else if (removeHero) fd.append("hero", "");
     fd.append("nadia_title", $("#s-nadia-title").value.trim());

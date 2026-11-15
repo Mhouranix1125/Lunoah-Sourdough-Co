@@ -88,12 +88,13 @@
           <button type="button" class="swatch" data-theme="spring"><i style="background:linear-gradient(135deg,#e9f7ee 45%,#6f4aa8 45% 75%,#f5d547 75%)"></i>Spring</button>
           <button type="button" class="swatch" data-theme="summer"><i style="background:linear-gradient(135deg,#e3f5f8 45%,#c0391f 45% 75%,#0e7f8c 75%)"></i>Summer</button>
         </div>
-        <label>Order text number <span class="muted">(the number customers text their orders to)</span>
+        <label>Shop phone number <span class="muted">(shown to customers for questions)</span>
           <input id="s-phone" type="tel" placeholder="(555) 123-4567">
         </label>
         <div class="setting-box">
-          <label class="check"><input type="checkbox" id="s-reqpay"> Customers must pay before sending their order</label>
-          <p class="muted small-print">When on, checkout asks them to pay with one of your payment apps and confirm it before they can text you the order. Turn off if you'd rather take payment at pickup.</p>
+          <p><strong>Online card payments:</strong> <span id="s-stripe">checking…</span></p>
+          <label>Email for new orders <span class="muted">(each paid order is emailed here)</span>
+            <input id="s-notify" type="email" maxlength="200" placeholder="you@example.com"></label>
         </div>
         <label>Headline <input id="s-tagline" maxlength="200"></label>
         <label>About your bread <textarea id="s-about" rows="4" maxlength="2000"></textarea></label>
@@ -179,7 +180,7 @@
 
     <!-- PAYMENTS -->
     <main id="tab-pay" class="panel" hidden>
-      <p class="hint top-hint">These show on your website under <strong>“How to pay”</strong>. Customers tap a logo to see your QR code, username or number.</p>
+      <p class="hint top-hint">These are for orders you take yourself (by phone or in person). Website orders are paid by card when the customer orders.</p>
       <ul id="pay-list" class="bread-list"></ul>
       <button id="add-pay" class="btn big full">＋ Add a payment app</button>
     </main>

@@ -176,3 +176,8 @@ dialog form { padding: 24px; }
 .pk-bookings .pk-day-head:first-child { margin-top: 0; }
 .pk-booking .name { font-weight: 600; }
 #nadia-box { aspect-ratio: 1; max-width: 240px; }
+
+/* Booking status badges (Pickup Times → Upcoming pickups) */
+.badge-pill { display: inline-block; margin-top: 4px; padding: 2px 9px; border-radius: 999px; font-size: .78rem; font-weight: 700; background: var(--cream); color: var(--ink); border: 1px solid var(--line); }
+.badge-pill.ok { color: var(--ok); border-color: var(--ok); }
+.badge-pill.bad { background: var(--danger); color: #fff; border-color: var(--danger); }

@@ -18,7 +18,9 @@ window.PickupAdmin = function ({ api, toast, busy }) {
   }
 
   const getBlocks = () => api(`/api/collections/pickup_blocks/records?perPage=500&sort=start_date&filter=${encodeURIComponent(`end_date >= '${today()}'`)}`);
-  const getBookings = () => api(`/api/collections/bookings/records?perPage=500&sort=date,time&filter=${encodeURIComponent(`date >= '${today()}'`)}`);
+  // Upcoming pickups, plus any cancelled order whose refund failed (until Nadia retries it).
+  const getBookings = () => api(`/api/collections/bookings/records?perPage=500&sort=date,time&filter=${encodeURIComponent(
+    `(date >= '${today()}' && status != 'cancelled') || refund_status = 'failed'`)}`);
   const getShop = () => api("/api/collections/shop/records?perPage=1");
 
   function showShop() {
@@ -93,21 +95,49 @@ window.PickupAdmin = function ({ api, toast, busy }) {
       const li = h("li", "pk-block pk-booking");
       const info = h("div");
       info.append(h("div", "name", `${S.formatTime(b.time)} · ${b.name}`));
-      const meta = [b.items, b.total ? `$${Number(b.total).toFixed(2).replace(/\.00$/, "")}` : "", b.order_code].filter(Boolean).join(" · ");
+      const cents = b.amount_cents || Math.round((Number(b.total) || 0) * 100);
+      const amount = `$${(cents / 100).toFixed(2)}`;
+      info.append(
+        b.refund_status === "failed" ? h("span", "badge-pill bad", "Refund failed")
+        : b.status === "paid" ? h("span", "badge-pill ok", `Paid ${amount}`)
+        : b.status === "held" ? h("span", "badge-pill", "Paying now…")
+        : h("span", "badge-pill", "Paid outside the site"));
+      const meta = [b.items, b.phone, b.notes ? `“${b.notes}”` : ""].filter(Boolean).join(" · ");
       if (meta) info.append(h("div", "muted small-print", meta));
-      const cancel = h("button", "btn ghost small danger-text", "Cancel");
-      cancel.type = "button";
-      cancel.setAttribute("aria-label", `Cancel ${b.name}'s ${S.formatTime(b.time)} pickup`);
-      cancel.addEventListener("click", async () => {
-        const when = `${S.formatTime(b.time)} pickup on ${S.formatDate(b.date, "short")}`;
-        if (!confirm(`Cancel ${b.name}'s ${when}? That time will open up for other customers.`)) return;
-        try {
-          await api(`/api/collections/bookings/records/${b.id}`, { method: "DELETE" });
-          toast(`Pickup cancelled. ${S.formatTime(b.time)} is open again.`);
-          await reloadBookings();
-        } catch (err) { toast(err.message, "bad"); }
-      });
-      li.append(info, cancel);
+      li.append(info);
+
+      if (b.refund_status === "failed") {
+        const retry = h("button", "btn ghost small", "Retry refund");
+        retry.type = "button";
+        retry.addEventListener("click", async () => {
+          busy(retry, true);
+          try {
+            const r = await api("/api/lunoah/admin/retry-refund", { method: "POST", body: { id: b.id } });
+            if (r.refund_status === "refunded") toast(`Refunded ${amount} to ${b.name}.`);
+            else toast("The refund still didn't go through. Please try again later.", "bad");
+            await reloadBookings();
+          } catch (err) { toast(err.message, "bad"); } finally { busy(retry, false); }
+        });
+        li.append(retry);
+      } else if (b.status !== "held") {
+        const cancel = h("button", "btn ghost small danger-text", "Cancel");
+        cancel.type = "button";
+        cancel.setAttribute("aria-label", `Cancel ${b.name}'s ${S.formatTime(b.time)} pickup`);
+        cancel.addEventListener("click", async () => {
+          const when = `${S.formatTime(b.time)} pickup on ${S.formatDate(b.date, "short")}`;
+          const q = b.status === "paid"
+            ? `Cancel ${b.name}'s ${when} and refund ${amount} to their card?`
+            : `Cancel ${b.name}'s ${when}? That time will open up for other customers.`;
+          if (!confirm(q)) return;
+          try {
+            const r = await api("/api/lunoah/admin/cancel", { method: "POST", body: { id: b.id } });
+            if (r.refund_status === "failed") toast("Cancelled, but the refund didn't go through. Tap “Retry refund”.", "bad");
+            else toast(`Pickup cancelled${r.refund_status === "refunded" ? ` and ${amount} refunded` : ""}. ${S.formatTime(b.time)} is open again.`);
+            await reloadBookings();
+          } catch (err) { toast(err.message, "bad"); }
+        });
+        li.append(cancel);
+      }
       ul.append(li);
     }
     box.replaceChildren(...parts);
@@ -247,6 +277,16 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     if (!start || !end) return toast("Please choose the first and last day.", "bad");
     if (end < start) return toast("The last day can't be before the first day.", "bad");
     if (!allDay && (!from || !to || to <= from)) return toast("Please choose a start and end time (end after start).", "bad");
+    // Booked pickups inside the new time off: warn, and cancel (refunding paid ones) if she agrees.
+    const toMin = (t) => { const [hh, mm] = t.split(":").map(Number); return hh * 60 + mm; };
+    const len = (shop && shop.slot_minutes) || 15;
+    const hit = bookings.filter((b) => (b.status === "paid" || b.status === "manual") && b.date >= start && b.date <= end &&
+      (allDay || (toMin(b.time) < toMin(to) && toMin(from) < toMin(b.time) + len)));
+    if (hit.length) {
+      const list = hit.map((b) => `• ${S.formatDate(b.date, "short")} ${S.formatTime(b.time)}: ${b.name}`).join("\n");
+      const one = hit.length === 1;
+      if (!confirm(`${hit.length} booked ${one ? "pickup falls" : "pickups fall"} in this time off:\n${list}\n\nCancel ${one ? "it" : "them"} (paid orders are refunded) and save the time off?`)) return;
+    }
     const btn = e.submitter || e.target.querySelector('[type=submit]');
     busy(btn, true);
     try {
@@ -254,9 +294,18 @@ window.PickupAdmin = function ({ api, toast, busy }) {
         method: "POST",
         body: { start_date: start, end_date: end, all_day: allDay, from: allDay ? "" : from, to: allDay ? "" : to, note: $("#bk-note").value.trim() },
       });
+      let failed = 0;
+      for (const b of hit) {
+        try {
+          const r = await api("/api/lunoah/admin/cancel", { method: "POST", body: { id: b.id } });
+          if (r.refund_status === "failed") failed++;
+        } catch (_) { failed++; }
+      }
       $("#block-dialog").close();
-      toast("Time off added");
+      if (failed) toast(`Time off added, but ${failed} refund${failed === 1 ? "" : "s"} didn't go through. See “Refund failed” under Upcoming pickups.`, "bad");
+      else toast(hit.length ? `Time off added. ${hit.length} pickup${hit.length === 1 ? "" : "s"} cancelled.` : "Time off added");
       await reloadBlocks();
+      if (hit.length) await reloadBookings();
     } catch (err) { toast(err.message, "bad"); }
     finally { busy(btn, false); }
   });
@@ -279,7 +328,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
       slotMinutes: shop.slot_minutes || 15,
       bookAheadDays: shop.book_ahead_days || 21,
       now: new Date(), tz: S.SHOP_TZ,
-      taken: bookings.map((b) => ({ date: b.date, time: b.time })),
+      taken: bookings.filter((b) => b.status !== "cancelled").map((b) => ({ date: b.date, time: b.time })),
     });
     $("#bk2-day").replaceChildren(...openDays.map((d) => {
       const o = h("option", null, S.formatDate(d.date, "short"));
@@ -359,7 +408,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
       slotMinutes: shop.slot_minutes || 15,
       bookAheadDays: shop.book_ahead_days || 21,
       now: new Date(),
-      taken: bookings.map((b) => ({ date: b.date, time: b.time })),
+      taken: bookings.filter((b) => b.status !== "cancelled").map((b) => ({ date: b.date, time: b.time })),
       tz: S.SHOP_TZ,
     });
     const ul = $("#pk-preview");
