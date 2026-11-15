@@ -7,7 +7,7 @@ routerAdd("GET", "/api/lunoah/taken", (e) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(from)) {
     return e.json(400, { message: "from must be a date like 2026-11-13" });
   }
-  const recs = $app.findRecordsByFilter("bookings", "date >= {:from}", "date,time", 5000, 0, { from: from });
+  const recs = $app.findRecordsByFilter("bookings", "date >= {:from} && status != 'cancelled'", "date,time", 5000, 0, { from: from });
   return e.json(200, {
     taken: recs.map((r) => ({ date: r.getString("date"), time: r.getString("time") })),
   });

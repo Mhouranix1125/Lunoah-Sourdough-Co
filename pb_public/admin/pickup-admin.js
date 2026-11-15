@@ -312,7 +312,7 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     try {
       await api("/api/collections/bookings/records", {
         method: "POST",
-        body: { date, time, name, items: $("#bk2-note").value.trim(), total: 0, order_code: "PHONE" },
+        body: { date, time, name, items: $("#bk2-note").value.trim(), total: 0, order_code: "PHONE", status: "manual", refund_status: "none" },
       });
       $("#booking-dialog").close();
       toast("Pickup added.");
