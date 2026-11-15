@@ -326,3 +326,11 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
   .brand-name { font-size: .9rem; letter-spacing: .02em; }
   .site-header nav { gap: 16px; }
 }
+
+/* ---------- Order page (after paying, and the link in the confirmation email) ---------- */
+.order-page { max-width: 560px; min-height: calc(100vh - 110px); margin: 0 auto; padding: 24px 16px 48px; }
+.order-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.order-card h1 { margin: 0; font-size: clamp(1.6rem, 6vw, 2.2rem); }
+.order-card .lead, .order-card p { margin: 0; }
+.op-details, .op-cancel { display: flex; flex-direction: column; gap: 10px; }
+.op-cancel .btn { align-self: flex-start; }

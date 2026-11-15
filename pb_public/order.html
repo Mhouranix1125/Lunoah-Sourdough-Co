@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Your order · Lunoah Sourdough Co.</title>
+  <link rel="icon" href="/img/logo/lunoah-logo-64.png" type="image/png" sizes="64x64">
+  <link rel="apple-touch-icon" href="/img/logo/lunoah-logo-180.png">
+  <meta name="theme-color" content="#000000">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="/theme.js"></script>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/themes.css">
+</head>
+<body>
+  <header class="site-header">
+   <div class="site-header-inner">
+    <a href="/" class="brand">
+      <img class="brand-logo" src="/img/logo/lunoah-logo-192.png" width="44" height="44" alt="">
+      <span class="brand-name">Lunoah Sourdough Co.</span>
+    </a>
+   </div>
+  </header>
+
+  <main class="order-page">
+    <section class="order-card" aria-live="polite">
+      <h1 id="op-title">Loading your order…</h1>
+      <p id="op-lead" class="lead"></p>
+      <div id="op-details" class="op-details" hidden>
+        <p class="review-pickup" id="op-when"></p>
+        <p id="op-where" class="muted"></p>
+        <ul id="op-lines" class="order-lines"></ul>
+      </div>
+      <div id="op-cancel-box" class="op-cancel" hidden>
+        <p class="policy" id="op-cancel-note"></p>
+        <button type="button" id="op-cancel" class="btn btn-ghost">Cancel my order</button>
+      </div>
+      <p id="op-msg" class="pickup-notice" role="status" hidden></p>
+      <p><a href="/" class="btn">Back to the bakery</a></p>
+    </section>
+  </main>
+
+  <script src="/order.js"></script>
+</body>
+</html>
