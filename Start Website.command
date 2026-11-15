@@ -8,6 +8,9 @@ if [ ! -x "$PB" ]; then
   read -r -p "Press Enter to close."; exit 1
 fi
 
+# Online card payments: keys live in stripe.env (not in git). Without it, online ordering is paused.
+if [ -f stripe.env ]; then set -a; . ./stripe.env; set +a; fi
+
 PORT=8090
 echo ""
 echo "  Lunoah Sourdough Co. is starting…"

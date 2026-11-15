@@ -9,3 +9,6 @@ pocketbase
 
 # Local scratch: agent workspaces and DB backups
 .superpowers/
+
+# Stripe keys (see stripe.env.example)
+stripe.env
