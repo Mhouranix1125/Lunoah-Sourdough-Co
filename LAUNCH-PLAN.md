@@ -93,7 +93,12 @@ after Stripe confirms the payment. Without the steps below, the site shows "Onli
    *Refunds*, and nothing else. Copy the key (`rk_live_…`).
 3. **Webhook:** Developers → Webhooks → **Add endpoint**
    `https://lunoahsourdoughco.com/api/lunoah/stripe-webhook`, events `checkout.session.completed`,
-   `checkout.session.expired` and `charge.refunded`. Copy the signing secret (`whsec_…`).
+   `checkout.session.expired`, `checkout.session.async_payment_succeeded`,
+   `checkout.session.async_payment_failed` and `charge.refunded`. Copy the signing secret (`whsec_…`).
+   **Payment methods:** Settings → Payment methods. Stripe decides which ways to pay appear at checkout from
+   here (the site can't). Recommended: keep **Cards** (includes Apple Pay and Google Pay) and **Link**; turn
+   **off Bank / ACH** (settles days later) and **Klarna / Affirm** (much higher fees). Cash App Pay and Amazon Pay
+   are optional. The site copes safely with any of them (a slow payment holds the time until it clears).
 4. **On the server:** create `/opt/lunoah/stripe.env` (see `stripe.env.example`):
    ```bash
    sudo tee /opt/lunoah/stripe.env >/dev/null <<'EOF'

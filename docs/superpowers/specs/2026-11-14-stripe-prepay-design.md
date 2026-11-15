@@ -15,7 +15,7 @@ for a full refund **within 2 hours** of paying. When Nadia cancels, the customer
 
 | Topic | Decision |
 |---|---|
-| Processor | **Stripe Checkout**, the hosted payment page. Payment methods are cards (which includes Apple Pay and Google Pay) and Link. Methods that settle later, like bank transfers, are off. |
+| Processor | **Stripe Checkout**, the hosted payment page. Stripe API `2026-10-28.endive` (pinned) no longer accepts `payment_method_types`: which methods appear is set in the Stripe Dashboard. Recommended: cards (incl. Apple Pay / Google Pay) and Link; bank debits off. The server still copes with methods that settle later: `checkout.session.completed` arrives `unpaid`, the hold is kept until `async_payment_succeeded` (confirm) or `async_payment_failed` (free), and after 24 h the slot is freed and a late success is refunded. |
 | Venmo / Zelle | Removed from online checkout. The public "How to pay" section is hidden. Nadia's saved payment apps stay in the admin, renamed "Payment apps (for orders you take yourself)". |
 | Holding a slot | Tapping **Pay** creates a *held* booking, then a Stripe Checkout Session that expires in 30 min. The hold expires after 35 min, so it always outlasts the Stripe session. |
 | What counts as paid | Only the server can mark a booking paid. It does that after Stripe's signed webhook arrives **or** after the server fetches the session from Stripe, and in both cases the session's amount, currency, `payment_status` and booking id must all match. |
