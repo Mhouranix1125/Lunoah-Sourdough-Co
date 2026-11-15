@@ -64,11 +64,17 @@ function releaseHold(rec) {
     var exp = X.api("POST", "/v1/checkout/sessions/" + sid + "/expire", null, null);
     if (exp.status !== 200) {
       var g = X.api("GET", "/v1/checkout/sessions/" + sid, null, null);
+      var keepUntil = rec.getInt("hold_expires") + FORCE_RELEASE_MS;
       if (g.status === 200 && g.json.status === "complete") {
-        return confirmPaid(rec.id, g.json) ? "paid" : "released";
+        // confirmPaid either confirms, or refunds and deletes the hold itself
+        if (g.json.payment_status === "paid") return confirmPaid(rec.id, g.json) ? "paid" : "released";
+        // Paid with a method that settles later: keep the slot while it settles. If it takes
+        // longer than a day, free it; a late success is then refunded by confirmPaid.
+        if (Date.now() < keepUntil) return "kept";
+      } else {
+        var stuck = g.status !== 200 || g.json.status === "open";
+        if (stuck && Date.now() < keepUntil) return "kept";
       }
-      var stuck = g.status !== 200 || g.json.status === "open";
-      if (stuck && Date.now() < rec.getInt("hold_expires") + FORCE_RELEASE_MS) return "kept";
     }
   }
   $app.delete(rec);
@@ -160,8 +166,8 @@ function checkout(e) {
 
   var site = $os.getenv("SITE_URL");
   var r = X.api("POST", "/v1/checkout/sessions", {
+    // Payment methods are chosen in the Stripe Dashboard (Settings → Payment methods), not here.
     mode: "payment",
-    payment_method_types: ["card", "link"],
     client_reference_id: rec.id,
     metadata: { booking: rec.id },
     expires_at: Math.floor(now / 1000) + SESSION_SEC,

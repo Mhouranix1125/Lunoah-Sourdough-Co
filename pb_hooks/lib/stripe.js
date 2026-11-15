@@ -35,8 +35,12 @@ function configured(getenv) {
   return !!(getenv("STRIPE_SECRET_KEY") && getenv("STRIPE_WEBHOOK_SECRET") && getenv("SITE_URL"));
 }
 
+// The Stripe API version this site was built and tested against. Pinned so a Stripe-side
+// default change can't silently alter responses. Change only after re-testing checkout.
+var API_VERSION = "2026-10-28.endive";
+
 function api(method, path, params, idemKey) {
-  var headers = { Authorization: "Bearer " + $os.getenv("STRIPE_SECRET_KEY") };
+  var headers = { Authorization: "Bearer " + $os.getenv("STRIPE_SECRET_KEY"), "Stripe-Version": API_VERSION };
   if (idemKey) headers["Idempotency-Key"] = idemKey;
   var url = "https://api.stripe.com" + path;
   var body = "";

@@ -35,9 +35,10 @@ routerAdd("POST", "/api/lunoah/stripe-webhook", (e) => {
   if (!ok) return e.json(400, { message: "bad signature" });
   const ev = JSON.parse(raw);
   const o = (ev.data && ev.data.object) || {};
-  if (ev.type === "checkout.session.completed") {
+  if (ev.type === "checkout.session.completed" || ev.type === "checkout.session.async_payment_succeeded") {
+    // completed may still be "unpaid" for methods that settle later; confirmPaid ignores those
     if (o.metadata && o.metadata.booking) B.confirmPaid(o.metadata.booking, o);
-  } else if (ev.type === "checkout.session.expired") {
+  } else if (ev.type === "checkout.session.expired" || ev.type === "checkout.session.async_payment_failed") {
     const rec = o.metadata && o.metadata.booking ? B.findById(o.metadata.booking) : null;
     if (rec && rec.getString("status") === "held") $app.delete(rec);
   } else if (ev.type === "charge.refunded") {
