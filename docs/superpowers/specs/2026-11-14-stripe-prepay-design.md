@@ -24,7 +24,7 @@ for a full refund **within 2 hours** of paying. When Nadia cancels, the customer
 | Customer cancel | Full refund through a private link, valid until **paid time + 2 h** or the pickup time, whichever comes first. After that the link shows Nadia's number instead. |
 | Nadia cancel | Always a full refund for Stripe-paid bookings. "Paid outside the site" bookings are just cancelled. |
 | Cancelled bookings | Kept as history with `status = cancelled`. The one-per-slot rule ignores them. |
-| Notifications | Email Nadia for each paid order. Email the customer a confirmation with the pickup details and the cancel link. Stripe sends its own receipt. No texting step. |
+| Notifications | Email Nadia for each paid order and each customer cancellation. Email the customer a confirmation with the pickup details and the cancel link, and a notice if Nadia cancels. Stripe sends its own receipt. No texting step. |
 | Contact | Name and US phone number (10 digits) are required on the site. Stripe collects the email. |
 | Stripe not configured | Checkout is replaced by "Online ordering is paused. Text Nadia at …". It **never** falls back to the honor system. |
 | Secrets | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and `SITE_URL` are environment variables, kept only on the server. They are never in git, the database or the admin. |
@@ -50,7 +50,7 @@ Status only ever moves forward. A held record is deleted, never cancelled, becau
 - `notes` text, max 500
 - `lines` json: snapshot `[{ bread, name, qty, price_cents }]`
 - `amount_cents` number (integer)
-- `hold_expires` date, `paid_at` date, `cancelled_at` date
+- `hold_expires`, `paid_at`, `cancelled_at`: integer epoch milliseconds (number fields)
 - `cancelled_by` select: `customer`, `nadia`, `stripe`
 - `refund_status` select: `none`, `refunded`, `failed`, `partial`
 - `email` text (from Stripe), `stripe_session` text, `stripe_payment_intent` text
