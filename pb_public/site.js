@@ -3,7 +3,7 @@
   const cart = {}; // id -> qty
   let breads = [];
   let shop = {};
-  let payMethods = [];
+  let online = false; // Stripe is set up on the server
   const S = window.LunoahSlots;
   let pickupData = null; // { hours, blocks } or null when the picker can't be used
   let slots = [];         // [{ date, times }] from slots.js
@@ -30,7 +30,6 @@
   }
 
   let pickupReady = null; // promise for the pickup fetch, started in parallel with the rest
-  let usingPicker = false; // which pickup input the current checkout session shows
 
   async function load() {
     $("#year").textContent = new Date().getFullYear();
@@ -47,85 +46,12 @@
       return;
     }
     renderShop();
-    renderGrid();
     try {
-      const p = await fetch("/api/collections/payment_methods/records?perPage=50&sort=sort,created").then((r) => r.json());
-      renderPay(p.items || []);
-    } catch (_) {}
+      online = !!(await fetch("/api/lunoah/checkout-config").then((r) => r.json())).online;
+    } catch (_) { online = false; }
+    renderGrid();
     await pickupReady;
-  }
-
-  // ---------- How to pay ----------
-  function svg(html) {
-    const s = document.createElement("span");
-    s.className = "pay-logo";
-    s.innerHTML = html; // static SVG from pay-apps.js (no user content)
-    return s;
-  }
-
-  function copyBtn(text) {
-    return el("button", {
-      type: "button", class: "copy",
-      onclick: async (e) => {
-        const b = e.currentTarget;
-        try { await navigator.clipboard.writeText(text); } catch (_) { prompt("Copy:", text); return; }
-        b.textContent = "Copied!";
-        setTimeout(() => (b.textContent = "Copy"), 1800);
-      },
-    }, "Copy");
-  }
-
-  function payDetails(m) {
-    const app = PAY_APPS[m.kind] || PAY_APPS.other;
-    const rows = [];
-    const row = (label, value) => rows.push(el("div", { class: "pay-row" }, el("span", { class: "pay-label" }, label), el("strong", { class: "pay-value" }, value), copyBtn(value)));
-    if (m.handle && app.handle) row(app.handle.label.replace(/^\$Cashtag$/, "Cashtag"), (app.handle.prefix || "") + m.handle);
-    if (m.phone) row("Phone", m.phone);
-    if (m.email) row("Email", m.email);
-
-    const info = el("div", { class: "pay-info" },
-      el("h3", {}, svg(app.logo), payName(m)),
-      ...rows
-    );
-    const link = app.link && app.link(m);
-    if (link) info.append(el("a", { class: "btn", href: link, target: "_blank", rel: "noopener" }, app.linkLabel + " ↗"));
-    if (app.tip) info.append(el("p", { class: "muted small" }, app.tip));
-    if (m.note) info.append(el("p", { class: "pay-note" }, m.note));
-    info.append(el("p", { class: "muted small" }, "Please include your name so we can match your payment to your order."));
-
-    const parts = [info];
-    if (m.qr) {
-      parts.unshift(el("figure", { class: "pay-qr" },
-        el("img", { src: fileUrl(m, "qr"), alt: payName(m) + " QR code" }),
-        el("figcaption", {}, "Scan with your phone's camera")
-      ));
-    }
-    return parts;
-  }
-
-  function renderPay(methods) {
-    payMethods = methods;
-    if (!methods.length) return;
-    $("#pay").hidden = false;
-    $("#nav-pay").hidden = false;
-    const logos = $("#pay-logos");
-    const panel = $("#pay-panel");
-    let open = null;
-    logos.replaceChildren(...methods.map((m) => {
-      const btn = el("button", { type: "button", class: "pay-btn", "aria-expanded": "false", "aria-controls": "pay-panel" },
-        svg((PAY_APPS[m.kind] || PAY_APPS.other).logo), el("span", {}, payName(m)));
-      btn.addEventListener("click", () => {
-        logos.querySelectorAll(".pay-btn").forEach((b) => { b.classList.remove("active"); b.setAttribute("aria-expanded", "false"); });
-        if (open === m.id) { open = null; panel.hidden = true; return; }
-        open = m.id;
-        btn.classList.add("active");
-        btn.setAttribute("aria-expanded", "true");
-        panel.replaceChildren(...payDetails(m));
-        panel.hidden = false;
-      });
-      return btn;
-    }));
-
+    resumeFromStripe();
   }
 
   function renderShop() {
@@ -167,12 +93,7 @@
 
     const phone = digits(shop.phone);
     if (phone) {
-      $("#phone-line").replaceChildren(
-        "Text your order to ",
-        el("br"),
-        el("a", { class: "phone-big", href: "sms:" + phone }, shop.phone)
-      );
-      document.querySelectorAll(".phone-text").forEach((n) => (n.textContent = shop.phone));
+      $("#phone-line").replaceChildren("Questions? Text Nadia at ", el("a", { href: "sms:" + phone }, shop.phone), ".");
     }
     if (shop.instagram) {
       const handle = shop.instagram.replace(/^@/, "");
@@ -186,7 +107,9 @@
       grid.innerHTML = '<p class="muted">Fresh bread is coming soon. Check back shortly!</p>';
       return;
     }
-    const canOrder = !!digits(shop.phone);
+    const canOrder = online;
+    $("#ordering-paused").hidden = online;
+    if (!online) $("#ordering-paused").textContent = `Online ordering is paused. Text Nadia at ${shop.phone || "the number on this page"}.`;
     grid.replaceChildren(
       ...breads.map((b) => {
         const qtyEl = el("span", {}, String(cart[b.id] || 0));
@@ -254,11 +177,9 @@
       ]);
       pickupData = { hours: h.items || [], blocks: b.items || [], taken: t.taken || [] };
     } catch (_) {
-      pickupData = null; // fall back to the free-text box
+      pickupData = null; // checkout shows "Couldn't load pickup times"
     }
   }
-
-  const myBookings = new Set(); // "date time" pairs this page has booked (orderCode is fixed per page)
 
   function computeSlots() {
     if (!pickupData) return;
@@ -266,7 +187,7 @@
       hours: pickupData.hours,
       blocks: pickupData.blocks,
       leadDays: shop.lead_days ?? 2,
-      taken: pickupData.taken.filter((t) => !myBookings.has(`${t.date} ${t.time}`)),
+      taken: pickupData.taken,
       slotMinutes: shop.slot_minutes || 15,
       bookAheadDays: shop.book_ahead_days || 21,
       now: new Date(),
@@ -286,7 +207,7 @@
       if (!r.ok) return;
       pickupData.taken = (await r.json()).taken || [];
     } catch (_) { return; } // keep the last known list
-    if (usingPicker && step === 1) { computeSlots(); renderCal(); }
+    if (step === 1) { computeSlots(); renderCal(); }
   }
 
   function shiftMonth(n) {
@@ -340,215 +261,138 @@
   $("#cal-prev").addEventListener("click", () => shiftMonth(-1));
   $("#cal-next").addEventListener("click", () => shiftMonth(1));
 
-  // ---------- Checkout: 1 order → 2 pay → 3 send ----------
+  // ---------- Checkout: 1 your order → 2 review & pay (Stripe) ----------
+  const SAVED = "lunoah_checkout";
   let step = 1;
-  let chosen = null; // payment method picked in step 2
-  let orderCode = "";
-  const needsPay = () => !!shop.require_payment && payMethods.length > 0;
-  const amt = () => total().toFixed(2);
-
-  function orderText() {
-    const name = $("#o-name").value.trim();
-    const day = usingPicker ? pickupLabel() : $("#o-day").value.trim();
-    const notes = $("#o-notes").value.trim();
-    let t = `Hi Lunoah! Order ${orderCode}\n`;
-    for (const { b, q } of lines()) t += `• ${q} × ${b.name} (${money(q * b.price)})\n`;
-    t += `Total: ${money(total())}\n`;
-    if (needsPay() && chosen) {
-      const payer = $("#co-payer").value.trim();
-      t += `Paid: ${money(total())} via ${payName(chosen)}${payer ? ` (from ${payer})` : ""}\n`;
-    }
-    if (name) t += `Name: ${name}\n`;
-    if (day) t += `Pickup: ${day}\n`;
-    if (day && shop.pickup_location) t += `Pickup at: ${shop.pickup_location}\n`;
-    if (notes) t += `Notes: ${notes}\n`;
-    return t.trim();
-  }
+  const save = (v) => { try { sessionStorage.setItem(SAVED, JSON.stringify(v)); } catch (_) {} };
+  const saved = () => { try { return JSON.parse(sessionStorage.getItem(SAVED) || "null"); } catch (_) { return null; } };
+  const phoneOk = (p) => { let d = p.replace(/\D/g, ""); if (d.length === 11 && d[0] === "1") d = d.slice(1); return d.length === 10 && !/^[01]/.test(d); };
 
   function goStep(n) {
-    if (n === 2 && !needsPay()) n = step < 2 ? 3 : 1; // skip paying when it's turned off
     step = n;
-    $("#sms-fallback").hidden = true;
-    $("#order-received").hidden = true;
     document.querySelectorAll("#order-form .step").forEach((sec) => (sec.hidden = Number(sec.dataset.step) !== n));
-    $("#steps-pay").hidden = !needsPay();
     document.querySelectorAll("#steps li").forEach((li) => {
       const k = Number(li.dataset.step);
       li.classList.toggle("current", k === n);
       li.classList.toggle("done", k < n);
     });
-    $("#back-to-pay").textContent = "← Back";
-    $("#back-to-pay").dataset.back = needsPay() ? "2" : "1";
-    if (n === 2) renderCheckoutApps();
-    if (n === 3) $("#order-preview").textContent = orderText();
+    if (n === 2) renderReview();
     $("#order-form").scrollTop = 0;
   }
 
-  function infoRow(label, value, copyValue) {
-    return el("div", { class: "pay-row" }, el("span", { class: "pay-label" }, label), el("strong", { class: "pay-value" }, value), copyBtn(copyValue || value));
-  }
-
-  function renderCheckoutApps() {
-    $("#pay-total").textContent = money(total());
-    const box = $("#co-apps");
-    box.replaceChildren(...payMethods.map((m) => {
-      const b = el("button", { type: "button", class: "pay-btn" + (chosen && chosen.id === m.id ? " active" : "") },
-        svg((PAY_APPS[m.kind] || PAY_APPS.other).logo), el("span", {}, payName(m)));
-      b.addEventListener("click", () => { chosen = m; $("#co-paid").checked = false; renderCheckoutApps(); });
-      return b;
-    }));
-    const panel = $("#co-panel");
-    $("#co-confirm").hidden = panel.hidden = !chosen;
-    if (!chosen) return updateContinue();
-
-    const m = chosen;
-    const app = PAY_APPS[m.kind] || PAY_APPS.other;
-    const note = `Lunoah order ${orderCode}`;
-    const info = el("div", { class: "pay-info" },
-      infoRow("Amount", money(total()), amt()));
-    if (m.handle && app.handle) info.append(infoRow(app.handle.label.replace(/^\$Cashtag$/, "Cashtag"), (app.handle.prefix || "") + m.handle));
-    if (m.phone) info.append(infoRow("Phone", m.phone));
-    if (m.email) info.append(infoRow("Email", m.email));
-    info.append(infoRow("Payment note", note.replace("-", "‑"), note)); // non-breaking hyphen on screen only
-    const link = (app.payLink && app.payLink(m, amt(), note)) || (app.link && app.link(m));
-    if (link) info.append(el("a", { class: "btn", href: link, target: "_blank", rel: "noopener" },
-      app.payLink ? `${app.linkLabel}: ${money(total())} filled in ↗` : `${app.linkLabel} ↗`));
-    if (app.tip) info.append(el("p", { class: "muted small" }, app.tip));
-    if (m.note) info.append(el("p", { class: "pay-note" }, m.note));
-    const parts = [info];
-    if (m.qr) parts.push(el("figure", { class: "pay-qr" },
-      el("img", { src: fileUrl(m, "qr"), alt: payName(m) + " QR code" }),
-      el("figcaption", {}, m.kind === "zelle" ? "Or scan in your bank's app" : "Or scan with your phone's camera")));
-    panel.replaceChildren(...parts);
-
-    $("#co-paid-label").textContent = `I've sent ${money(total())} with ${payName(m)}`;
-    if (!$("#co-payer").value.trim()) $("#co-payer").value = $("#o-name").value.trim();
-    updateContinue();
-  }
-
-  function updateContinue() {
-    $("#to-step-3").disabled = !(chosen && $("#co-paid").checked && $("#co-payer").value.trim());
-  }
-
-  function showReceived() {
-    $("#order-received-text").textContent = shop.order_received || "Your order has been received. Nadia will reach out to you shortly.";
-    $("#order-received").hidden = false;
-  }
-
-  function openDialog() {
-    if (!orderCode) orderCode = "LUN-" + String(Math.floor(1000 + Math.random() * 9000));
-    const ul = $("#order-lines");
+  function renderLines(ul) {
     ul.replaceChildren(
       ...lines().map(({ b, q }) => el("li", {}, el("span", {}, `${q} × ${b.name}`), el("span", {}, money(q * b.price)))),
       el("li", { class: "total" }, el("span", {}, "Total"), el("span", {}, money(total())))
     );
-    $("#to-step-2").textContent = needsPay() ? "Continue to payment →" : "Continue →";
-    $("#co-paid").checked = false; // a changed cart means a new amount: confirm again
-    usingPicker = !!pickupData; // fixed for this dialog session, even if the data arrives late
-    $("#pickup-picker").hidden = !usingPicker;
-    $("#o-day-wrap").hidden = usingPicker;
-    if (usingPicker) { computeSlots(); renderCal(); }
-    $("#pickup-notice").hidden = true; $("#send-error").hidden = true; $("#sms-fallback").hidden = true; $("#order-received").hidden = true;
+  }
+
+  function renderReview() {
+    renderLines($("#review-lines"));
+    $("#review-pickup").textContent = `Pickup: ${pickupLabel()}` + (shop.pickup_location ? ` · ${shop.pickup_location}` : "");
+    $("#review-contact").textContent = `${$("#o-name").value.trim()} · ${$("#o-phone").value.trim()}`;
+    $("#pay-btn").textContent = `Pay ${money(total())} securely →`;
+    $("#pay-btn").disabled = false;
+  }
+
+  function openDialog(notice) {
+    renderLines($("#order-lines"));
+    const usable = !!pickupData;
+    $("#pickup-picker").hidden = !usable;
+    $("#pickup-error").hidden = usable;
+    if (usable) { computeSlots(); renderCal(); }
+    $("#pickup-notice").hidden = true;
+    $("#pay-error").hidden = true;
+    $("#checkout-notice").hidden = !notice;
+    if (notice) $("#checkout-notice").textContent = notice;
     goStep(1);
-    $("#order-dialog").showModal();
+    if (!$("#order-dialog").open) $("#order-dialog").showModal();
     refreshTaken();
   }
 
-  $("#bar-btn").addEventListener("click", openDialog);
+  $("#bar-btn").addEventListener("click", () => openDialog(""));
   $("#close-dialog").addEventListener("click", () => $("#order-dialog").close());
   $("#to-step-2").addEventListener("click", () => {
     if (!$("#o-name").value.trim()) { $("#o-name").focus(); $("#o-name").reportValidity(); return; }
-    if (usingPicker && !pickupLabel()) return;
+    if (!phoneOk($("#o-phone").value)) {
+      $("#o-phone").setCustomValidity("Please enter a 10-digit phone number.");
+      $("#o-phone").reportValidity();
+      return;
+    }
+    if (!pickupData || !pickupLabel()) return;
     goStep(2);
   });
-  $("#to-step-3").addEventListener("click", () => { if (!$("#to-step-3").disabled) goStep(3); });
+  $("#o-phone").addEventListener("input", () => $("#o-phone").setCustomValidity(""));
   document.querySelectorAll("#order-form [data-back]").forEach((b) => b.addEventListener("click", () => goStep(Number(b.dataset.back))));
-  $("#co-paid").addEventListener("change", updateContinue);
-  $("#co-payer").addEventListener("input", updateContinue);
 
-  // ---------- Booking the pickup time ----------
-  const BTN_SEND = "Open Messages";
-
-  function setSending(on) {
-    $("#send-text").disabled = on;
-    $("#copy-order").disabled = on;
-    $("#send-text").textContent = on ? "Saving your pickup time…" : BTN_SEND;
+  function backToTimes(msg) {
+    pick.time = "";
+    goStep(1);
+    refreshTaken().then(() => { computeSlots(); renderCal(); });
+    $("#pickup-notice").textContent = msg;
+    $("#pickup-notice").hidden = false;
   }
 
-  // Saves the booking. Returns true when the order may be sent.
-  async function reserve() {
-    if (!usingPicker) return true; // free-text fallback: nothing to book
-    const key = `${pick.date} ${pick.time}`;
-    if (myBookings.has(key)) return true;
-    $("#send-error").hidden = true;
-    setSending(true);
+  $("#pay-btn").addEventListener("click", async () => {
+    const btn = $("#pay-btn");
+    btn.disabled = true;
+    btn.textContent = "Holding your pickup time…";
+    $("#pay-error").hidden = true;
+    const prev = saved();
+    const body = {
+      items: lines().map(({ b, q }) => ({ id: b.id, qty: q })),
+      date: pick.date, time: pick.time,
+      name: $("#o-name").value.trim(), phone: $("#o-phone").value.trim(), notes: $("#o-notes").value.trim(),
+      previous: prev && prev.token ? prev.token : "",
+    };
+    let res, data;
     try {
-      const res = await fetch("/api/collections/bookings/records", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          date: pick.date,
-          time: pick.time,
-          name: $("#o-name").value.trim(),
-          items: lines().map(({ b, q }) => `${q} × ${b.name}`).join(", "),
-          total: total(),
-          order_code: orderCode,
-        }),
-      });
-      if (res.ok) { myBookings.add(key); return true; }
-      const body = await res.json().catch(() => ({}));
-      const d = body.data || {};
-      const isTaken = res.status === 400 && [d.date, d.time].some((x) => x && /not_unique/.test(x.code || ""));
-      if (isTaken) {
-        const lost = S.formatTime(pick.time);
-        pickupData.taken.push({ date: pick.date, time: pick.time });
-        pick.time = "";
-        goStep(1);
-        computeSlots();
-        renderCal();
-        $("#pickup-notice").textContent = `Sorry, ${lost} was just taken. Please pick another time.`;
-        $("#pickup-notice").hidden = false;
-        refreshTaken();
-        return false;
-      }
-      throw new Error(String(res.status));
+      res = await fetch("/api/lunoah/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      data = await res.json().catch(() => ({}));
     } catch (_) {
-      $("#send-error").textContent = "We couldn't save your pickup time. Please check your connection and try again.";
-      $("#send-error").hidden = false;
-      return false;
-    } finally {
-      setSending(false);
+      data = { code: "network" };
     }
-  }
+    if (res && res.ok && data.url) {
+      save({ token: data.token, cart: { ...cart }, name: body.name, phone: body.phone, notes: body.notes, date: body.date, time: body.time });
+      location.href = data.url;
+      return;
+    }
+    renderReview();
+    if (data.code === "taken") return backToTimes(`Sorry, ${S.formatTime(body.time)} was just taken. Please pick another time.`);
+    if (data.code === "sold_out" || data.code === "unavailable") {
+      const b = breads.find((x) => x.name === data.bread);
+      if (b) { delete cart[b.id]; b.sold_out = true; renderGrid(); updateBar(); }
+      $("#order-dialog").close();
+      if (lines().length) openDialog(data.message);
+      return;
+    }
+    $("#pay-error").textContent = data.code === "network"
+      ? "We couldn't reach the bakery. Please check your connection and try again."
+      : data.message || "Something went wrong. Please try again.";
+    $("#pay-error").hidden = false;
+  });
 
-  $("#send-text").addEventListener("click", async () => {
-    if (needsPay() && !(chosen && $("#co-paid").checked)) return goStep(2); // can't skip paying
-    if (!(await reserve())) return;
-    showReceived();
-    // "?&body=" works on both iPhone and Android. A real link click is more reliable than
-    // setting location.href (which can leave the page stuck on desktop browsers).
-    const href = `sms:${digits(shop.phone)}?&body=${encodeURIComponent(orderText())}`;
-    const a = el("a", { href, hidden: "" });
-    document.body.append(a);
-    a.click();
-    a.remove();
-    // Saving the booking took a moment, and some phones then refuse to open Messages
-    // automatically, so offer a real link the customer can tap.
-    $("#sms-link").href = href;
-    $("#sms-fallback").hidden = false;
-  });
-  $("#copy-order").addEventListener("click", async (e) => {
-    if (needsPay() && !(chosen && $("#co-paid").checked)) return goStep(2);
-    if (!(await reserve())) return;
-    showReceived();
+  // Came back from Stripe without paying (?back=<token>): free the hold and reopen checkout.
+  async function resumeFromStripe() {
+    const u = new URL(location.href);
+    const back = u.searchParams.get("back");
+    if (!back) return;
+    history.replaceState(null, "", u.pathname + u.hash);
+    const s = saved();
     try {
-      await navigator.clipboard.writeText(orderText());
-      e.target.textContent = "Copied!";
-      setTimeout(() => (e.target.textContent = "Copy order"), 2000);
-    } catch (_) {
-      prompt("Copy your order:", orderText());
-    }
-  });
+      await fetch("/api/lunoah/release", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: back }) });
+    } catch (_) {}
+    try { sessionStorage.removeItem(SAVED); } catch (_) {}
+    if (!s || s.token !== back) return;
+    for (const [id, q] of Object.entries(s.cart || {})) if (breads.some((b) => b.id === id && !b.sold_out)) cart[id] = q;
+    renderGrid(); updateBar();
+    if (!lines().length) return;
+    $("#o-name").value = s.name || ""; $("#o-phone").value = s.phone || ""; $("#o-notes").value = s.notes || "";
+    pick = { date: s.date || "", time: s.time || "" };
+    await refreshTaken();
+    openDialog("Payment not completed. Your pickup time was released.");
+    if (pickupData && slots.some((d) => d.date === pick.date && d.times.includes(pick.time))) goStep(2);
+  }
 
   load();
 })();

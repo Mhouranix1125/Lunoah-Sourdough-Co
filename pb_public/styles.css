@@ -301,6 +301,8 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
 .pickup-notice, .send-error { margin: 0; padding: 10px 12px; border-radius: 10px; font-size: .92rem; font-weight: 600; }
 .pickup-notice { background: var(--notice-bg); color: var(--notice-fg); border: 1px solid var(--notice-line); }
 .send-error { background: var(--error-bg); color: var(--error-fg); border: 1px solid var(--error-line); }
+.policy { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--paper); border: 1px solid var(--line); font-size: .9rem; }
+.review-pickup { margin: 0; font-weight: 600; }
 #send-text:disabled, #copy-order:disabled { opacity: .6; cursor: wait; }
 
 .order-received { background: var(--card); border: 1.5px solid var(--accent); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; margin-top: 12px; }
