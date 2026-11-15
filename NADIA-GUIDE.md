@@ -41,15 +41,16 @@ You can also add a big photo for the top of the website there.
 
 Open **Pickup Times**.
 
-- **Upcoming pickups:** each pickup time can be booked by **one** customer. When someone taps **Open Messages** or **Copy order** at checkout,
-  their time is saved here and disappears from the website for everyone else.
-  Tap **Cancel** to free a time (for example if they never texted you, or changed their mind).
-  If you see the same order code twice, the customer changed their time — cancel the one that isn't in their text.
+- **Upcoming pickups:** each pickup time can be booked by **one** customer. A time is booked once the
+  customer has paid, and it disappears from the website for everyone else. See **How orders reach you** below
+  for what each label means and how cancelling works.
   Took an order by phone or in person? Tap **＋ Add pickup**, choose the day and time and their name, so nobody else can book that time.
 - **Regular hours:** switch on the days you do pickups and set the hours. Tap **＋ add hours**
   for a second window that day. Tap **Save regular hours**.
 - **Time off:** going away, or need a few days after a trip? Tap **＋ Add time off**, pick the first
   and last day, and save. For a single busy hour, turn off **All day** and pick the times.
+  If people have already booked pickups in that time, the site lists them and asks before cancelling them.
+  Paid ones are refunded automatically.
 - **Settings:** *Minimum notice* is how many days ahead people must order (2 = an order on
   Monday can be picked up Wednesday at the earliest). Change the slot length only when you have no
   upcoming pickups, so times don't overlap.
@@ -58,16 +59,15 @@ Open **Pickup Times**.
   **Shop Info** so those words match your pickup times.
   If your pickup spot changes, keep **Pickup location** in **Shop Info** current too.
 
-Customers pick a day and time on a calendar when they check out. Their text to you says, for example,
-`Pickup: Saturday, Nov 14 at 10:00 AM`.
+Customers pick a day and time on a calendar when they check out.
 
 ## Seasonal themes
 
 Go to **Shop Info → Website theme**, pick Basic, Halloween, Thanksgiving, Christmas, Valentine's Day, Spring or Summer, then tap **Save shop info**. Both the website and this admin page change to match.
 
 ## Payment apps (Venmo, Zelle, Cash App…)
-Tap **Payments**. Your website shows each app's logo under **How to pay**. Customers tap a
-logo to see your QR code, username or number.
+Website orders are paid by card, so these are only for orders you take yourself (by phone or in person).
+Tap **Payments** to keep your details handy.
 - **Change a username, number or QR code:** tap **Edit** next to the app, change it, tap **Save**.
   For the QR code, open the app (e.g. Venmo → your QR code), take a screenshot, and choose that screenshot.
 - **Add another app:** tap **＋ Add a payment app** and pick it (Cash App, PayPal, Apple Cash, or Other,
@@ -77,26 +77,28 @@ logo to see your QR code, username or number.
 
 ## How orders reach you
 Customers tap **+** on the breads they want, then **Checkout**:
-1. **Your order:** their name and pickup day & time
-2. **Pay:** they pick Venmo, Zelle, etc., pay the total, and tick "I've sent $__".
-   Venmo opens with the amount and the order code already filled in.
-3. **Send order:** their phone opens a text to your order number with everything filled in.
+1. **Your order:** their name, phone number, and pickup day & time.
+2. **Review & pay:** they pay the full amount by card, Apple Pay or Google Pay on a secure payment page (Stripe).
 
-The text you get looks like:
-```
-Hi Lunoah! Order LUN-4821
-• 2 × Seeded Whole Wheat ($24)
-Total: $24
-Paid: $24 via Venmo (from Sam R)
-Name: Sam Rivera
-Pickup: Saturday, Nov 14 at 10:00 AM
-```
-**Before baking, check the money arrived:** open Venmo or your bank's Zelle and look for a payment
-of that amount from that name, with the order code in the note. The website can't check this for you.
-Then reply to the text to confirm.
+**Their pickup time is booked only after the payment goes through.** Nobody can hold your times without paying.
 
-**Want to take payment at pickup instead?** **Shop Info** → turn off
-"Customers must pay before sending their order" → **Save**.
+**You get an email for every order** with their name, phone, loaves, pickup time and any notes. Set which email
+address in **Shop Info → Email for new orders**. Every order also shows under **Pickup Times → Upcoming pickups**.
+
+What the labels mean:
+- **Paid $24.00:** paid online. Nothing to check, the money is real.
+- **Paid outside the site:** a pickup you added yourself.
+- **Paying now…:** someone is on the payment page right now. If they don't finish, the time frees itself within about 35 minutes.
+- **Refund failed** (red): a cancelled order whose refund didn't go through. Tap **Retry refund**.
+
+**Cancelling:**
+- **Customers** can cancel for a full refund **within 2 hours of ordering**, using the link in their
+  confirmation email. You get an email when they do. After 2 hours the link tells them to text you.
+- **You** can cancel any pickup: tap **Cancel**. Paid orders are refunded in full to their card automatically,
+  and the customer gets an email telling them.
+
+**Your money:** Stripe sends your payments to your bank, usually within 2 business days. The Stripe app on your
+phone shows every payment, refund and payout. Stripe keeps about 2.9% + 30¢ of each order.
 
 ## Forgot your password?
 Ask your website helper to reset it. It takes them a minute.

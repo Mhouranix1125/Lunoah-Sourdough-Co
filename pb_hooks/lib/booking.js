@@ -204,7 +204,7 @@ function summary(rec) {
     refund_status: rec.getString("refund_status"),
     cancel_until: deadline || null, cancel_until_label: deadline ? T.clock(deadline) : "",
     can_cancel: !!deadline && Date.now() < deadline,
-    location: s.getString("pickup_location"), phone: s.getString("phone"),
+    location: s.getString("pickup_location"), phone: s.getString("phone"), message: s.getString("order_received"),
   };
 }
 

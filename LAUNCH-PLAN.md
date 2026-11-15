@@ -5,14 +5,15 @@ bought or signed up for yet.
 
 | Piece | Recommendation | Cost (approx.) |
 |---|---|---|
-| Order texting number | **Google Voice** (free, separate number) | $0 |
+| Shop phone (customer questions) | **Google Voice** (free, separate number) | $0 |
 | Domain | **lunoahsourdough.com** at Cloudflare Registrar or Porkbun | ~$10–12 / year |
 | Hosting | Small Linux server (DigitalOcean or Hetzner) running this folder | ~$4–6 / month |
+| Card payments | **Stripe** (no monthly fee) | ~2.9% + 30¢ per order |
 | **Total** | | **~$60–85 / year** |
 
 ---
 
-## 1. Order texting number: Google Voice (do this first)
+## 1. Shop phone number: Google Voice (do this first)
 
 **Why:** It's free, gives Nadia a real phone number separate from her personal one, and
 texts arrive in the Google Voice app with normal notifications. She can reply from the app.
@@ -60,6 +61,9 @@ HTTPS certificate on its own, so no extra web server is needed.
    scp -r pb_public pb_migrations pb_hooks root@SERVER_IP:/opt/lunoah/
    scp deploy/lunoah.service root@SERVER_IP:/etc/systemd/system/
    ```
+   Online ordering stays **paused** until the Stripe keys are in place (section 4).
+   ```bash
+   ```
    *Optional:* also copy `pb_data/` if you want to bring over the breads/photos Nadia already entered locally.
 4. On the server: `sudo systemctl enable --now lunoah`
 5. Create accounts on the server (the local ones don't carry over unless you copied `pb_data`):
@@ -77,12 +81,44 @@ HTTPS certificate on its own, so no extra web server is needed.
 **PocketHost.io** is managed PocketBase hosting: no server to look after. Upload `pb_public`, `pb_migrations` and
 `pb_hooks` (the pickup calendar needs it) through their dashboard. Check their current pricing and custom-domain support before choosing it.
 
-## 4. Launch checklist
+## 4. Card payments (Stripe) and order emails
+
+Customers pay in full by card, Apple Pay or Google Pay when they order. A pickup time is booked only
+after Stripe confirms the payment. Without the steps below, the site shows "Online ordering is paused".
+
+1. **Nadia signs up at stripe.com in her own name.** Business type: Individual / sole proprietor. Add her bank
+   account for payouts. Set the statement descriptor to `LUNOAH SOURDOUGH` (what shows on card statements).
+   Install the **Stripe** app on her phone to see payments and payouts.
+2. **API key:** Developers → API keys → **Create restricted key**. Give it **Write** on *Checkout Sessions* and
+   *Refunds*, and nothing else. Copy the key (`rk_live_…`).
+3. **Webhook:** Developers → Webhooks → **Add endpoint**
+   `https://lunoahsourdough.com/api/lunoah/stripe-webhook`, events `checkout.session.completed`,
+   `checkout.session.expired` and `charge.refunded`. Copy the signing secret (`whsec_…`).
+4. **On the server:** create `/opt/lunoah/stripe.env` (see `stripe.env.example`):
+   ```bash
+   sudo tee /opt/lunoah/stripe.env >/dev/null <<'EOF'
+   STRIPE_SECRET_KEY=rk_live_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   SITE_URL=https://lunoahsourdough.com
+   EOF
+   sudo chmod 600 /opt/lunoah/stripe.env
+   sudo systemctl daemon-reload && sudo systemctl restart lunoah
+   ```
+   Admin → **Shop Info** should now say "Online card payments: **On**".
+5. **Emails** (order notices to Nadia, confirmations with the cancel link to customers):
+   `/_/` → Settings → Mail settings → turn on SMTP. With the bakery Gmail: host `smtp.gmail.com`, port `587`,
+   username = the Gmail address, password = a Google **app password** (Google Account → Security → App passwords).
+   Sender name `Lunoah Sourdough Co.`, sender address = the Gmail address. Click **Send test email**.
+   Then in Admin → **Shop Info**, set **Email for new orders**.
+6. **Real test:** order the cheapest loaf with a real card. Check that both emails arrive, then use the
+   **Cancel my order** link in the confirmation email and confirm the refund shows in Stripe.
+
+## 5. Launch checklist
 - [ ] Google Voice number set up and entered in Shop Info
 - [ ] Domain bought in Nadia's name, auto-renew on
 - [ ] Server running, `https://` works for both `lunoahsourdough.com` and `www`
 - [ ] Nadia's login created, she's changed her password (Shop Info → Change my password)
 - [ ] Sample breads replaced with real ones and real photos
-- [ ] Test order: add loaves on your phone → Text my order → arrives in Google Voice
-- [ ] Protect bookings from spam before going public: in the dashboard (/_/ → Settings → Rate limits) enable rate limiting for creating bookings (e.g. a few per minute per visitor), or add a captcha / deposit.
+- [ ] Stripe account in Nadia's name, live keys + webhook set, "Online card payments: On"
+- [ ] Order emails arrive (Nadia + customer); a real order placed, cancelled and refunded
 - [ ] Automatic backups on

@@ -40,7 +40,7 @@
 
     if (o.status === "paid") {
       $("#op-title").textContent = "You're booked!";
-      $("#op-lead").textContent = `Thank you, ${o.name}. A confirmation email is on its way.`;
+      $("#op-lead").textContent = `Thank you, ${o.name}! ${o.message || ""} A confirmation email is on its way.`.replace(/  +/g, " ");
       if (o.can_cancel) {
         $("#op-cancel-box").hidden = false;
         $("#op-cancel-note").textContent = `Changed your mind? You can cancel for a full refund until ${o.cancel_until_label}.`;
