@@ -11,7 +11,7 @@ Type=simple
 User=root
 WorkingDirectory=/opt/lunoah
 EnvironmentFile=-/opt/lunoah/stripe.env
-ExecStart=/opt/lunoah/pocketbase serve lunoahsourdough.com www.lunoahsourdough.com --dir=/opt/lunoah/pb_data --migrationsDir=/opt/lunoah/pb_migrations --publicDir=/opt/lunoah/pb_public --hooksDir=/opt/lunoah/pb_hooks
+ExecStart=/opt/lunoah/pocketbase serve lunoahsourdoughco.com www.lunoahsourdoughco.com --dir=/opt/lunoah/pb_data --migrationsDir=/opt/lunoah/pb_migrations --publicDir=/opt/lunoah/pb_public --hooksDir=/opt/lunoah/pb_hooks
 Restart=always
 RestartSec=5
 LimitNOFILE=4096

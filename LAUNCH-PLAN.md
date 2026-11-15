@@ -6,7 +6,7 @@ bought or signed up for yet.
 | Piece | Recommendation | Cost (approx.) |
 |---|---|---|
 | Shop phone (customer questions) | **Google Voice** (free, separate number) | $0 |
-| Domain | **lunoahsourdough.com** at Cloudflare Registrar or Porkbun | ~$10–12 / year |
+| Domain | **lunoahsourdoughco.com** at Namecheap ✅ bought | ~$10–15 / year |
 | Hosting | Small Linux server (DigitalOcean or Hetzner) running this folder | ~$4–6 / month |
 | Card payments | **Stripe** (no monthly fee) | ~2.9% + 30¢ per order |
 | **Total** | | **~$60–85 / year** |
@@ -21,7 +21,7 @@ Her personal number stays private.
 
 **Steps (about 10 minutes, on Nadia's phone):**
 1. Install the **Google Voice** app (iPhone or Android) and sign in with a Google account.
-   Ideally use a new one just for the bakery, e.g. `lunoahsourdough@gmail.com`.
+   Use the bakery's Gmail account (already created ✅).
 2. Pick a local number when prompted.
 3. Verify with her existing cell number (Google requires this, but it's never shown to customers).
 4. In Google Voice settings: turn **on** text notifications. Optionally turn **off**
@@ -32,15 +32,15 @@ Her personal number stays private.
 ("Thanks! Got your order, we'll confirm soon"), business hours, and a shared inbox if someone
 helps her. Swap the number in Shop Info, nothing else changes.
 
-## 2. Domain: lunoahsourdough.com
+## 2. Domain: lunoahsourdoughco.com ✅ bought (Namecheap)
 
-Available as of Nov 5, 2026 (checked via public registry lookup). `lunoah.com` is taken.
-- Buy at **Cloudflare Registrar** (at-cost pricing, free privacy) or **Porkbun**.
-- Register it under Nadia's name/email so she owns it. Turn on auto-renew.
-- After you have a server (step 3), add DNS records:
-  - `A` record `@` → server IP
-  - `A` record `www` → server IP
-  - If using Cloudflare: set both to **DNS only** (grey cloud) so PocketBase can get its HTTPS certificate.
+- Make sure **auto-renew** is on and **domain privacy** (Withheld for Privacy, free at Namecheap) is on.
+- The account should be in Nadia's name, or transferred to her later, so she owns it.
+- After you have a server (step 3): Namecheap → Domain List → **Manage** → **Advanced DNS**.
+  Delete the default parking records (the `CNAME www` → parkingpage and the `URL Redirect` for `@`), then add:
+  - `A Record`, host `@`, value = server IP, TTL Automatic
+  - `A Record`, host `www`, value = server IP, TTL Automatic
+  DNS changes usually take a few minutes (up to an hour). PocketBase then gets the HTTPS certificate by itself.
 
 ## 3. Hosting: one small server
 
@@ -70,8 +70,8 @@ HTTPS certificate on its own, so no extra web server is needed.
    ```bash
    cd /opt/lunoah && ./pocketbase superuser upsert YOU@email.com 'StrongPassword' --dir=pb_data
    ```
-   Then open `https://lunoahsourdough.com/_/` → log in → **bakers** → **New record** → Nadia's email + password.
-6. Visit `https://lunoahsourdough.com` and `https://lunoahsourdough.com/admin`. Done.
+   Then open `https://lunoahsourdoughco.com/_/` → log in → **bakers** → **New record** → Nadia's email + password.
+6. Visit `https://lunoahsourdoughco.com` and `https://lunoahsourdoughco.com/admin`. Done.
 
 **Backups:** In the dashboard (`/_/` → Settings → Backups) turn on automatic daily backups.
 
@@ -92,14 +92,14 @@ after Stripe confirms the payment. Without the steps below, the site shows "Onli
 2. **API key:** Developers → API keys → **Create restricted key**. Give it **Write** on *Checkout Sessions* and
    *Refunds*, and nothing else. Copy the key (`rk_live_…`).
 3. **Webhook:** Developers → Webhooks → **Add endpoint**
-   `https://lunoahsourdough.com/api/lunoah/stripe-webhook`, events `checkout.session.completed`,
+   `https://lunoahsourdoughco.com/api/lunoah/stripe-webhook`, events `checkout.session.completed`,
    `checkout.session.expired` and `charge.refunded`. Copy the signing secret (`whsec_…`).
 4. **On the server:** create `/opt/lunoah/stripe.env` (see `stripe.env.example`):
    ```bash
    sudo tee /opt/lunoah/stripe.env >/dev/null <<'EOF'
    STRIPE_SECRET_KEY=rk_live_...
    STRIPE_WEBHOOK_SECRET=whsec_...
-   SITE_URL=https://lunoahsourdough.com
+   SITE_URL=https://lunoahsourdoughco.com
    EOF
    sudo chmod 600 /opt/lunoah/stripe.env
    sudo systemctl daemon-reload && sudo systemctl restart lunoah
@@ -115,8 +115,8 @@ after Stripe confirms the payment. Without the steps below, the site shows "Onli
 
 ## 5. Launch checklist
 - [ ] Google Voice number set up and entered in Shop Info
-- [ ] Domain bought in Nadia's name, auto-renew on
-- [ ] Server running, `https://` works for both `lunoahsourdough.com` and `www`
+- [x] Domain bought (lunoahsourdoughco.com, Namecheap); auto-renew + privacy on
+- [ ] Server running, `https://` works for both `lunoahsourdoughco.com` and `www`
 - [ ] Nadia's login created, she's changed her password (Shop Info → Change my password)
 - [ ] Sample breads replaced with real ones and real photos
 - [ ] Stripe account in Nadia's name, live keys + webhook set, "Online card payments: On"

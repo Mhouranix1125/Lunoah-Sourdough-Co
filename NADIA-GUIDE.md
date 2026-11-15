@@ -1,7 +1,7 @@
 # Your Lunoah Website: How To
 
 Everything happens on one page: **your website address + `/admin`**
-(for example `lunoahsourdough.com/admin`). It works on your phone or computer.
+(for example `lunoahsourdoughco.com/admin`). It works on your phone or computer.
 
 Log in with your email and password. You'll stay logged in for 30 days.
 
