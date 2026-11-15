@@ -49,3 +49,35 @@ routerAdd("POST", "/api/lunoah/stripe-webhook", (e) => {
 cronAdd("lunoah_holds", "*/5 * * * *", () => {
   require(`${__hooks}/lib/booking.js`).sweep();
 });
+
+routerAdd("POST", "/api/lunoah/order/cancel", (e) => {
+  const B = require(`${__hooks}/lib/booking.js`);
+  let rec = B.byToken((e.requestInfo().body || {}).token);
+  if (!rec) return B.fail(e, 404, "not_found", "We couldn't find that order.");
+  rec = B.refreshHeld(rec);
+  const s = B.summary(rec);
+  if (s.status === "cancelled") return e.json(200, s);
+  if (s.status !== "paid") return B.fail(e, 409, "not_paid", "This order isn't paid yet.");
+  if (!s.can_cancel) return B.fail(e, 409, "closed", "This order can no longer be cancelled online.", { phone: s.phone });
+  B.cancelBooking(rec, "customer");
+  return e.json(200, B.summary(B.findById(rec.id)));
+});
+
+routerAdd("POST", "/api/lunoah/admin/cancel", (e) => {
+  const B = require(`${__hooks}/lib/booking.js`);
+  const rec = B.findById(String((e.requestInfo().body || {}).id || ""));
+  if (!rec) return B.fail(e, 404, "not_found", "That pickup no longer exists.");
+  if (rec.getString("status") === "held") return B.fail(e, 409, "held", "This customer is paying right now. The time frees itself if they don't finish.");
+  B.cancelBooking(rec, "nadia");
+  return e.json(200, { status: rec.getString("status"), refund_status: rec.getString("refund_status") });
+}, $apis.requireAuth("bakers"));
+
+routerAdd("POST", "/api/lunoah/admin/retry-refund", (e) => {
+  const B = require(`${__hooks}/lib/booking.js`);
+  const rec = B.findById(String((e.requestInfo().body || {}).id || ""));
+  if (!rec || rec.getString("refund_status") !== "failed") return B.fail(e, 409, "no_refund", "There's no failed refund to retry.");
+  const r = B.refundPayment(rec.getString("stripe_payment_intent"), "refund-" + rec.id + "-" + Date.now());
+  rec.set("refund_status", r.status === 200 ? "refunded" : "failed");
+  $app.save(rec);
+  return e.json(200, { refund_status: rec.getString("refund_status") });
+}, $apis.requireAuth("bakers"));

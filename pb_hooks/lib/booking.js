@@ -226,7 +226,29 @@ function syncRefund(charge) {
   $app.save(rec);
 }
 
+// Cancels a paid or manual booking. Stripe-paid bookings are refunded in full. The slot is
+// freed even if the refund fails (refund_status = failed, Nadia can retry from the admin).
+function cancelBooking(rec, by) {
+  var st = rec.getString("status");
+  if (st === "cancelled") return rec;
+  var pi = rec.getString("stripe_payment_intent");
+  var refund = "none";
+  if (st === "paid" && pi) {
+    var r = refundPayment(pi, "refund-" + rec.id);
+    refund = r.status === 200 ? "refunded" : "failed";
+    if (refund === "failed") $app.logger().error("lunoah refund failed", "id", rec.id, "error", JSON.stringify(r.json.error || {}));
+  }
+  rec.set("status", "cancelled");
+  rec.set("cancelled_at", Date.now());
+  rec.set("cancelled_by", by);
+  rec.set("refund_status", refund);
+  $app.save(rec);
+  lib("mail").cancelledEmail(rec, by);
+  return rec;
+}
+
 module.exports = {
+  cancelBooking: cancelBooking,
   checkout: checkout, confirmPaid: confirmPaid, releaseHold: releaseHold, sweep: sweep, byToken: byToken,
   findById: findById, refreshHeld: refreshHeld, summary: summary, refundPayment: refundPayment,
   syncRefund: syncRefund, shopRecord: shopRecord, fail: fail,
