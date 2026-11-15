@@ -45,9 +45,9 @@
 
   function availableSlots({
     hours = [], blocks = [], leadDays = 2, slotMinutes = 30, bookAheadDays = 21,
-    now = new Date(), tz = SHOP_TZ, taken = [],
+    now = new Date(), tz = SHOP_TZ, taken = [], today: todayIn = null,
   } = {}) {
-    const today = localParts(now, tz);
+    const today = todayIn || localParts(now, tz); // the server passes today (it has no Intl)
     const len = Number(slotMinutes) || 30;
     const out = [];
     const takenSet = new Set(taken.map((t) => `${t.date} ${t.time}`));

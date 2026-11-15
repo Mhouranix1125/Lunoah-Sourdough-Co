@@ -128,7 +128,7 @@ test("availableSlots: an injected today replaces the clock", () => {
 
 - [ ] **Step 2: Run them and confirm they fail**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: FAIL, `Cannot find module '../pb_hooks/lib/shoptime.js'`, and the slots test fails on the date.
 
 - [ ] **Step 3: Implement `pb_hooks/lib/shoptime.js`**
@@ -202,7 +202,7 @@ In `pb_public/slots.js`, change the `availableSlots` signature and first line:
 
 - [ ] **Step 4: Run the tests and confirm they pass**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: all pass.
 
 - [ ] **Step 5: Commit**
@@ -311,7 +311,7 @@ test("cancelDeadline is 2 hours after paying or the pickup, whichever is first",
 
 - [ ] **Step 2: Run them and confirm they fail**
 
-Run: `node --test tests/order.test.js`
+Run: `node --test`
 Expected: FAIL, `Cannot find module`.
 
 - [ ] **Step 3: Implement `pb_hooks/lib/order.js`**
@@ -391,7 +391,7 @@ module.exports = {
 
 - [ ] **Step 4: Run all tests and confirm they pass**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: all pass.
 
 - [ ] **Step 5: Commit**
@@ -462,7 +462,7 @@ test("configured needs all three settings", () => {
 
 - [ ] **Step 2: Run them and confirm they fail**
 
-Run: `node --test tests/stripe.test.js`
+Run: `node --test`
 Expected: FAIL, `Cannot find module`.
 
 - [ ] **Step 3: Implement `pb_hooks/lib/stripe.js`**
@@ -530,7 +530,7 @@ module.exports = { encode: encode, verifySignature: verifySignature, configured:
 
 - [ ] **Step 4: Run all tests and confirm they pass**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: all pass.
 
 - [ ] **Step 5: Commit**
@@ -1988,7 +1988,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 - [ ] **Step 1: Unit tests**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: all pass.
 
 - [ ] **Step 2: Walk the spec's end-to-end list in a 375px browser**, with `stripe listen` and Mailpit running

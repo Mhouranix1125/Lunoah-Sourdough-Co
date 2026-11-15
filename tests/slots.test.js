@@ -145,3 +145,9 @@ test("taken: works with 15-minute slots", () => {
   assert.deepEqual(r[0].times.slice(0, 3), ["09:00", "09:30", "09:45"]);
   assert.equal(r[0].times.length, 15);
 });
+
+test("availableSlots: an injected today replaces the clock", () => {
+  // the clock says Saturday Nov 14, but today says Thursday Nov 12 at noon (lead 0)
+  const r = S.availableSlots(base({ leadDays: 0, now: est("2026-11-14"), today: { date: "2026-11-12", minutes: 720 } }));
+  assert.equal(r[0].date, "2026-11-13");
+});
