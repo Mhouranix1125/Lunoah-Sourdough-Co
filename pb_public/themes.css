@@ -1,9 +1,11 @@
 /* Seasonal themes. Basic is the default :root in styles.css / admin.css, so it needs no block here.
    Variables: --paper --cream --line --ink --muted --crust (buttons) --crust-dark --card --accent
    --on-crust (text on crust) --on-ink (text on ink-coloured chips) --pattern-filter --theme-icon
-   --band-bg --band-ink --band-trim (the masthead band at the top) */
+   --band-bg --band-ink --band-trim (the masthead band at the top)
+   --wood --wood-base (the Meet Nadia frame: a real wood per theme, made by tools/make-wood-textures.py) */
 
 html[data-theme="halloween"] {
+  --wood: url("/img/wood-ebony.webp"); --wood-base: #2c221e;
   --band-bg: linear-gradient(90deg, #5a2a0a, #2e1a4d); --band-ink: #f4ece1; --band-trim: #e8731a;
   --banner-a: rgba(232, 115, 26, .30); --banner-b: rgba(142, 91, 214, .24);
   color-scheme: dark;
@@ -20,6 +22,7 @@ html[data-theme="halloween"] {
   --theme-icon: "🎃";
 }
 html[data-theme="thanksgiving"] {
+  --wood: url("/img/wood-walnut.webp"); --wood-base: #5c3c28;
   --band-bg: linear-gradient(90deg, #6e1422, #3f4a1c); --band-ink: #fff6dc; --band-trim: #d98e2b;
   --banner-a: rgba(140, 29, 44, .26); --banner-b: rgba(91, 107, 42, .22);
   --paper: #f3cf7a; --card: #fff6dc; --cream: #ebc766; --line: #c9a24a;
@@ -32,6 +35,7 @@ html[data-theme="thanksgiving"] {
   --theme-icon: "🦃";
 }
 html[data-theme="christmas"] {
+  --wood: url("/img/wood-pine.webp"); --wood-base: #d2a662;
   --band-bg: linear-gradient(90deg, #123f29, #1f6b45); --band-ink: #ffffff; --band-trim: #b3202f;
   --banner-a: rgba(31, 107, 69, .24); --banner-b: rgba(179, 32, 47, .16);
   --paper: #fbfbf8; --card: #ffffff; --cream: #e9f0e8; --line: #e7dcc0;
@@ -42,6 +46,7 @@ html[data-theme="christmas"] {
   --theme-icon: "🎄";
 }
 html[data-theme="valentines"] {
+  --wood: url("/img/wood-bloodwood.webp"); --wood-base: #80282a;
   --band-bg: linear-gradient(90deg, #7a0c35, #b3164f); --band-ink: #ffffff; --band-trim: #d6293e;
   --banner-a: rgba(179, 22, 79, .22); --banner-b: rgba(214, 41, 62, .12);
   --paper: #fde4ec; --card: #fff8fa; --cream: #f8c9d9; --line: #eba9bf;
@@ -53,6 +58,7 @@ html[data-theme="valentines"] {
   --theme-icon: "💝";
 }
 html[data-theme="spring"] {
+  --wood: url("/img/wood-ash.webp"); --wood-base: #cec4b4;
   --band-bg: linear-gradient(90deg, #4a2c78, #6f4aa8); --band-ink: #ffffff; --band-trim: #f5d547;
   --banner-a: rgba(111, 74, 168, .22); --banner-b: rgba(245, 213, 71, .30);
   --paper: #e9f7ee; --card: #fbfffc; --cream: #cdeed9; --line: #a8d8b9;
@@ -64,6 +70,7 @@ html[data-theme="spring"] {
   --theme-icon: "🌷";
 }
 html[data-theme="summer"] {
+  --wood: url("/img/wood-driftwood.webp"); --wood-base: #9e988e;
   --band-bg: linear-gradient(90deg, #0a5059, #0e7f8c); --band-ink: #ffffff; --band-trim: #e8603f;
   --banner-a: rgba(192, 57, 31, .22); --banner-b: rgba(14, 127, 140, .24);
   --paper: #e3f5f8; --card: #fcffff; --cream: #c2e8ee; --line: #8fcfd9;

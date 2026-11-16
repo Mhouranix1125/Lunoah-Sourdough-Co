@@ -1,4 +1,5 @@
 :root {
+  --wood: url("/img/wood-oak.webp"); --wood-base: #a8703e; /* Meet Nadia frame; each theme picks a real wood */
   --sprig: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 22'%3E%3Cpath d='M4 11h112' stroke='%239a8a6a' stroke-width='1.5' stroke-linecap='round'/%3E%3Cg fill='%237d8c4c'%3E%3Cellipse cx='44' cy='7' rx='7' ry='3.2' transform='rotate(-25 44 7)'/%3E%3Cellipse cx='60' cy='15' rx='7' ry='3.2' transform='rotate(25 60 15)'/%3E%3Cellipse cx='76' cy='7' rx='7' ry='3.2' transform='rotate(-25 76 7)'/%3E%3C/g%3E%3Ccircle cx='60' cy='6' r='3.6' fill='%234f5d27'/%3E%3C/svg%3E");
   --paper: #fbf7f0;
   --cream: #f3eadb;
@@ -140,7 +141,7 @@ section[id] { scroll-margin-top: 16px; }
 .nadia { max-width: 1120px; margin: 0 auto; padding: 16px 20px 72px; }
 .nadia[hidden], .nadia-photo-wrap[hidden], .hero-img[hidden] { display: none; }
 .nadia-frame, .photo-frame { /* wood, with a bevelled edge */
-  background: #a8703e url("/img/wood.webp") 0 0 / 420px auto;
+  background: var(--wood-base) var(--wood) 0 0 / 420px auto;
   box-shadow:
     inset 2px 2px 2px rgba(255, 228, 190, .45), inset -2px -2px 3px rgba(40, 20, 5, .55),
     inset 0 0 0 1px rgba(40, 20, 5, .5), 0 18px 40px rgba(0, 0, 0, .22);
