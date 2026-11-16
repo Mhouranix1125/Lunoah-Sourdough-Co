@@ -20,7 +20,7 @@ const SHOP = {
   "slot_minutes": 15,
   "book_ahead_days": 7,
   "pickup_location": "Dearborn Park, Dearborn, MI",
-  "order_received": "Your order has been received. Nadia will reach out to you shortly.",
+  "order_received": "You're all set! Nadia will text you shortly with her home address for pickup.",
   "allergy_note": "Our breads are baked in a home kitchen that also handles wheat (gluten), sesame, tree nuts, peanuts, milk, eggs and soy. We can't guarantee any bread is free of allergens. If you have a severe allergy, please text Nadia before ordering.",
   "theme": "halloween",
   "nadia_title": "Meet Nadia",
