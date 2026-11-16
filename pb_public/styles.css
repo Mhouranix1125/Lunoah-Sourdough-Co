@@ -1,4 +1,5 @@
 :root {
+  --sprig: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 22'%3E%3Cpath d='M4 11h112' stroke='%239a8a6a' stroke-width='1.5' stroke-linecap='round'/%3E%3Cg fill='%237d8c4c'%3E%3Cellipse cx='44' cy='7' rx='7' ry='3.2' transform='rotate(-25 44 7)'/%3E%3Cellipse cx='60' cy='15' rx='7' ry='3.2' transform='rotate(25 60 15)'/%3E%3Cellipse cx='76' cy='7' rx='7' ry='3.2' transform='rotate(-25 76 7)'/%3E%3C/g%3E%3Ccircle cx='60' cy='6' r='3.6' fill='%234f5d27'/%3E%3C/svg%3E");
   --paper: #fbf7f0;
   --cream: #f3eadb;
   --line: #e4d8c4;
@@ -135,13 +136,32 @@ section[id] { scroll-margin-top: 16px; }
 .hero.no-photo { grid-template-columns: 1fr; }
 .hero.no-photo .hero-text { max-width: 40em; }
 
-/* Meet Nadia */
-.nadia { max-width: 1120px; margin: 0 auto; padding: 8px 20px 64px; display: grid; grid-template-columns: 280px 1fr; gap: 44px; align-items: center; }
+/* Meet Nadia: a parchment board in a wooden frame, with her photo squared in its own small frame */
+.nadia { max-width: 1120px; margin: 0 auto; padding: 16px 20px 72px; }
 .nadia[hidden], .nadia-photo-wrap[hidden], .hero-img[hidden] { display: none; }
-.nadia-photo-wrap img { width: 280px; height: 280px; object-fit: cover; border-radius: 50%; border: 1px solid var(--line); background: var(--cream); box-shadow: 0 10px 28px rgba(0,0,0,.12); }
-.nadia-text { text-shadow: 0 0 2px var(--paper), 0 0 8px var(--paper), 0 0 14px var(--paper); }
-.nadia-text p { color: var(--ink); margin: 0 0 1em; max-width: 38em; font-size: 1.05rem; line-height: 1.65; }
-.nadia:not(:has(.nadia-photo-wrap:not([hidden]))) { grid-template-columns: 1fr; }
+.nadia-frame, .photo-frame { /* wood, with a bevelled edge */
+  background: #a8703e url("/img/wood.webp") 0 0 / 420px auto;
+  box-shadow:
+    inset 2px 2px 2px rgba(255, 228, 190, .45), inset -2px -2px 3px rgba(40, 20, 5, .55),
+    inset 0 0 0 1px rgba(40, 20, 5, .5), 0 18px 40px rgba(0, 0, 0, .22);
+}
+.nadia-frame { padding: 16px; border-radius: 6px; }
+.nadia-board {
+  display: grid; grid-template-columns: 300px 1fr; gap: 48px; align-items: center; padding: 44px 48px;
+  background: radial-gradient(ellipse at 50% 40%, transparent 55%, rgba(120, 78, 36, .10)), var(--card);
+  box-shadow: inset 0 0 0 1px rgba(40, 20, 5, .35), inset 0 3px 10px rgba(40, 20, 5, .18); /* sits just inside the frame */
+  text-shadow: none;
+}
+.nadia-board:not(:has(.nadia-photo-wrap:not([hidden]))) { grid-template-columns: 1fr; }
+.nadia-photo-wrap { margin: 0; }
+.photo-frame { padding: 10px; border-radius: 3px; transform: rotate(-1.5deg); }
+.photo-frame img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border: 12px solid #f7f0e3; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); outline: 1px solid rgba(40, 20, 5, .35); }
+
+.nadia-text h2 { margin-bottom: .4em; }
+.nadia-text h2::after { content: ""; display: block; width: 110px; height: 20px; margin-top: 12px; background: var(--sprig) left center / contain no-repeat; }
+.nadia-text p { color: var(--ink); margin: 0 0 1em; max-width: 38em; font-size: 1.05rem; line-height: 1.7; }
+.nadia-text p.eyebrow { color: var(--crust); font-size: .75rem; line-height: 1.4; margin: 0 0 8px; }
+.nadia-text .nadia-sign { font-family: "Caveat", "Segoe Script", cursive; font-size: 2.1rem; line-height: 1; color: var(--crust); margin: .3em 0 0; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -191,7 +211,7 @@ section[id] { scroll-margin-top: 16px; }
 .extras h2 { margin-bottom: .35em; }
 .extras h2::after { /* olive sprig divider */
   content: ""; display: block; width: 120px; height: 22px; margin: 14px auto 0;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 22'%3E%3Cpath d='M4 11h112' stroke='%239a8a6a' stroke-width='1.5' stroke-linecap='round'/%3E%3Cg fill='%237d8c4c'%3E%3Cellipse cx='44' cy='7' rx='7' ry='3.2' transform='rotate(-25 44 7)'/%3E%3Cellipse cx='60' cy='15' rx='7' ry='3.2' transform='rotate(25 60 15)'/%3E%3Cellipse cx='76' cy='7' rx='7' ry='3.2' transform='rotate(-25 76 7)'/%3E%3C/g%3E%3Ccircle cx='60' cy='6' r='3.6' fill='%234f5d27'/%3E%3C/svg%3E") center / contain no-repeat;
+  background: var(--sprig) center / contain no-repeat;
 }
 .extras-intro { color: var(--muted); font-size: 1.05rem; max-width: 36em; margin: 0 auto; }
 .extras-intro[hidden] { display: none; }
@@ -288,8 +308,12 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
   .masthead { --crest: 160px; }
   .masthead .site-header-inner { padding-bottom: 16px; }
   .hero-img { order: -1; }
-  .nadia { grid-template-columns: 1fr; gap: 20px; padding-top: 0; text-align: left; }
-  .nadia-photo-wrap img { width: 180px; height: 180px; margin: 0 auto; }
+  .nadia { padding: 0 12px 56px; }
+  .nadia-frame { padding: 10px; }
+  .nadia-board { grid-template-columns: 1fr; gap: 28px; padding: 28px 22px 30px; }
+  .nadia-photo-wrap { width: min(260px, 82%); margin: 0 auto; }
+  .photo-frame { padding: 8px; }
+  .photo-frame img { border-width: 9px; }
   .order-cols { grid-template-columns: 1fr; gap: 22px; }
   .site-header nav { gap: 14px; }
   .pay-panel { flex-direction: column; gap: 20px; padding: 18px; }
