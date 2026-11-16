@@ -7,7 +7,7 @@ bought or signed up for yet.
 |---|---|---|
 | Shop phone (customer questions) | **Google Voice** (free, separate number) | $0 |
 | Domain | **lunoahsourdoughco.com** at Namecheap ✅ bought | ~$10–15 / year |
-| Hosting | Small Linux server (DigitalOcean or Hetzner) running this folder | ~$4–6 / month |
+| Hosting | Small Linux server (DigitalOcean or Hetzner); it installs the site from GitHub | ~$4–6 / month |
 | Card payments | **Stripe** (no monthly fee) | ~2.9% + 30¢ per order |
 | **Total** | | **~$60–85 / year** |
 
@@ -44,31 +44,36 @@ helps her. Swap the number in Shop Info, nothing else changes.
 
 ## 3. Hosting: one small server
 
-The whole site is a single program (PocketBase) plus this folder. PocketBase gets and renews the
-HTTPS certificate on its own, so no extra web server is needed.
+The whole site is a single program (PocketBase) plus the code on GitHub. PocketBase gets and renews the
+HTTPS certificate on its own, so no extra web server is needed. **Everything below is done in a web browser**
+(any computer or phone), so no work computer is involved. The server pulls the site from GitHub itself.
 
 1. Create a server: **Ubuntu 24.04, smallest plan** (DigitalOcean "Basic" ~$6/mo, or Hetzner CX22 ~€4/mo).
-   When it asks how to log in, choose **SSH key** and add this Mac's key (`cat ~/.ssh/id_ed25519.pub`;
-   if that file doesn't exist, run `ssh-keygen -t ed25519` first). Turn on the provider's weekly backups (~$1/mo).
-   Note the server's **IP address**.
-2. Check you can log in: `ssh root@SERVER_IP` (type `yes` the first time, then `exit`).
-3. From this folder on the Mac, put the site up, **including** the breads, photos and Nadia's login:
+   For login, choose **password** (or an SSH key from a personal computer, if you have one). Turn on the
+   provider's weekly backups (~$1/mo). Note the server's **IP address**.
+2. Open the server's **web console** (DigitalOcean: the droplet → **Console**; Hetzner: the server → **>_** icon)
+   and paste:
    ```bash
-   deploy/deploy.sh SERVER_IP --with-data
+   curl -fsSL https://raw.githubusercontent.com/Mhouranix1125/Lunoah-Sourdough-Co/main/deploy/install.sh | sudo bash
    ```
-   The script runs the tests, installs PocketBase 0.41.1 (the same version as the Mac), opens the
-   firewall for web traffic, copies everything up and starts the site. It never uploads `stripe.env`.
-   Online ordering stays **paused** until the live Stripe keys are on the server (section 4).
+   It installs PocketBase 0.41.1, downloads the site from GitHub, opens the firewall for web traffic and starts
+   the site. A brand-new server starts with Nadia's real menu, shop text and pickup hours (from the repo).
+3. Still in the console, create your site-admin login (the script prints this line for you):
+   ```bash
+   sudo /opt/lunoah/pocketbase superuser upsert YOU@example.com 'A-Strong-Password' --dir=/opt/lunoah/pb_data
+   ```
 4. Point the domain at the server (section 2, Advanced DNS). Once DNS has updated, visit
    `https://lunoahsourdoughco.com`. The first visit can take ~10 seconds while it gets the HTTPS certificate.
-5. Log in at `https://lunoahsourdoughco.com/_/` with the site-admin account and **change its password**
-   (the local one was only for testing). Nadia logs in at `/admin` and changes hers (Shop Info → Change my password).
+5. At `https://lunoahsourdoughco.com/_/` log in → **bakers** → **New record** → Nadia's email and a password.
+6. Nadia logs in at `/admin` and fills in what the repo leaves out on purpose (it's public):
+   the **shop phone** (Google Voice) and **email for new orders** in Shop Info, her **photo** and story in
+   Meet Nadia, and the Venmo/Zelle QR codes in Payment apps if she wants them.
 
 **Backups:** In the dashboard (`/_/` → Settings → Backups) turn on automatic daily backups.
 
-**Updating the site later:** commit the change, then from this folder run `deploy/deploy.sh SERVER_IP`
-(without `--with-data`). It replaces the site files and restarts; orders, breads and photos on the server are
-untouched. It refuses `--with-data` once the server has its own database, so live orders can't be overwritten.
+**Updating the site later:** push the change to `main` on GitHub, then paste the **same line from step 2**
+into the server's console. It swaps in the new code and restarts; orders, breads and photos are untouched.
+If the new version doesn't start cleanly, it puts the previous version back by itself and shows the error.
 
 ### Simpler (less control) alternative
 **PocketHost.io** is managed PocketBase hosting: no server to look after. Upload `pb_public`, `pb_migrations` and
@@ -124,15 +129,14 @@ after Stripe confirms the payment. Without the steps below, the site shows "Onli
 
 ## 6. Leaving this Mac (after launch)
 
-Once the live site works, nothing important should live only on this Mac. The code is on GitHub
-(`Mhouranix1125/Lunoah-Sourdough-Co`); the live data is on the server.
-- [ ] Live site checked: breads, photos, Nadia's login, a real order and refund all work
+This Mac is never needed for the live site: the code is on GitHub (`Mhouranix1125/Lunoah-Sourdough-Co`),
+the server pulls it from there, and the live data lives on the server. Once the live site works:
+- [ ] Live site checked: menu, Nadia's login, a real order and refund all work
 - [ ] Server backups on (provider weekly + PocketBase daily)
 - [ ] `git status` clean and `git push` done
 - [ ] `stripe logout` (the Stripe tool's login), then delete `stripe.env` (test keys only)
-- [ ] Delete `pb_data/` and `.superpowers/` (old local copies of the database; the server has the real one)
-- [ ] Delete this folder, or keep a fresh `git clone` wherever development continues.
-      To work on the site from another computer: `git clone`, `brew install pocketbase`, add that computer's SSH key to the server.
+- [ ] Delete `pb_data/` and `.superpowers/` (local test copies of the database)
+- [ ] Delete this folder. To work on the site from another computer: `git clone` the repo and `brew install pocketbase`.
 
 ## 7. Michigan cottage food rules (checked 2026-11-15)
 
