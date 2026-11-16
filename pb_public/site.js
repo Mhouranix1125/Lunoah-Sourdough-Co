@@ -62,7 +62,6 @@
     $("#order-note").textContent = shop.order_note || "";
     const loc = shop.pickup_location || "";
     $("#pickup-location-text").textContent = loc;
-    if (loc) $("#pickup-map").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(loc);
     $("#pickup-location").hidden = !loc;
     $("#pickup-at").textContent = loc ? `Pickup at ${loc}.` : "";
     $("#pickup-at").hidden = !loc;

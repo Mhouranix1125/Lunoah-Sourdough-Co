@@ -55,7 +55,7 @@ function orderEmails(rec) {
   var allergy = s.getString("allergy_note");
   send([email], "You're booked for " + when,
     "Hi " + name + ",\n\nThank you! Your order is paid and your pickup is booked.\n\nPickup: " + when + "\n" +
-    (loc ? "Where: " + loc + "\nMap: https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(loc) + "\n" : "") +
+    (loc ? "Where: " + loc + " (Nadia will text you the address)\n" : "") +
     "\n" + lineText(lines) + "\nTotal paid: " + total + "\n\n" +
     "Need to cancel? You can cancel for a full refund until " + T.clock(deadline) + ":\n" +
     site() + "/order.html?k=" + rec.getString("token") + "\n\n" +
