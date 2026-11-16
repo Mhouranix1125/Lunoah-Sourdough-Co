@@ -1,8 +1,10 @@
 /* Seasonal themes. Basic is the default :root in styles.css / admin.css, so it needs no block here.
    Variables: --paper --cream --line --ink --muted --crust (buttons) --crust-dark --card --accent
-   --on-crust (text on crust) --on-ink (text on ink-coloured chips) --pattern-filter --theme-icon */
+   --on-crust (text on crust) --on-ink (text on ink-coloured chips) --pattern-filter --theme-icon
+   --band-bg --band-ink --band-trim (the masthead band at the top) */
 
 html[data-theme="halloween"] {
+  --band-bg: linear-gradient(90deg, #5a2a0a, #2e1a4d); --band-ink: #f4ece1; --band-trim: #e8731a;
   --banner-a: rgba(232, 115, 26, .30); --banner-b: rgba(142, 91, 214, .24);
   color-scheme: dark;
   --paper: #1c1a1f; --card: #2a2630; --cream: #25212b; --line: #473f52;
@@ -18,6 +20,7 @@ html[data-theme="halloween"] {
   --theme-icon: "🎃";
 }
 html[data-theme="thanksgiving"] {
+  --band-bg: linear-gradient(90deg, #6e1422, #3f4a1c); --band-ink: #fff6dc; --band-trim: #d98e2b;
   --banner-a: rgba(140, 29, 44, .26); --banner-b: rgba(91, 107, 42, .22);
   --paper: #f3cf7a; --card: #fff6dc; --cream: #ebc766; --line: #c9a24a;
   --ink: #34190d; --muted: #6a3f1c;
@@ -29,6 +32,7 @@ html[data-theme="thanksgiving"] {
   --theme-icon: "🦃";
 }
 html[data-theme="christmas"] {
+  --band-bg: linear-gradient(90deg, #123f29, #1f6b45); --band-ink: #ffffff; --band-trim: #b3202f;
   --banner-a: rgba(31, 107, 69, .24); --banner-b: rgba(179, 32, 47, .16);
   --paper: #fbfbf8; --card: #ffffff; --cream: #e9f0e8; --line: #e7dcc0;
   --ink: #1f2a24; --muted: #5f6e66;
@@ -38,6 +42,7 @@ html[data-theme="christmas"] {
   --theme-icon: "🎄";
 }
 html[data-theme="valentines"] {
+  --band-bg: linear-gradient(90deg, #7a0c35, #b3164f); --band-ink: #ffffff; --band-trim: #d6293e;
   --banner-a: rgba(179, 22, 79, .22); --banner-b: rgba(214, 41, 62, .12);
   --paper: #fde4ec; --card: #fff8fa; --cream: #f8c9d9; --line: #eba9bf;
   --ink: #3b1522; --muted: #7a3350;
@@ -48,6 +53,7 @@ html[data-theme="valentines"] {
   --theme-icon: "💝";
 }
 html[data-theme="spring"] {
+  --band-bg: linear-gradient(90deg, #4a2c78, #6f4aa8); --band-ink: #ffffff; --band-trim: #f5d547;
   --banner-a: rgba(111, 74, 168, .22); --banner-b: rgba(245, 213, 71, .30);
   --paper: #e9f7ee; --card: #fbfffc; --cream: #cdeed9; --line: #a8d8b9;
   --ink: #271c3d; --muted: #59467a;
@@ -58,6 +64,7 @@ html[data-theme="spring"] {
   --theme-icon: "🌷";
 }
 html[data-theme="summer"] {
+  --band-bg: linear-gradient(90deg, #0a5059, #0e7f8c); --band-ink: #ffffff; --band-trim: #e8603f;
   --banner-a: rgba(192, 57, 31, .22); --banner-b: rgba(14, 127, 140, .24);
   --paper: #e3f5f8; --card: #fcffff; --cream: #c2e8ee; --line: #8fcfd9;
   --ink: #0f2f3a; --muted: #37626e;

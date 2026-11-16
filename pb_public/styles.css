@@ -8,6 +8,7 @@
   --crust-dark: #6e411d;
   --card: #fff;
   --banner-a: rgba(138, 84, 40, .24); --banner-b: rgba(196, 150, 104, .16);
+  --band-bg: linear-gradient(90deg, #5c3618, #8a5428); --band-ink: #fbf7f0; --band-trim: #d9b48a;
   --accent: var(--crust);
   --on-crust: #fff;
   --on-ink: #fff;
@@ -43,7 +44,7 @@ body::before {
 }
 .site-header, main, .site-footer { position: relative; z-index: 1; }
 /* Soft paper-coloured halo so text stays easy to read over the sketches */
-.hero-text, .menu > h2, .order-info, .site-footer, .site-header {
+.hero-text, .menu > h2, .order-info, .site-footer {
   text-shadow: 0 0 2px var(--paper), 0 0 8px var(--paper), 0 0 14px var(--paper);
 }
 .btn { text-shadow: none; }
@@ -58,25 +59,36 @@ h2 { font-size: clamp(1.7rem, 3.5vw, 2.3rem); }
 .small { font-size: .875rem; }
 
 /* Header */
-/* Full-width banner behind the logo, name and menu; colours come from the theme, fades out at the bottom */
-.site-header { position: relative; }
-.site-header::before {
-  content: ""; position: absolute; inset: 0 0 -28px 0; z-index: -1; pointer-events: none;
-  background: linear-gradient(90deg, var(--banner-a), var(--banner-b));
-  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
-          mask-image: linear-gradient(to bottom, #000 55%, transparent);
+/* Masthead: a solid full-width band in the theme's colours with an accent trim along the bottom.
+   On the home page the round crest sits on that trim, half in the band and half below it. */
+.site-header {
+  position: relative; background: var(--band-bg); color: var(--band-ink);
+  border-bottom: 4px solid var(--band-trim); text-shadow: 0 1px 2px rgba(0,0,0,.25);
+}
+.site-header::before { /* the bag's bread sketches, faint, inside the band */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: url("/img/bag-pattern.webp") repeat 0 0 / 560px auto;
+  filter: invert(1); opacity: .07;
+}
+.site-header-inner, .crest-wrap { position: relative; }
+.masthead { --crest: clamp(170px, 19vw, 230px); margin-bottom: calc(var(--crest) * .45 + 20px); }
+.masthead .site-header-inner { padding-bottom: 8px; }
+.crest-wrap { height: calc(var(--crest) * .55); display: flex; justify-content: center; }
+.crest {
+  position: absolute; top: 0; width: var(--crest); height: var(--crest); max-width: none;
+  border-radius: 50%; box-shadow: 0 0 0 4px var(--band-trim), 0 12px 28px rgba(0,0,0,.28);
 }
 .site-header-inner {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   max-width: 1120px; margin: 0 auto; padding: 20px 20px;
 }
-.brand { text-decoration: none; color: var(--ink); display: flex; align-items: center; gap: 10px; }
+.brand { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px; }
 .brand-logo { width: 44px; height: 44px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px var(--line); }
 .brand-name { font-family: "Cinzel", var(--serif); font-size: 1.35rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .brand-name::after { content: var(--theme-icon, ""); margin-left: .4em; letter-spacing: 0; }
 .site-header nav { display: flex; gap: 22px; }
-.site-header nav a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: .95rem; white-space: nowrap; }
-.site-header nav a:hover { color: var(--crust); }
+.site-header nav a { color: inherit; text-decoration: none; font-weight: 500; font-size: .95rem; white-space: nowrap; }
+.site-header nav a:hover { text-decoration: underline; text-underline-offset: 6px; text-decoration-color: var(--band-trim); }
 
 /* Hero */
 .hero {
@@ -90,18 +102,6 @@ h2 { font-size: clamp(1.7rem, 3.5vw, 2.3rem); }
 /* No top photo: the text takes the full width */
 .hero.no-photo { grid-template-columns: 1fr; }
 .hero.no-photo .hero-text { max-width: 40em; }
-
-/* Logo band: a theme-coloured glow that melts into the banner above and the page below */
-.logo-band { position: relative; height: 300px; display: grid; place-items: center; margin-top: -8px; }
-/* soft glow in the theme's own banner colours; fades out at every edge, behind the emblem */
-.logo-band::before {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 62% 50% at 50% 50%, var(--banner-a) 0%, var(--banner-b) 45%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 75%, transparent);
-          mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 75%, transparent);
-}
-.logo-band-img { position: relative; height: 240px; width: 240px; max-width: none; object-fit: contain; filter: drop-shadow(0 10px 22px rgba(0,0,0,.22)); }
 
 /* Meet Nadia */
 .nadia { max-width: 1120px; margin: 0 auto; padding: 8px 20px 64px; display: grid; grid-template-columns: 280px 1fr; gap: 44px; align-items: center; }
@@ -215,9 +215,9 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
 
 @media (max-width: 760px) {
   .hero { grid-template-columns: 1fr; gap: 28px; padding-top: 8px; }
+  .masthead { --crest: 160px; }
+  .masthead .site-header-inner { padding-bottom: 16px; }
   .hero-img { order: -1; }
-  .logo-band { height: 230px; }
-  .logo-band-img { height: 190px; width: 190px; }
   .nadia { grid-template-columns: 1fr; gap: 20px; padding-top: 0; text-align: left; }
   .nadia-photo-wrap img { width: 180px; height: 180px; margin: 0 auto; }
   .order-cols { grid-template-columns: 1fr; gap: 22px; }
@@ -231,7 +231,6 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
 }
 @media (max-width: 360px) {
   .brand-name { font-size: 1rem; letter-spacing: .04em; }
-  .logo-band-img { height: 170px; width: 170px; }
 }
 
 /* ---------- Checkout (order → pay → send) ---------- */
