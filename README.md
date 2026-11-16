@@ -21,7 +21,7 @@ Requires PocketBase: `brew install pocketbase` (already installed on this Mac).
 | `pb_public/` | The public website (`index.html`, `styles.css`, `site.js`) and Nadia's admin (`admin/`) |
 | `pb_migrations/` | Database layout + sample breads (applied automatically on start) |
 | `pb_data/` | The actual data: breads, photos, accounts. **Back this up. Don't commit it.** |
-| `deploy/` | Server service file for going live |
+| `deploy/` | `deploy.sh` (puts the site on the server, or updates it) and the server service file |
 | `NADIA-GUIDE.md` | Plain-language guide for Nadia |
 | `LAUNCH-PLAN.md` | Domain, hosting and texting number: what to buy and how to go live |
 

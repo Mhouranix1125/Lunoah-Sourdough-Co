@@ -94,6 +94,8 @@
     const phone = digits(shop.phone);
     if (phone) {
       $("#phone-line").replaceChildren("Questions? Text Nadia at ", el("a", { href: "sms:" + phone }, shop.phone), ".");
+      $("#review-ask").replaceChildren("Questions before you pay? Text Nadia at ", el("a", { href: "sms:" + phone }, shop.phone), ".");
+      $("#review-ask").hidden = false;
     }
     if (shop.instagram) {
       const handle = shop.instagram.replace(/^@/, "");

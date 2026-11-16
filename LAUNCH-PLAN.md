@@ -48,34 +48,27 @@ The whole site is a single program (PocketBase) plus this folder. PocketBase get
 HTTPS certificate on its own, so no extra web server is needed.
 
 1. Create a server: **Ubuntu 24.04, smallest plan** (DigitalOcean "Basic" ~$6/mo, or Hetzner CX22 ~€4/mo).
-   Turn on the provider's weekly backups (~$1/mo). Worth it.
-2. On the server:
+   When it asks how to log in, choose **SSH key** and add this Mac's key (`cat ~/.ssh/id_ed25519.pub`;
+   if that file doesn't exist, run `ssh-keygen -t ed25519` first). Turn on the provider's weekly backups (~$1/mo).
+   Note the server's **IP address**.
+2. Check you can log in: `ssh root@SERVER_IP` (type `yes` the first time, then `exit`).
+3. From this folder on the Mac, put the site up, **including** the breads, photos and Nadia's login:
    ```bash
-   sudo mkdir -p /opt/lunoah && cd /opt/lunoah
-   # use the SAME version you run locally (check with: pocketbase --version)
-   curl -LO https://github.com/pocketbase/pocketbase/releases/download/v0.41.1/pocketbase_0.41.1_linux_amd64.zip
-   sudo apt install -y unzip && unzip pocketbase_0.41.1_linux_amd64.zip pocketbase
+   deploy/deploy.sh SERVER_IP --with-data
    ```
-3. From your Mac, copy the site up (from this folder):
-   ```bash
-   scp -r pb_public pb_migrations pb_hooks root@SERVER_IP:/opt/lunoah/
-   scp deploy/lunoah.service root@SERVER_IP:/etc/systemd/system/
-   ```
-   Online ordering stays **paused** until the Stripe keys are in place (section 4).
-   ```bash
-   ```
-   *Optional:* also copy `pb_data/` if you want to bring over the breads/photos Nadia already entered locally.
-4. On the server: `sudo systemctl enable --now lunoah`
-5. Create accounts on the server (the local ones don't carry over unless you copied `pb_data`):
-   ```bash
-   cd /opt/lunoah && ./pocketbase superuser upsert YOU@email.com 'StrongPassword' --dir=pb_data
-   ```
-   Then open `https://lunoahsourdoughco.com/_/` → log in → **bakers** → **New record** → Nadia's email + password.
-6. Visit `https://lunoahsourdoughco.com` and `https://lunoahsourdoughco.com/admin`. Done.
+   The script runs the tests, installs PocketBase 0.41.1 (the same version as the Mac), opens the
+   firewall for web traffic, copies everything up and starts the site. It never uploads `stripe.env`.
+   Online ordering stays **paused** until the live Stripe keys are on the server (section 4).
+4. Point the domain at the server (section 2, Advanced DNS). Once DNS has updated, visit
+   `https://lunoahsourdoughco.com`. The first visit can take ~10 seconds while it gets the HTTPS certificate.
+5. Log in at `https://lunoahsourdoughco.com/_/` with the site-admin account and **change its password**
+   (the local one was only for testing). Nadia logs in at `/admin` and changes hers (Shop Info → Change my password).
 
 **Backups:** In the dashboard (`/_/` → Settings → Backups) turn on automatic daily backups.
 
-**Updating the site design later:** edit files in `pb_public/` locally, then `scp -r pb_public root@SERVER_IP:/opt/lunoah/`. No restart needed. If `pb_migrations` (or `pb_hooks`) changed too, copy those folders as well and restart: `sudo systemctl restart lunoah`.
+**Updating the site later:** commit the change, then from this folder run `deploy/deploy.sh SERVER_IP`
+(without `--with-data`). It replaces the site files and restarts; orders, breads and photos on the server are
+untouched. It refuses `--with-data` once the server has its own database, so live orders can't be overwritten.
 
 ### Simpler (less control) alternative
 **PocketHost.io** is managed PocketBase hosting: no server to look after. Upload `pb_public`, `pb_migrations` and
@@ -127,3 +120,29 @@ after Stripe confirms the payment. Without the steps below, the site shows "Onli
 - [ ] Stripe account in Nadia's name, live keys + webhook set, "Online card payments: On"
 - [ ] Order emails arrive (Nadia + customer); a real order placed, cancelled and refunded
 - [ ] Automatic backups on
+- [ ] Pepperoni & Cheese settled with MDARD (or hidden); loaf labels printed (section 7)
+
+## 6. Leaving this Mac (after launch)
+
+Once the live site works, nothing important should live only on this Mac. The code is on GitHub
+(`Mhouranix1125/Lunoah-Sourdough-Co`); the live data is on the server.
+- [ ] Live site checked: breads, photos, Nadia's login, a real order and refund all work
+- [ ] Server backups on (provider weekly + PocketBase daily)
+- [ ] `git status` clean and `git push` done
+- [ ] `stripe logout` (the Stripe tool's login), then delete `stripe.env` (test keys only)
+- [ ] Delete `pb_data/` and `.superpowers/` (old local copies of the database; the server has the real one)
+- [ ] Delete this folder, or keep a fresh `git clone` wherever development continues.
+      To work on the site from another computer: `git clone`, `brew install pocketbase`, add that computer's SSH key to the server.
+
+## 7. Michigan cottage food rules (checked 2026-11-15)
+
+From MDARD's Cottage Food FAQ (michigan.gov/mdard → Cottage Food):
+- **Sales cap:** $50,000 gross per year since March 24, 2026 (was $25,000). Keep sales records; MDARD can ask for them.
+- **Selling online is allowed** if the customer can talk to Nadia before buying. The site shows
+  "Questions? Text Nadia at …" on the page and at checkout, so keep a phone number in Shop Info.
+- **Only foods that don't need refrigeration.** MDARD lists meat and dairy (cheese) as not allowed.
+  **Pepperoni & Cheese Loaf likely doesn't qualify.** Ask MDARD (800-292-3939, MDARD-CottageFood@michigan.gov)
+  before selling it, or hide it in the admin until they confirm.
+- **Labels:** every loaf needs a printed label (name and address of the business, ingredients by weight, allergens,
+  and the "Made in a home kitchen…" statement). Check MDARD's labeling guide for exact wording before printing.
+- Local zoning rules may also apply; check with the city/township.
