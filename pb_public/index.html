@@ -20,16 +20,33 @@
   <link rel="stylesheet" href="/themes.css">
 </head>
 <body>
-  <header class="site-header masthead">
+  <header class="site-header masthead" id="top">
    <div class="site-header-inner">
     <a href="/" class="brand">
       <span class="brand-name">Lunoah Sourdough Co.</span>
     </a>
-    <nav>
-      <a href="#menu">Bread</a>
+    <nav aria-label="Main">
+      <a href="#top">Home</a>
+      <a href="#menu">Bakery</a>
       <a href="#order">How to order</a>
+      <a href="#nadia" id="nav-nadia" hidden>Meet Nadia</a>
     </nav>
    </div>
+   <button type="button" id="basket" class="basket" aria-label="Your basket is empty. See the breads">
+      <svg class="basket-art" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M15 31C15 9 49 9 49 31" fill="none" stroke="#8a5428" stroke-width="3.5" stroke-linecap="round"/>
+        <g transform="rotate(-30 30 24)">
+          <rect x="11" y="18" width="38" height="11" rx="5.5" fill="#e6ab62" stroke="#9a5d24" stroke-width="1.6"/>
+          <path d="M19 21.5l3 4M27 21.5l3 4M35 21.5l3 4" stroke="#fbe2b8" stroke-width="1.6" stroke-linecap="round"/>
+        </g>
+        <ellipse cx="40" cy="30" rx="12.5" ry="9" fill="#d68f45" stroke="#9a5d24" stroke-width="1.6"/>
+        <path d="M33 29q7-5.5 14 0" fill="none" stroke="#fbe2b8" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M9 34h46l-4.6 17.5a5 5 0 0 1-4.8 3.7H18.4a5 5 0 0 1-4.8-3.7Z" fill="#c98b4c" stroke="#8a5428" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M12 41.5h40M14 48.5h36M21 35v19M29 35v20M37 35v20M45 35v19" stroke="#8a5428" stroke-width="1.3" opacity=".45"/>
+        <rect x="6" y="29.5" width="52" height="6.5" rx="3.25" fill="#b47639" stroke="#8a5428" stroke-width="2"/>
+      </svg>
+      <span id="basket-count" class="basket-count" hidden>0</span>
+   </button>
    <div class="crest-wrap"><img class="crest" src="/img/logo/lunoah-logo-1200.png" width="240" height="240" alt="Lunoah Sourdough Co. logo"></div>
   </header>
 

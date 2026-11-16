@@ -77,6 +77,7 @@
     // "Meet Nadia" section: only when she has written a story
     const story = (shop.nadia_story || "").trim();
     $("#nadia").hidden = !story;
+    $("#nav-nadia").hidden = !story;
     if (story) {
       $("#nadia-title").textContent = (shop.nadia_title || "").trim() || "Meet Nadia";
       $("#nadia-story").replaceChildren(...story.split(/\n\s*\n/).filter((t) => t.trim()).map((para) => {
@@ -160,7 +161,41 @@
     const count = ls.reduce((s, l) => s + l.q, 0);
     $("#bar").hidden = count === 0;
     $("#bar-summary").textContent = `${count} ${count === 1 ? "loaf" : "loaves"} · ${money(total())}`;
+    updateBasket(count);
   }
+
+  // ---------- Bread basket (top right, under the banner) ----------
+  let basketShown = 0;
+  function updateBasket(count) {
+    const badge = $("#basket-count");
+    badge.textContent = count > 99 ? "99+" : String(count);
+    badge.hidden = count === 0;
+    $("#basket").setAttribute("aria-label", count
+      ? `Your basket: ${count} ${count === 1 ? "loaf" : "loaves"}, ${money(total())}. Check out`
+      : "Your basket is empty. See the breads");
+    if (count !== basketShown) { // a little hop whenever the number changes
+      const b = $("#basket");
+      b.classList.remove("hop"); void b.offsetWidth; b.classList.add("hop");
+    }
+    basketShown = count;
+  }
+  $("#basket").addEventListener("click", () => {
+    if (lines().length) openDialog("");
+    else $("#menu").scrollIntoView();
+  });
+  // It sits just under the banner's trim, then stays pinned to the top corner while scrolling.
+  function placeBasket() {
+    const bottom = $(".masthead").getBoundingClientRect().bottom;
+    $("#basket").style.top = `${Math.max(12, bottom + 14)}px`;
+  }
+  let placing = false;
+  addEventListener("scroll", () => {
+    if (placing) return;
+    placing = true;
+    requestAnimationFrame(() => { placing = false; placeBasket(); });
+  }, { passive: true });
+  addEventListener("resize", placeBasket);
+  placeBasket();
 
   // ---------- Pickup time picker ----------
   const takenUrl = () => `/api/lunoah/taken?from=${S.localParts(new Date(), S.SHOP_TZ).date}`;
