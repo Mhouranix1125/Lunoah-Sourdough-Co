@@ -103,50 +103,68 @@
     }
   }
 
+  const isExtra = (b) => b.kind === "extra";
+
+  // One product card. Breads and Beyond the Basket items share the + / − controls and the basket.
+  function productCard(b, extra) {
+    const qtyEl = el("span", {}, String(cart[b.id] || 0));
+    const change = (d) => {
+      cart[b.id] = Math.max(0, (cart[b.id] || 0) + d);
+      qtyEl.textContent = cart[b.id];
+      updateBar();
+    };
+    const placeholder = extra ? "/img/placeholder-extra.svg" : "/img/placeholder-loaf.webp";
+    return el(
+      "article",
+      { class: (extra ? "card extra-card" : "card") + (b.sold_out ? " sold" : "") },
+      el(
+        "div",
+        { class: "card-img" },
+        el("img", { src: b.photo ? fileUrl(b, "photo", extra ? "400x300" : "800x600") : placeholder, alt: b.name, loading: "lazy" }),
+        b.sold_out ? el("span", { class: "badge" }, "Sold out") : null
+      ),
+      el(
+        "div",
+        { class: "card-body" },
+        el("div", { class: "card-top" }, el("h3", {}, b.name), el("span", { class: "price" }, money(b.price))),
+        b.size ? el("span", { class: "size-chip" }, b.size) : null,
+        b.description ? el("p", {}, b.description) : null,
+        online && !b.sold_out
+          ? el(
+              "div",
+              { class: "qty" },
+              el("button", { type: "button", "aria-label": "Remove one " + b.name, onclick: () => change(-1) }, "−"),
+              qtyEl,
+              el("button", { type: "button", "aria-label": "Add one " + b.name, onclick: () => change(1) }, "+")
+            )
+          : null
+      )
+    );
+  }
+
   function renderGrid() {
     const grid = $("#grid");
-    if (!breads.length) {
-      grid.innerHTML = '<p class="muted">Fresh bread is coming soon. Check back shortly!</p>';
-      return;
-    }
-    const canOrder = online;
+    const loaves = breads.filter((b) => !isExtra(b));
+    const extras = breads.filter(isExtra);
     $("#ordering-paused").hidden = online;
     if (!online) $("#ordering-paused").textContent = `Online ordering is paused. Text Nadia at ${shop.phone || "the number on this page"}.`;
-    grid.replaceChildren(
-      ...breads.map((b) => {
-        const qtyEl = el("span", {}, String(cart[b.id] || 0));
-        const change = (d) => {
-          cart[b.id] = Math.max(0, (cart[b.id] || 0) + d);
-          qtyEl.textContent = cart[b.id];
-          updateBar();
-        };
-        return el(
-          "article",
-          { class: "card" + (b.sold_out ? " sold" : "") },
-          el(
-            "div",
-            { class: "card-img" },
-            el("img", { src: b.photo ? fileUrl(b, "photo", "800x600") : "/img/placeholder-loaf.webp", alt: b.name, loading: "lazy" }),
-            b.sold_out ? el("span", { class: "badge" }, "Sold out") : null
-          ),
-          el(
-            "div",
-            { class: "card-body" },
-            el("div", { class: "card-top" }, el("h3", {}, b.name), el("span", { class: "price" }, money(b.price))),
-            b.description ? el("p", {}, b.description) : null,
-            canOrder && !b.sold_out
-              ? el(
-                  "div",
-                  { class: "qty" },
-                  el("button", { type: "button", "aria-label": "Remove one " + b.name, onclick: () => change(-1) }, "−"),
-                  qtyEl,
-                  el("button", { type: "button", "aria-label": "Add one " + b.name, onclick: () => change(1) }, "+")
-                )
-              : null
-          )
-        );
-      })
-    );
+    if (!loaves.length) grid.innerHTML = '<p class="muted">Fresh bread is coming soon. Check back shortly!</p>';
+    else grid.replaceChildren(...loaves.map((b) => productCard(b, false)));
+
+    const title = shop.extras_title || "Beyond the Basket";
+    $("#extras").hidden = !extras.length;
+    $("#hero-extras").hidden = !extras.length;
+    $("#hero-extras").textContent = title;
+    $("#extras-title").textContent = title;
+    $("#extras-intro").textContent = shop.extras_intro || "";
+    $("#extras-intro").hidden = !shop.extras_intro;
+    $("#extras-grid").replaceChildren(...extras.map((b) => productCard(b, true)));
+  }
+
+  // "3 loaves" when it's all bread, "3 items" once anything else is in the basket.
+  function countWord(n) {
+    const allBread = lines().every(({ b }) => !isExtra(b));
+    return allBread ? (n === 1 ? "loaf" : "loaves") : (n === 1 ? "item" : "items");
   }
 
   function lines() {
@@ -160,7 +178,7 @@
     const ls = lines();
     const count = ls.reduce((s, l) => s + l.q, 0);
     $("#bar").hidden = count === 0;
-    $("#bar-summary").textContent = `${count} ${count === 1 ? "loaf" : "loaves"} · ${money(total())}`;
+    $("#bar-summary").textContent = `${count} ${countWord(count)} · ${money(total())}`;
     updateBasket(count);
     if (count) $("#basket-empty").hidden = true;
   }
@@ -172,7 +190,7 @@
     badge.textContent = count > 99 ? "99+" : String(count);
     badge.hidden = count === 0;
     $("#basket").setAttribute("aria-label", count
-      ? `Your basket: ${count} ${count === 1 ? "loaf" : "loaves"}, ${money(total())}. Check out`
+      ? `Your basket: ${count} ${countWord(count)}, ${money(total())}. Check out`
       : "Your basket is empty");
     if (count !== basketShown) { // a little hop whenever the number changes
       const b = $("#basket");

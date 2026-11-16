@@ -52,7 +52,7 @@
        </svg>
        <span id="basket-count" class="basket-count" hidden>0</span>
     </button>
-    <p id="basket-empty" class="basket-pop" role="status" hidden>Your basket is empty. Tap <b>+</b> on a loaf to add it.</p>
+    <p id="basket-empty" class="basket-pop" role="status" hidden>Your basket is empty. Tap <b>+</b> on anything you'd like to add it.</p>
   </div>
 
   <main>
@@ -61,7 +61,10 @@
         <p class="eyebrow">Small-batch · Naturally fermented</p>
         <h1 id="tagline">Naturally fermented bread, baked in small batches.</h1>
         <p id="about" class="lead"></p>
-        <a href="#menu" class="btn">What's in the Basket</a>
+        <div class="hero-actions">
+          <a href="#menu" class="btn">What's in the Basket</a>
+          <a href="#extras" class="btn btn-ghost" id="hero-extras" hidden>Beyond the Basket</a>
+        </div>
       </div>
       <div class="hero-img" id="hero-wrap" hidden><img id="hero-img" alt="Fresh bread from Lunoah Sourdough Co."></div>
     </section>
@@ -81,11 +84,21 @@
       <p id="allergy-note" class="allergy-note" hidden></p>
     </section>
 
+    <!-- Beyond the Basket: olive oil, merchandise and other things besides bread. Same basket, same checkout. -->
+    <section id="extras" class="extras" hidden>
+      <div class="extras-inner">
+        <p class="eyebrow">More from Lunoah</p>
+        <h2 id="extras-title">Beyond the Basket</h2>
+        <p id="extras-intro" class="extras-intro"></p>
+        <div id="extras-grid" class="extras-grid" aria-live="polite"></div>
+      </div>
+    </section>
+
     <section id="order" class="order-info">
       <h2>How to order</h2>
       <div class="order-cols">
         <div>
-          <h3>1. Pick your loaves</h3>
+          <h3>1. Fill your basket</h3>
           <p>Use the <strong>+</strong> buttons above, then tap <em>Checkout</em>.</p>
         </div>
         <div>

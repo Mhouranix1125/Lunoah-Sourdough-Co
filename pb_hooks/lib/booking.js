@@ -128,10 +128,10 @@ function checkout(e) {
   if (!priced.ok) {
     var msgs = {
       empty: "Your basket is empty.",
-      unavailable: "One of your breads is no longer available. Please refresh the page.",
+      unavailable: "One of the items in your basket is no longer available. Please refresh the page.",
       bad_qty: "Please check the quantities in your order.",
-      sold_out: (priced.bread || "A bread") + " just sold out. We've updated your basket.",
-      too_many: "Online orders are limited to " + O.MAX_LOAVES + " loaves. For bigger orders, please text Nadia.",
+      sold_out: (priced.bread || "An item") + " just sold out. We've updated your basket.",
+      too_many: "Online orders are limited to " + O.MAX_LOAVES + " items. For bigger orders, please text Nadia.",
       too_small: "Your order is too small to pay online.",
     };
     return fail(e, 400, priced.error, msgs[priced.error], { bread: priced.bread || "" });

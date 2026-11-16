@@ -181,3 +181,8 @@ dialog form { padding: 24px; }
 .badge-pill { display: inline-block; margin-top: 4px; padding: 2px 9px; border-radius: 999px; font-size: .78rem; font-weight: 700; background: var(--cream); color: var(--ink); border: 1px solid var(--line); }
 .badge-pill.ok { color: var(--ok); border-color: var(--ok); }
 .badge-pill.bad { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+/* Beyond the Basket tab */
+.extras-hint { margin-top: 4px; margin-bottom: 14px; }
+.extras-wording { margin-top: 28px; }
+.extras-wording h2 { margin: 0; font-size: 1.15rem; }

@@ -31,6 +31,16 @@ and customers can't add it to an order. Flip it back when you're baking it again
 ## Change the order breads appear in
 Use the **▲ ▼** arrows.
 
+## Beyond the Basket (olive oil, merchandise and more)
+Tap **Beyond the Basket**. It works just like My Breads: **＋ Add an item**, then a photo, name, price,
+an optional **size** (e.g. "500 ml bottle") and a description. Sold out, Hide, the arrows and Edit all work the same.
+These show in their own section under your breads, with a **Beyond the Basket** button at the top of the website.
+Customers add them to the same basket and pay in the same checkout. The section only appears once there's at least one item.
+Change the section's title and intro under **Section wording** at the bottom of that tab.
+
+**Before selling food here:** Michigan's home-kitchen (cottage food) rules only cover food you make yourself that
+doesn't need the fridge. Imported olive oil, dips, and dressings need a license or MDARD's OK first. Merchandise is fine.
+
 ## Change your phone number, pickup details, or the words on the front page
 Tap **Shop Info**, make your changes, tap **Save shop info**.
 Here you can also set the **Pickup location** (shown to customers with a map link), the **Message after ordering**, and the **Allergy note** (shown under your breads).

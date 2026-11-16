@@ -163,7 +163,7 @@
   document.querySelectorAll(".tab").forEach((t) =>
     t.addEventListener("click", () => {
       document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("active", x === t));
-      for (const name of ["breads", "shop", "pickup", "pay"]) $("#tab-" + name).hidden = t.dataset.tab !== name;
+      for (const name of ["breads", "extras", "shop", "pickup", "pay"]) $("#tab-" + name).hidden = t.dataset.tab !== name;
     })
   );
 
@@ -352,24 +352,36 @@
     } catch (err) { toast(err.message, "bad"); }
   });
 
-  // ---------- breads ----------
+  // ---------- breads and Beyond the Basket items ----------
+  // Both live in the breads collection; kind = "extra" marks Beyond the Basket items.
+  const isExtra = (b) => b.kind === "extra";
+  const ofKind = (extra) => breads.filter((b) => isExtra(b) === extra);
+  const WORDS = {
+    false: { list: "#bread-list", empty: "No breads yet. Tap “Add a new bread” to get started.", placeholder: "/img/placeholder-loaf.webp" },
+    true: { list: "#extra-list", empty: "Nothing here yet. Tap “Add an item” to add olive oil, merchandise or anything else.", placeholder: "/img/placeholder-extra.svg" },
+  };
+
   async function loadBreads() {
     const r = await api("/api/collections/breads/records?perPage=200&sort=sort,created");
     breads = r.items;
     renderBreads();
   }
 
-  function renderBreads() {
-    const ul = $("#bread-list");
-    if (!breads.length) {
-      ul.innerHTML = '<li class="hint">No breads yet. Tap “Add a new bread” to get started.</li>';
+  function renderBreads() { renderList(false); renderList(true); }
+
+  function renderList(extra) {
+    const w = WORDS[extra];
+    const ul = $(w.list);
+    const items = ofKind(extra);
+    if (!items.length) {
+      ul.innerHTML = `<li class="hint">${w.empty}</li>`;
       return;
     }
-    ul.replaceChildren(...breads.map((b, i) => {
+    ul.replaceChildren(...items.map((b, i) => {
       const li = document.createElement("li");
       li.className = "bread";
       const img = document.createElement("img");
-      img.src = b.photo ? fileUrl(b, "photo", "400x300") : "/img/placeholder-loaf.webp";
+      img.src = b.photo ? fileUrl(b, "photo", "400x300") : w.placeholder;
       img.alt = "";
 
       const info = document.createElement("div");
@@ -380,7 +392,7 @@
       else if (b.sold_out) name.insertAdjacentHTML("beforeend", ' <span class="tag sold">Sold out</span>');
       const meta = document.createElement("div");
       meta.className = "meta";
-      meta.textContent = money(b.price || 0);
+      meta.textContent = money(b.price || 0) + (b.size ? " · " + b.size : "");
       info.append(name, meta);
 
       const actions = document.createElement("div");
@@ -393,7 +405,7 @@
       cb.addEventListener("change", async () => {
         try {
           const updated = await api(`/api/collections/breads/records/${b.id}`, { method: "PATCH", body: { sold_out: cb.checked } });
-          breads[i] = updated;
+          breads[breads.indexOf(b)] = updated;
           renderBreads();
           toast(cb.checked ? `${b.name} marked sold out` : `${b.name} is available again`);
         } catch (err) { cb.checked = !cb.checked; toast(err.message, "bad"); }
@@ -402,9 +414,9 @@
 
       const row = document.createElement("div");
       row.className = "row";
-      const up = mk("button", "move", "▲", () => move(i, -1)); up.disabled = i === 0; up.title = "Move up";
-      const down = mk("button", "move", "▼", () => move(i, 1)); down.disabled = i === breads.length - 1; down.title = "Move down";
-      const edit = mk("button", "btn small", "Edit", () => openEdit(b));
+      const up = mk("button", "move", "▲", () => move(extra, i, -1)); up.disabled = i === 0; up.title = "Move up";
+      const down = mk("button", "move", "▼", () => move(extra, i, 1)); down.disabled = i === items.length - 1; down.title = "Move down";
+      const edit = mk("button", "btn small", "Edit", () => openEdit(b, extra));
       row.append(up, down, edit);
       actions.append(sw, row);
 
@@ -420,13 +432,17 @@
     return e;
   }
 
-  async function move(i, dir) {
+  // Reorder within one list (breads or Beyond the Basket); the other list keeps its order.
+  async function move(extra, i, dir) {
+    const items = ofKind(extra);
     const j = i + dir;
-    if (j < 0 || j >= breads.length) return;
-    [breads[i], breads[j]] = [breads[j], breads[i]];
+    if (j < 0 || j >= items.length) return;
+    [items[i], items[j]] = [items[j], items[i]];
+    const others = ofKind(!extra);
+    breads = extra ? others.concat(items) : items.concat(others);
     renderBreads();
     try {
-      await Promise.all(breads.map((b, idx) => {
+      await Promise.all(items.map((b, idx) => {
         const sort = (idx + 1) * 10;
         if (b.sort === sort) return null;
         b.sort = sort;
@@ -435,16 +451,38 @@
     } catch (err) { toast(err.message, "bad"); loadBreads(); }
   }
 
+  // Section title and intro, saved on the shop record.
+  $("#extras-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = $("#x-save");
+    busy(btn, true);
+    try {
+      shop = await api(`/api/collections/shop/records/${shop.id}`, {
+        method: "PATCH",
+        body: { extras_title: $("#x-title").value.trim() || "Beyond the Basket", extras_intro: $("#x-intro").value.trim() },
+      });
+      $("#x-title").value = shop.extras_title || "";
+      toast("Saved!");
+    } catch (err) { toast(err.message, "bad"); }
+    finally { busy(btn, false); }
+  });
+
   // ---------- edit dialog ----------
   function setPreview(imgEl, src) {
     if (src) imgEl.src = src; else imgEl.removeAttribute("src");
     imgEl.nextElementSibling.hidden = !!src;
   }
 
-  function openEdit(b) {
+  let editingExtra = false;
+  function openEdit(b, extra) {
     editing = b || null;
+    editingExtra = !!extra;
     pendingPhoto = null; removePhoto = false;
-    $("#edit-title").textContent = b ? "Edit bread" : "Add a new bread";
+    $("#edit-title").textContent = extra ? (b ? "Edit item" : "Add an item") : (b ? "Edit bread" : "Add a new bread");
+    $("#e-name-label").textContent = extra ? "Name" : "Name of bread";
+    $("#e-name").placeholder = extra ? "e.g. Lunoah tote bag" : "e.g. Classic Country Loaf";
+    $("#e-size").value = b ? b.size || "" : "";
+    $("#delete-bread").textContent = extra ? "Delete this item forever" : "Delete this bread forever";
     $("#e-name").value = b ? b.name : "";
     $("#e-price").value = b ? b.price : "";
     $("#e-desc").value = b ? b.description : "";
@@ -455,7 +493,8 @@
     $("#edit-dialog").showModal();
   }
 
-  $("#add-bread").addEventListener("click", () => openEdit(null));
+  $("#add-bread").addEventListener("click", () => openEdit(null, false));
+  $("#add-extra").addEventListener("click", () => openEdit(null, true));
   $("#cancel-edit").addEventListener("click", () => $("#edit-dialog").close());
 
   $("#photo-file").addEventListener("change", async (e) => {
@@ -483,17 +522,19 @@
     fd.append("name", $("#e-name").value.trim());
     fd.append("price", String(Number($("#e-price").value) || 0));
     fd.append("description", $("#e-desc").value.trim());
+    fd.append("size", $("#e-size").value.trim());
+    if (!editing) fd.append("kind", editingExtra ? "extra" : "bread");
     fd.append("hidden", $("#e-hidden").checked ? "true" : "false");
     if (pendingPhoto) fd.append("photo", pendingPhoto);
     else if (removePhoto) fd.append("photo", "");
-    if (!editing) fd.append("sort", String((breads.length + 1) * 10));
+    if (!editing) fd.append("sort", String((ofKind(editingExtra).length + 1) * 10));
 
     busy(btn, true);
     try {
       if (editing) await api(`/api/collections/breads/records/${editing.id}`, { method: "PATCH", body: fd });
       else await api("/api/collections/breads/records", { method: "POST", body: fd });
       $("#edit-dialog").close();
-      toast(editing ? "Saved!" : "New bread added!");
+      toast(editing ? "Saved!" : editingExtra ? "New item added!" : "New bread added!");
       await loadBreads();
     } catch (err) { toast(err.message, "bad"); }
     finally { busy(btn, false); }
@@ -505,7 +546,7 @@
     try {
       await api(`/api/collections/breads/records/${editing.id}`, { method: "DELETE" });
       $("#edit-dialog").close();
-      toast("Bread deleted");
+      toast(editingExtra ? "Item deleted" : "Bread deleted");
       await loadBreads();
     } catch (err) { toast(err.message, "bad"); }
   });
@@ -524,6 +565,8 @@
     if (!shop) return;
     $("#s-theme").value = (window.LunoahTheme && window.LunoahTheme.apply(shop.theme)) || shop.theme || "basic";
     markSwatch();
+    $("#x-title").value = shop.extras_title || "";
+    $("#x-intro").value = shop.extras_intro || "";
     $("#s-phone").value = shop.phone || "";
     $("#s-tagline").value = shop.tagline || "";
     $("#s-about").value = shop.about || "";

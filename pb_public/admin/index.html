@@ -61,6 +61,7 @@
 
     <nav class="tabs">
       <button class="tab active" data-tab="breads">My Breads</button>
+      <button class="tab" data-tab="extras">Beyond the Basket</button>
       <button class="tab" data-tab="shop">Shop Info</button>
       <button class="tab" data-tab="pickup">Pickup Times</button>
       <button class="tab" data-tab="pay">Payments</button>
@@ -71,6 +72,20 @@
       <button id="add-bread" class="btn big full">＋ Add a new bread</button>
       <ul id="bread-list" class="bread-list"></ul>
       <p class="hint">Tip: <strong>Sold out</strong> keeps the bread on the website with a “Sold out” label. Use <strong>Edit → Hide</strong> to take it off the website without deleting it.</p>
+    </main>
+
+    <!-- BEYOND THE BASKET (olive oil, merchandise…) -->
+    <main id="tab-extras" class="panel" hidden>
+      <p class="hint extras-hint">Olive oil, merchandise and anything else besides bread. These show in their own
+        section under your breads, and customers add them to the same basket and pay in the same checkout.</p>
+      <button id="add-extra" class="btn big full">＋ Add an item</button>
+      <ul id="extra-list" class="bread-list"></ul>
+      <form id="extras-form" class="form setting-box extras-wording">
+        <h2>Section wording</h2>
+        <label>Title <span class="muted">(also the button at the top of the website)</span><input id="x-title" maxlength="80" placeholder="Beyond the Basket"></label>
+        <label>Short intro <textarea id="x-intro" rows="2" maxlength="400" placeholder="A few more good things from our family's table…"></textarea></label>
+        <button class="btn big" type="submit" id="x-save">Save section wording</button>
+      </form>
     </main>
 
     <!-- SHOP -->
@@ -242,10 +257,11 @@
           <button type="button" id="photo-remove" class="btn ghost small danger-text">Remove photo</button>
         </div>
       </div>
-      <label>Name of bread <input id="e-name" required maxlength="120" placeholder="e.g. Classic Country Loaf"></label>
+      <label><span id="e-name-label">Name of bread</span> <input id="e-name" required maxlength="120" placeholder="e.g. Classic Country Loaf"></label>
       <label>Price
         <div class="price-input"><span>$</span><input id="e-price" type="number" inputmode="decimal" min="0" step="0.01" required placeholder="10"></div>
       </label>
+      <label>Size <span class="muted">(optional, e.g. 500 ml bottle)</span><input id="e-size" maxlength="60"></label>
       <label>Description <textarea id="e-desc" rows="3" maxlength="1000" placeholder="What makes it special?"></textarea></label>
       <label class="check"><input type="checkbox" id="e-hidden"> Hide from website</label>
       <div class="dialog-actions">

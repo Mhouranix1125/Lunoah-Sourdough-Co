@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="">
+  <!-- Shown for Beyond the Basket items without a photo: a sketched bottle and jar with an olive sprig. -->
+  <rect width="400" height="400" fill="#f3eadb"/>
+  <g fill="none" stroke="#8a6a4a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- bottle -->
+    <path d="M168 96h28v34c0 10 22 22 22 48v130a14 14 0 0 1-14 14h-44a14 14 0 0 1-14-14V178c0-26 22-38 22-48z"/>
+    <path d="M164 84h36v12h-36z"/>
+    <path d="M150 220h68M150 270h68"/>
+    <!-- jar -->
+    <path d="M246 214h68v10c0 6 8 8 8 18v66a14 14 0 0 1-14 14h-56a14 14 0 0 1-14-14v-66c0-10 8-12 8-18z"/>
+    <path d="M242 200h76v14h-76z"/>
+    <path d="M254 262h52"/>
+    <!-- olive sprig -->
+    <path d="M110 330c40-30 90-46 150-48"/>
+  </g>
+  <g fill="#9aa86a" stroke="#6b7a42" stroke-width="4">
+    <ellipse cx="138" cy="304" rx="18" ry="8" transform="rotate(-35 138 304)"/>
+    <ellipse cx="178" cy="296" rx="18" ry="8" transform="rotate(20 178 296)"/>
+    <ellipse cx="214" cy="284" rx="18" ry="8" transform="rotate(-25 214 284)"/>
+  </g>
+  <g fill="#5a6b2e"><circle cx="160" cy="318" r="9"/><circle cx="236" cy="296" r="9"/></g>
+</svg>
