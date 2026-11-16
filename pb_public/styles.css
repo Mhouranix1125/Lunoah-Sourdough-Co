@@ -91,9 +91,9 @@ h2 { font-size: clamp(1.7rem, 3.5vw, 2.3rem); }
 .site-header nav a:hover { text-decoration: underline; text-underline-offset: 6px; text-decoration-color: var(--band-trim); }
 
 /* Bread basket (the cart): under the banner's trim on the right, then pinned while scrolling */
+.basket-dock { position: fixed; z-index: 40; top: 0; right: max(16px, calc((100vw - 1120px) / 2 + 20px)); }
 .basket {
-  position: fixed; z-index: 20; top: 0; right: max(16px, calc((100vw - 1120px) / 2 + 20px));
-  width: 60px; height: 60px; padding: 0; display: grid; place-items: center; cursor: pointer;
+  position: relative; width: 60px; height: 60px; padding: 0; display: grid; place-items: center; cursor: pointer;
   background: var(--card); border: 1.5px solid var(--line); border-radius: 50%;
   box-shadow: 0 6px 18px rgba(0,0,0,.16); text-shadow: none;
   transition: transform .15s, border-color .15s;
@@ -107,6 +107,16 @@ h2 { font-size: clamp(1.7rem, 3.5vw, 2.3rem); }
   font: 700 .8rem/20px var(--sans); text-align: center; box-sizing: border-box;
 }
 .basket-count[hidden] { display: none; }
+.basket-pop {
+  position: absolute; top: calc(100% + 12px); right: 0; width: max-content; max-width: min(240px, calc(100vw - 32px));
+  margin: 0; padding: 10px 14px; background: var(--card); color: var(--ink); border: 1.5px solid var(--line);
+  border-radius: 14px; box-shadow: 0 8px 22px rgba(0,0,0,.16); font-size: .9rem; line-height: 1.4; text-shadow: none;
+}
+.basket-pop::before { /* little tail pointing up at the basket */
+  content: ""; position: absolute; top: -8px; right: 22px; width: 14px; height: 14px; background: var(--card);
+  border-left: 1.5px solid var(--line); border-top: 1.5px solid var(--line); transform: rotate(45deg);
+}
+.basket-pop[hidden] { display: none; }
 .basket.hop { animation: basket-hop .45s ease; }
 @keyframes basket-hop { 0%, 100% { transform: none; } 30% { transform: translateY(-6px) rotate(-6deg); } 60% { transform: translateY(0) rotate(4deg); } }
 @media (prefers-reduced-motion: reduce) { .basket.hop { animation: none; } }

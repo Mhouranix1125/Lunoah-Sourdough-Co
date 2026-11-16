@@ -162,6 +162,7 @@
     $("#bar").hidden = count === 0;
     $("#bar-summary").textContent = `${count} ${count === 1 ? "loaf" : "loaves"} · ${money(total())}`;
     updateBasket(count);
+    if (count) $("#basket-empty").hidden = true;
   }
 
   // ---------- Bread basket (top right, under the banner) ----------
@@ -172,21 +173,28 @@
     badge.hidden = count === 0;
     $("#basket").setAttribute("aria-label", count
       ? `Your basket: ${count} ${count === 1 ? "loaf" : "loaves"}, ${money(total())}. Check out`
-      : "Your basket is empty. See the breads");
+      : "Your basket is empty");
     if (count !== basketShown) { // a little hop whenever the number changes
       const b = $("#basket");
       b.classList.remove("hop"); void b.offsetWidth; b.classList.add("hop");
     }
     basketShown = count;
   }
-  $("#basket").addEventListener("click", () => {
-    if (lines().length) openDialog("");
-    else $("#menu").scrollIntoView();
+  let popTimer = 0;
+  const hidePop = () => { $("#basket-empty").hidden = true; clearTimeout(popTimer); };
+  $("#basket").addEventListener("click", (e) => {
+    if (lines().length) { hidePop(); openDialog(""); return; }
+    e.stopPropagation();
+    const pop = $("#basket-empty");
+    pop.hidden = !pop.hidden;
+    clearTimeout(popTimer);
+    if (!pop.hidden) popTimer = setTimeout(hidePop, 4000);
   });
+  document.addEventListener("click", (e) => { if (!e.target.closest("#basket-dock")) hidePop(); });
   // It sits just under the banner's trim, then stays pinned to the top corner while scrolling.
   function placeBasket() {
     const bottom = $(".masthead").getBoundingClientRect().bottom;
-    $("#basket").style.top = `${Math.max(12, bottom + 14)}px`;
+    $("#basket-dock").style.top = `${Math.max(12, bottom + 14)}px`;
   }
   let placing = false;
   addEventListener("scroll", () => {
