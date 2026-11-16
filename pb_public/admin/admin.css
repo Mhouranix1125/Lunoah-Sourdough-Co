@@ -5,18 +5,18 @@
   --switch-off: #d8cfc0; --switch-on: var(--ink);
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.5 "Inter", -apple-system, sans-serif; position: relative; min-height: 100vh; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.5 "Jost", -apple-system, sans-serif; position: relative; min-height: 100vh; }
 body::before { content: ""; position: absolute; inset: 0; background: url("/img/bag-pattern.webp") repeat 0 0 / 720px auto; opacity: var(--pattern-strength, .1); filter: var(--pattern-filter, none); pointer-events: none; z-index: 0; }
 body > section, body > #app-view { position: relative; z-index: 1; }
 [hidden] { display: none !important; }
-h1, h2, .logo { font-family: "Fraunces", Georgia, serif; font-weight: 600; margin: 0 0 .4em; }
+h1, h2, .logo { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 700; margin: 0 0 .4em; }
 .muted { color: var(--muted); font-weight: 400; }
 .error { color: var(--danger); margin: 0; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   background: var(--crust); color: var(--on-crust); border: 0; border-radius: 12px; cursor: pointer;
-  padding: 12px 18px; font: 600 1rem "Inter", sans-serif; text-decoration: none;
+  padding: 12px 18px; font: 600 1rem "Jost", sans-serif; text-decoration: none;
 }
 .btn:hover { background: var(--crust-dark); }
 .btn.big { padding: 16px 22px; font-size: 1.08rem; }
@@ -42,7 +42,7 @@ h1, h2, .logo { font-family: "Fraunces", Georgia, serif; font-weight: 600; margi
 .logo::after, .login-card h1::after { content: var(--theme-icon, ""); margin-left: .25em; }
 .top-links { display: flex; gap: 8px; }
 .tabs { display: flex; gap: 6px; max-width: 720px; margin: 18px auto 0; padding: 0 16px; }
-.tab { flex: 1; padding: 14px; border: 0; border-radius: 12px; background: var(--cream); font: 600 1rem "Inter", sans-serif; color: var(--muted); cursor: pointer; }
+.tab { flex: 1; padding: 14px; border: 0; border-radius: 12px; background: var(--cream); font: 600 1rem "Jost", sans-serif; color: var(--muted); cursor: pointer; }
 .tab.active { background: var(--ink); color: var(--on-ink); }
 .panel { max-width: 720px; margin: 0 auto; padding: 18px 16px 60px; }
 .hint { color: var(--muted); font-size: .92rem; margin-top: 18px; }
@@ -74,7 +74,7 @@ h1, h2, .logo { font-family: "Fraunces", Georgia, serif; font-weight: 600; margi
 .form { display: flex; flex-direction: column; gap: 16px; }
 .form label, .label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
 .form input:not([type=checkbox]):not([type=file]), .form textarea {
-  font: 400 1rem "Inter", sans-serif; padding: 13px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); width: 100%;
+  font: 400 1rem "Jost", sans-serif; padding: 13px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); width: 100%;
 }
 .form input:focus, .form textarea:focus { outline: none; border-color: var(--crust); }
 .form label.check { flex-direction: row; align-items: center; gap: 10px; font-weight: 500; }
@@ -92,7 +92,7 @@ h1, h2, .logo { font-family: "Fraunces", Georgia, serif; font-weight: 600; margi
 .photo-empty { color: var(--muted); font-weight: 600; }
 
 .theme-swatches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: -4px 0 6px; }
-.swatch { border: 2px solid var(--line); background: transparent; border-radius: 12px; padding: 5px 2px; min-width: 0; overflow: hidden; cursor: pointer; font: 600 .7rem "Inter", sans-serif; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.swatch { border: 2px solid var(--line); background: transparent; border-radius: 12px; padding: 5px 2px; min-width: 0; overflow: hidden; cursor: pointer; font: 600 .7rem "Jost", sans-serif; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .swatch i { display: block; width: 100%; height: 34px; border-radius: 8px; border: 1px solid rgba(0,0,0,.15); }
 .swatch.selected { border-color: var(--crust); box-shadow: 0 0 0 2px var(--crust); }
 .pw { margin-top: 36px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
@@ -105,7 +105,7 @@ dialog::backdrop { background: rgba(42,31,22,.5); }
 dialog form { padding: 24px; }
 .dialog-actions { display: flex; gap: 10px; }
 .dialog-actions .btn { flex: 1; }
-.link-danger { background: none; border: 0; color: var(--danger); font: 500 .95rem "Inter", sans-serif; cursor: pointer; text-decoration: underline; align-self: center; padding: 6px; }
+.link-danger { background: none; border: 0; color: var(--danger); font: 500 .95rem "Jost", sans-serif; cursor: pointer; text-decoration: underline; align-self: center; padding: 6px; }
 
 .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--on-ink); padding: 14px 22px; border-radius: 12px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,.25); z-index: 100; max-width: calc(100% - 32px); text-align: center; }
 .toast.ok { background: var(--ok); }
@@ -132,7 +132,7 @@ dialog form { padding: 24px; }
 .pay-choice {
   display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 8px;
   background: var(--card); border: 1.5px solid var(--line); border-radius: 14px; cursor: pointer;
-  font: 600 1rem "Inter", sans-serif; color: var(--ink);
+  font: 600 1rem "Jost", sans-serif; color: var(--ink);
 }
 .pay-choice:hover { border-color: var(--crust); }
 .pay-choice .pay-logo { width: 48px; height: 48px; }
@@ -163,16 +163,16 @@ dialog form { padding: 24px; }
 #bk-times { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 #bk-times label { min-width: 0; }
 .pk-range input[type=time], .form select {
-  font: 400 1rem "Inter", sans-serif; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink);
+  font: 400 1rem "Jost", sans-serif; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink);
 }
 .pk-range input[type=time] { min-width: 0; width: 100%; box-sizing: border-box; }
 .pk-x { width: 40px; height: 40px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--card); color: var(--danger); font-size: 1.3rem; cursor: pointer; }
-.pk-add { align-self: flex-start; background: none; border: 0; color: var(--crust); font: 600 .95rem "Inter", sans-serif; cursor: pointer; padding: 4px 0; }
+.pk-add { align-self: flex-start; background: none; border: 0; color: var(--crust); font: 600 .95rem "Jost", sans-serif; cursor: pointer; padding: 4px 0; }
 .pk-block { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .pk-block .name { font-weight: 600; }
 .pk-preview li { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: .95rem; }
 .pk-preview li.pk-empty { color: var(--danger); font-weight: 600; }
-.pk-day-head { font-family: "Inter", sans-serif; font-size: .95rem; font-weight: 700; margin: 14px 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.pk-day-head { font-family: "Jost", sans-serif; font-size: .95rem; font-weight: 700; margin: 14px 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .pk-bookings .pk-day-head:first-child { margin-top: 0; }
 .pk-booking .name { font-weight: 600; }
 #nadia-box { aspect-ratio: 1; max-width: 240px; }
