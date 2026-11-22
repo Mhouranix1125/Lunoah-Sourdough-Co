@@ -47,12 +47,14 @@
       return;
     }
     renderShop();
+    renderPrints();
     try {
       online = !!(await fetch("/api/lunoah/checkout-config").then((r) => r.json())).online;
     } catch (_) { online = false; }
     renderGrid();
     await pickupReady;
     renderAway();
+    renderBake();
     resumeFromStripe();
   }
 
@@ -84,14 +86,8 @@
     $("#pickup-location").hidden = !loc;
     $("#pickup-at").textContent = loc ? `Pickup at ${loc}.` : "";
     $("#pickup-at").hidden = !loc;
-    for (const id of ["#allergy-note", "#allergy-footer"]) {
-      $(id).textContent = shop.allergy_note || "";
-      $(id).hidden = !shop.allergy_note;
-    }
-    // Nadia's own top photo, if she added one; otherwise the hero text stands alone
-    $("#hero-wrap").hidden = !shop.hero;
-    document.querySelector(".hero").classList.toggle("no-photo", !shop.hero);
-    if (shop.hero) { $("#hero-img").src = fileUrl(shop, "hero", "1600x0"); Photo.apply($("#hero-img"), shop.hero_pos); }
+    $("#allergy-note").textContent = shop.allergy_note || "";
+    $("#allergy-note").hidden = !shop.allergy_note;
 
     // "Meet Nadia" section: only when she has written a story
     const story = (shop.nadia_story || "").trim();
@@ -119,22 +115,82 @@
       $("#review-ask").replaceChildren("Questions before you pay? Email Nadia at ", link(), ".");
       $("#review-ask").hidden = false;
     }
+    // Footer: how to reach the bakery, and where pickup is.
+    const links = [];
+    if (mail) links.push(el("li", {}, el("a", { href: "mailto:" + mail }, mail)));
     if (shop.instagram) {
       const handle = shop.instagram.replace(/^@/, "");
-      $("#insta").replaceChildren(" · ", el("a", { href: "https://instagram.com/" + encodeURIComponent(handle), target: "_blank", rel: "noopener" }, "@" + handle));
+      links.push(el("li", {}, el("a", { href: "https://instagram.com/" + encodeURIComponent(handle), target: "_blank", rel: "noopener" }, "@" + handle)));
     }
+    if (loc) links.push(el("li", {}, `Pickup in ${loc}`));
+    $("#footer-links").replaceChildren(...links);
+    if (loc) $("#footer-tag").textContent = `Baked with love in ${loc}, one loaf at a time.`;
+    $("#fact-where").hidden = !loc;
+    if (loc) $("#fact-where span").textContent = `Pickup in ${loc}`;
+  }
+
+  // "Next pickup" fact under the hero: the first day customers can actually pick (same rules as checkout).
+  function renderBake() {
+    const open = pickupData ? S.availableSlots({
+      hours: pickupData.hours, blocks: pickupData.blocks, taken: pickupData.taken,
+      leadDays: shop.lead_days ?? 2, slotMinutes: shop.slot_minutes || 15, bookAheadDays: shop.book_ahead_days || 21,
+      now: new Date(), tz: S.SHOP_TZ,
+    }) : [];
+    $("#fact-next").hidden = !open.length;
+    if (open.length) $("#fact-next span").textContent = `Next pickup ${S.formatDate(open[0].date, "short")}`;
+  }
+
+  // Hero photo stack: Nadia's top photo (if she chose one) in front, then her newest bread photos,
+  // as overlapping prints. Before there are any photos, a single print of the Lunoah crest.
+  function renderPrints() {
+    const prints = [];
+    if (shop.hero) prints.push({ src: fileUrl(shop, "hero", "1600x0"), pos: shop.hero_pos, alt: "Fresh bread from Lunoah Sourdough Co." });
+    breads
+      .filter((b) => b.photo && !b.hidden)
+      .sort((a, b) => (a.created < b.created ? 1 : -1)) // newest first
+      .slice(0, 3 - prints.length)
+      .forEach((b) => prints.push({ src: fileUrl(b, "photo", "800x0"), pos: b.photo_pos, alt: b.name, caption: b.name }));
+    const crest = !prints.length;
+    if (crest) prints.push({ src: "/img/logo/lunoah-logo-1200.png", alt: "Lunoah Sourdough Co.", caption: "Lunoah Sourdough Co.", crest: true });
+
+    const box = $("#hero-prints");
+    box.dataset.count = String(prints.length);
+    // The front print is added last so it sits on top of the stack.
+    box.replaceChildren(...prints.slice().reverse().map((p, i, all) => {
+      const img = el("img", { src: p.src, alt: p.alt, loading: i === all.length - 1 ? "eager" : "lazy" });
+      if (p.pos) Photo.apply(img, p.pos);
+      return el("figure", { class: "print" + (p.crest ? " print-crest" : ""), "data-n": String(all.length - 1 - i) },
+        el("div", { class: "print-mat" }, img),
+        p.caption ? el("figcaption", {}, p.caption) : null);
+    }));
   }
 
   const isExtra = (b) => b.kind === "extra";
 
   // One product card. Breads and Beyond the Basket items share the + / − controls and the basket.
   function productCard(b, extra) {
-    const qtyEl = el("span", {}, String(cart[b.id] || 0));
-    const change = (d) => {
+    // "Add to basket" until it's in the basket, then a − 2 + counter.
+    const controls = el("div", { class: "qty" });
+    const renderQty = (focusPlus) => {
+      const q = cart[b.id] || 0;
+      if (!q) {
+        controls.replaceChildren(el("button", { type: "button", class: "btn add-btn", "aria-label": `Add ${b.name} to your basket`, onclick: () => change(1, true) },
+          el("span", { "aria-hidden": "true" }, "+"), " Add to basket"));
+        return;
+      }
+      const plus = el("button", { type: "button", class: "step-btn", "aria-label": "Add one more " + b.name, onclick: () => change(1) }, "+");
+      controls.replaceChildren(
+        el("button", { type: "button", class: "step-btn", "aria-label": "Remove one " + b.name, onclick: () => change(-1) }, "−"),
+        el("span", { class: "qty-n", "aria-live": "polite" }, `${q} in basket`),
+        plus);
+      if (focusPlus) plus.focus();
+    };
+    const change = (d, fromAdd) => {
       cart[b.id] = Math.max(0, (cart[b.id] || 0) + d);
-      qtyEl.textContent = cart[b.id];
+      renderQty(fromAdd);
       updateBar();
     };
+    renderQty(false);
     const placeholder = extra ? "/img/placeholder-extra.svg" : "/img/placeholder-loaf.webp";
     return el(
       "article",
@@ -150,16 +206,8 @@
         { class: "card-body" },
         el("div", { class: "card-top" }, el("h3", {}, b.name), el("span", { class: "price" }, money(b.price))),
         b.size ? el("span", { class: "size-chip" }, b.size) : null,
-        b.description ? el("p", {}, b.description) : null,
-        online && !b.sold_out
-          ? el(
-              "div",
-              { class: "qty" },
-              el("button", { type: "button", "aria-label": "Remove one " + b.name, onclick: () => change(-1) }, "−"),
-              qtyEl,
-              el("button", { type: "button", "aria-label": "Add one " + b.name, onclick: () => change(1) }, "+")
-            )
-          : null
+        b.description ? el("p", { class: "desc" }, b.description) : null,
+        online && !b.sold_out ? controls : null
       )
     );
   }
@@ -183,6 +231,22 @@
     $("#extras-intro").textContent = shop.extras_intro || "";
     $("#extras-intro").hidden = !shop.extras_intro;
     $("#extras-grid").replaceChildren(...extras.map((b) => productCard(b, true)));
+    requestAnimationFrame(addReadMore);
+  }
+
+  // Long descriptions show 3 lines with "Read more", so the cards line up evenly.
+  function addReadMore() {
+    document.querySelectorAll(".card .desc").forEach((p) => {
+      if (p.nextElementSibling && p.nextElementSibling.classList.contains("more")) return;
+      if (p.scrollHeight <= p.clientHeight + 2) return;
+      const btn = el("button", { type: "button", class: "more", "aria-expanded": "false" }, "Read more");
+      btn.addEventListener("click", () => {
+        const open = p.classList.toggle("open");
+        btn.textContent = open ? "Show less" : "Read more";
+        btn.setAttribute("aria-expanded", String(open));
+      });
+      p.after(btn);
+    });
   }
 
   // "3 loaves" when it's all bread, "3 items" once anything else is in the basket.
@@ -416,7 +480,7 @@
     goStep(1);
     // Reload everything (hours, time off, bookings): the time may have closed because Nadia
     // just added time off, not only because someone else booked it.
-    loadPickup().then(() => { computeSlots(); renderCal(); renderAway(); });
+    loadPickup().then(() => { computeSlots(); renderCal(); renderAway(); renderBake(); });
     $("#pickup-notice").textContent = msg;
     $("#pickup-notice").hidden = false;
   }
@@ -482,5 +546,18 @@
     if (pickupData && slots.some((d) => d.date === pick.date && d.times.includes(pick.time))) goStep(2);
   }
 
-  load();
+  // Sections fade gently in as they scroll into view. Skipped for people who prefer less motion,
+  // and without IntersectionObserver everything simply shows as normal.
+  function revealOnScroll() {
+    if (!("IntersectionObserver" in window) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const targets = document.querySelectorAll("#nadia, #menu, #extras, #order, .site-footer");
+    const below = [...targets].filter((t) => t.getBoundingClientRect().top > innerHeight * 0.9); // never hide what's already on screen
+    if (!below.length) return;
+    const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    }), { rootMargin: "0px 0px -6% 0px" });
+    below.forEach((t) => { t.classList.add("reveal"); io.observe(t); });
+  }
+
+  load().then(revealOnScroll);
 })();

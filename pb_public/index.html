@@ -71,14 +71,23 @@
           <a href="#extras" class="btn btn-ghost" id="hero-extras" hidden>Beyond the Basket</a>
         </div>
       </div>
-      <div class="hero-img" id="hero-wrap" hidden><img id="hero-img" alt="Fresh bread from Lunoah Sourdough Co."></div>
+      <!-- A little stack of photo prints: Nadia's top photo (if any) and her newest bread photos (site.js) -->
+      <div class="hero-prints" id="hero-prints" aria-label="Photos from the bakery"></div>
     </section>
+
+    <!-- Quick facts under the hero -->
+    <ul class="facts" id="facts" aria-label="Good to know">
+      <li id="fact-where" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span></span></li>
+      <li id="fact-next" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span></span></li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19M6.5 15h4"/></svg><span>Pay online: card, Apple Pay or Google Pay</span></li>
+    </ul>
 
     <!-- Meet Nadia: her photo and story on a parchment board in a wooden frame -->
     <section id="nadia" class="nadia" hidden>
       <div class="nadia-frame">
         <div class="nadia-board">
-          <figure class="nadia-photo-wrap"><div class="photo-frame"><div class="photo-mat"><img id="nadia-photo" alt="Nadia" hidden></div></div></figure>
+          <figure class="nadia-photo-wrap"><div class="photo-frame">
+            <div class="photo-mat"><img id="nadia-photo" alt="Nadia" hidden></div></div></figure>
           <div class="nadia-text">
             <p class="eyebrow">From our kitchen to yours</p>
             <h2 id="nadia-title">Meet Nadia</h2>
@@ -90,7 +99,10 @@
     </section>
 
     <section id="menu" class="menu">
-      <h2>Our Bread Selection</h2>
+      <header class="section-head">
+        <p class="eyebrow">Fresh from the oven</p>
+        <h2>Our Bread Selection</h2>
+      </header>
       <p id="ordering-paused" class="pickup-notice" hidden></p>
       <div id="grid" class="grid" aria-live="polite"><p class="muted">Loading…</p></div>
       <p id="allergy-note" class="allergy-note" hidden></p>
@@ -99,40 +111,53 @@
     <!-- Beyond the Basket: olive oil, merchandise and other things besides bread. Same basket, same checkout. -->
     <section id="extras" class="extras" hidden>
       <div class="extras-inner">
-        <p class="eyebrow">More from Lunoah</p>
-        <h2 id="extras-title">Beyond the Basket</h2>
-        <p id="extras-intro" class="extras-intro"></p>
+        <header class="section-head">
+          <p class="eyebrow">More from Lunoah</p>
+          <h2 id="extras-title">Beyond the Basket</h2>
+          <p id="extras-intro" class="extras-intro"></p>
+        </header>
         <div id="extras-grid" class="extras-grid" aria-live="polite"></div>
       </div>
     </section>
 
     <section id="order" class="order-info">
-      <h2>How to order</h2>
-      <div class="order-cols">
-        <div>
-          <h3>1. Fill your basket</h3>
-          <p>Use the <strong>+</strong> buttons above, then tap <em>Checkout</em>.</p>
-        </div>
-        <div>
-          <h3>2. Pay online</h3>
+      <header class="section-head">
+        <p class="eyebrow">Simple as one, two, three</p>
+        <h2>How to order</h2>
+      </header>
+      <ol class="order-cols">
+        <li class="step-card">
+          <span class="step-num" aria-hidden="true">1</span>
+          <h3>Fill your basket</h3>
+          <p>Tap <strong>Add to basket</strong> on anything you'd like, then <em>Checkout</em>.</p>
+        </li>
+        <li class="step-card">
+          <span class="step-num" aria-hidden="true">2</span>
+          <h3>Pick a time &amp; pay</h3>
           <p>Choose a pickup time and pay securely by card, Apple Pay or Google Pay. Your time is booked once you've paid.</p>
           <p id="phone-line" class="muted small"></p>
-        </div>
-        <div>
-          <h3>3. Pick up</h3>
+        </li>
+        <li class="step-card">
+          <span class="step-num" aria-hidden="true">3</span>
+          <h3>Pick up</h3>
           <p id="pickup-location" class="pickup-location" hidden>📍 <span id="pickup-location-text"></span></p>
           <p id="pickup"></p>
           <p class="muted small pickup-late">Running late or need to change your pickup? Email Nadia and she'll sort it out with you.</p>
-        </div>
-      </div>
+        </li>
+      </ol>
       <p id="order-note" class="note"></p>
     </section>
 
   </main>
 
   <footer class="site-footer">
-    <p>© <span id="year"></span> Lunoah Sourdough Co. <span id="insta"></span></p>
-    <p id="allergy-footer" class="allergy-footer muted small" hidden></p>
+    <div class="footer-inner">
+      <img class="footer-crest" src="/img/logo/lunoah-logo-180.png" width="84" height="84" alt="" loading="lazy">
+      <p class="footer-name">Lunoah Sourdough Co.</p>
+      <p class="footer-tag" id="footer-tag">Baked with love, one loaf at a time.</p>
+      <ul class="footer-links" id="footer-links"></ul>
+      <p class="footer-copy">© <span id="year"></span> Lunoah Sourdough Co.</p>
+    </div>
   </footer>
 
   <!-- Sticky order bar -->
