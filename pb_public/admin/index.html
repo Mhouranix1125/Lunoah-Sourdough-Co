@@ -60,15 +60,42 @@
     </header>
 
     <nav class="tabs">
-      <button class="tab active" data-tab="breads">My Breads</button>
+      <button class="tab active" data-tab="orders">Orders <span id="or-tab-count" class="tab-count" hidden></span></button>
+      <button class="tab" data-tab="breads">My Breads</button>
       <button class="tab" data-tab="extras">Beyond the Basket</button>
       <button class="tab" data-tab="shop">Shop Info</button>
       <button class="tab" data-tab="pickup">Pickup Times</button>
       <button class="tab" data-tab="pay">Payments</button>
+      <button class="tab tab-sales" data-tab="sales">Sales</button>
     </nav>
 
+    <!-- ORDERS -->
+    <main id="tab-orders" class="panel">
+      <div class="or-views" role="tablist" aria-label="Which orders">
+        <button type="button" class="or-view active" data-view="upcoming" role="tab" aria-selected="true">Upcoming <span class="or-count" id="or-count-upcoming"></span></button>
+        <button type="button" class="or-view" data-view="completed" role="tab" aria-selected="false">Completed <span class="or-count" id="or-count-completed"></span></button>
+        <button type="button" class="or-view" data-view="cancelled" role="tab" aria-selected="false">Cancelled <span class="or-count" id="or-count-cancelled"></span></button>
+      </div>
+      <label class="or-search" aria-label="Search orders">
+        <input type="search" id="or-search" placeholder="Search by name or phone" autocomplete="off" enterkeyhint="search"></label>
+      <div id="or-list" class="or-list" aria-live="polite"><p class="hint">Loading orders…</p></div>
+      <button type="button" id="or-more" class="btn ghost full" hidden>Show more</button>
+      <button type="button" id="pk-add-booking" class="btn big full or-add">＋ Add a phone order</button>
+    </main>
+
+    <!-- SALES: one calendar year at a time, each year downloadable as a CSV for taxes -->
+    <main id="tab-sales" class="panel" hidden>
+      <div id="sl-years" class="sl-years" role="tablist" aria-label="Year"></div>
+      <div id="sl-summary" class="sl-summary"></div>
+      <div id="sl-cap" class="sl-cap"></div>
+      <button type="button" id="sl-download" class="btn big full sl-download">Download sales (CSV)</button>
+      <h2 class="sl-head">Month by month</h2>
+      <div id="sl-months" class="sl-months"><p class="hint">Loading sales…</p></div>
+      <p class="hint sl-foot">Website card sales are counted on the day they were paid, phone orders on their pickup day, and refunds on the day they were refunded. Stripe's card fees aren't included: download them from Stripe (Reports → Balance). Keep your receipts for flour and supplies separately.</p>
+    </main>
+
     <!-- BREADS -->
-    <main id="tab-breads" class="panel">
+    <main id="tab-breads" class="panel" hidden>
       <button id="add-bread" class="btn big full">＋ Add a new bread</button>
       <ul id="bread-list" class="bread-list"></ul>
       <p class="hint">Tip: <strong>Sold out</strong> keeps the bread on the website with a “Sold out” label. Use <strong>Edit → Hide</strong> to take it off the website without deleting it.</p>
@@ -103,8 +130,8 @@
           <button type="button" class="swatch" data-theme="spring"><i style="background:linear-gradient(135deg,#e9f7ee 45%,#6f4aa8 45% 75%,#f5d547 75%)"></i>Spring</button>
           <button type="button" class="swatch" data-theme="summer"><i style="background:linear-gradient(135deg,#e3f5f8 45%,#c0391f 45% 75%,#0e7f8c 75%)"></i>Summer</button>
         </div>
-        <label>Shop phone number <span class="muted">(shown to customers for questions)</span>
-          <input id="s-phone" type="tel" placeholder="(555) 123-4567">
+        <label>Contact email <span class="muted">(shown to customers for questions)</span>
+          <input id="s-contact" type="email" maxlength="200" placeholder="you@example.com">
         </label>
         <div class="setting-box">
           <p><strong>Online card payments:</strong> <span id="s-stripe">checking…</span></p>
@@ -154,12 +181,6 @@
     <!-- PICKUP TIMES -->
     <main id="tab-pickup" class="panel" hidden>
       <p class="hint top-hint">Customers choose a pickup day and time from these hours, at least <strong id="pk-lead-echo">2 days</strong> after they order.</p>
-
-      <section class="pk-section">
-        <h2>Upcoming pickups</h2>
-        <div id="pk-bookings" class="pk-bookings"></div>
-        <button type="button" id="pk-add-booking" class="btn big full">＋ Add pickup</button>
-      </section>
 
       <section class="pk-section">
         <h2>Regular hours</h2>
@@ -275,11 +296,17 @@
   <!-- ADD PICKUP -->
   <dialog id="booking-dialog">
     <form id="booking-form" class="form">
-      <h2>Add a pickup</h2>
+      <h2>Add a phone order</h2>
       <label>Day <select id="bk2-day"></select></label>
       <label>Time <select id="bk2-time"></select></label>
       <label>Name <input id="bk2-name" maxlength="100" required></label>
-      <label>Note <span class="muted">(optional, e.g. 2 country loaves, phone order)</span><input id="bk2-note" maxlength="1000"></label>
+      <label>Phone <span class="muted">(optional)</span><input id="bk2-phone" type="tel" inputmode="tel" maxlength="20" autocomplete="off"></label>
+      <label>What they ordered <span class="muted">(e.g. 2 country loaves)</span><input id="bk2-note" maxlength="1000"></label>
+      <div class="pay-row">
+        <label>Amount <span class="muted">($)</span><input id="bk2-amount" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off"></label>
+        <label>Paid with
+          <select id="bk2-via"><option value="">Not paid yet</option><option value="cash">Cash</option><option value="venmo">Venmo</option><option value="zelle">Zelle</option><option value="other">Other</option></select></label>
+      </div>
       <p id="bk2-empty" class="hint" hidden>No open pickup times right now.</p>
       <div class="dialog-actions">
         <button class="btn big" type="submit" id="bk2-save">Save</button>
@@ -288,17 +315,38 @@
     </form>
   </dialog>
 
+  <!-- PHONE ORDER PAYMENT (from an order card) -->
+  <dialog id="payment-dialog">
+    <form id="payment-form" class="form" novalidate>
+      <h2>Payment</h2>
+      <p id="pmt-who" class="muted"></p>
+      <div class="pay-row">
+        <label>Amount <span class="muted">($)</span><input id="pmt-amount" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off"></label>
+        <label>Paid with
+          <select id="pmt-via"><option value="">Not paid yet</option><option value="cash">Cash</option><option value="venmo">Venmo</option><option value="zelle">Zelle</option><option value="other">Other</option></select></label>
+      </div>
+      <p id="pmt-error" class="error" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button class="btn big" type="submit">Save</button>
+        <button class="btn ghost big" type="button" id="pmt-cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- ADD TIME OFF -->
   <dialog id="block-dialog">
-    <form id="block-form" class="form">
+    <!-- novalidate: the page checks the form itself and always says what's wrong. (The browser's own
+         checks can silently refuse to save on iPhones, e.g. for a time like 10:05.) -->
+    <form id="block-form" class="form" novalidate>
       <h2>Add time off</h2>
-      <label>First day <input type="date" id="bk-start" required></label>
-      <label>Last day <input type="date" id="bk-end" required></label>
+      <label>First day <input type="date" id="bk-start"></label>
+      <label>Last day <input type="date" id="bk-end"></label>
       <label class="check"><input type="checkbox" id="bk-allday" checked> All day</label>
       <div id="bk-times" class="pk-range" hidden>
-        <label>From <input type="time" id="bk-from" step="900"></label>
-        <label>To <input type="time" id="bk-to" step="900"></label>
+        <label>From <input type="time" id="bk-from"></label>
+        <label>To <input type="time" id="bk-to"></label>
       </div>
+      <p id="bk-error" class="error" role="alert" hidden></p>
       <label>Note <span class="muted">(optional, e.g. Vacation)</span><input id="bk-note" maxlength="200"></label>
       <div class="dialog-actions">
         <button class="btn big" type="submit">Save</button>
@@ -311,6 +359,10 @@
   <script src="/pay-apps.js"></script>
   <script src="/slots.js"></script>
   <script src="/admin/pickup-admin.js"></script>
+  <script src="/admin/orders-view.js"></script>
+  <script src="/admin/orders-admin.js"></script>
+  <script src="/admin/sales-view.js"></script>
+  <script src="/admin/sales-admin.js"></script>
   <script src="/admin/admin.js"></script>
 </body>
 </html>

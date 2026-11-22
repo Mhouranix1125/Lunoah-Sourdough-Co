@@ -186,3 +186,100 @@ dialog form { padding: 24px; }
 .extras-hint { margin-top: 4px; margin-bottom: 14px; }
 .extras-wording { margin-top: 28px; }
 .extras-wording h2 { margin: 0; font-size: 1.15rem; }
+
+/* Tabs: six tabs scroll sideways on a phone instead of squashing */
+.tabs { overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.tab-count { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--danger); color: #fff; font-size: .75rem; font-weight: 700; line-height: 20px; }
+@media (max-width: 520px) { .tab { flex: 0 0 auto; padding: 12px 14px; } }
+
+/* Orders */
+.or-views { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; background: var(--cream); border-radius: 14px; }
+.or-view { border: 0; border-radius: 10px; padding: 10px 6px; background: transparent; color: var(--muted); font: 600 .95rem "Jost", sans-serif; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; gap: 6px; }
+.or-view.active { background: var(--card); color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.or-count:empty { display: none; }
+.or-count { font-size: .78rem; min-width: 20px; padding: 1px 6px; border-radius: 999px; background: var(--line); color: var(--ink); }
+.or-count.alert { background: var(--danger); color: #fff; }
+.or-search { display: block; margin: 12px 0 4px; }
+.or-search input { width: 100%; box-sizing: border-box; padding: 12px 14px; font: 1rem "Jost", sans-serif; color: var(--ink); background: var(--card); border: 1.5px solid var(--line); border-radius: 12px; }
+.or-search input:focus { outline: none; border-color: var(--crust); }
+.or-list { margin-top: 8px; }
+.or-empty { color: var(--muted); text-align: center; padding: 28px 12px; margin: 0; }
+.or-section-head { font: 700 .95rem "Jost", sans-serif; text-transform: uppercase; letter-spacing: .04em; margin: 18px 0 8px; color: var(--crust); }
+.or-section-head.bad { color: var(--danger); }
+.or-day { margin-top: 18px; }
+.or-day-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; font: 700 1.05rem "Jost", sans-serif; margin: 0 0 8px; }
+.or-day-sum { color: var(--muted); font-weight: 600; font-size: .88rem; }
+.or-bake { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 10px; padding: 10px 12px; background: var(--cream); border-radius: 12px; }
+.or-bake-title { font-weight: 700; font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-right: 4px; }
+.or-chip { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: .88rem; font-weight: 600; }
+.or-chip-phone { font-weight: 500; }
+.or-cards { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.or-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+.or-card.or-needs_check { border: 2px solid var(--crust); box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+.or-card.or-cancelled { opacity: .85; }
+.or-nudge { margin: 0 0 4px; padding: 10px 12px; border-radius: 10px; background: var(--cream); font-weight: 600; line-height: 1.4; }
+.or-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+.or-time { font-weight: 700; color: var(--crust); }
+.or-name { font-weight: 700; font-size: 1.08rem; }
+.or-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.or-badges .badge-pill { margin-top: 0; }
+.badge-pill.bad-soft { color: var(--danger); border-color: var(--danger); }
+.or-items { margin: 2px 0 0; padding-left: 18px; }
+.or-items li { margin: 1px 0; }
+.or-items-text { margin: 2px 0 0; }
+.or-contact { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .92rem; color: var(--muted); }
+.or-contact a { color: var(--crust); font-weight: 600; overflow-wrap: anywhere; }
+.or-notes { margin: 0; font-style: italic; color: var(--muted); }
+.or-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.or-actions .or-check { flex: 1 1 100%; padding: 14px; font-size: 1.05rem; background: var(--ok); }
+.or-actions .or-check:hover { filter: brightness(.95); background: var(--ok); }
+.or-add { margin-top: 18px; }
+#or-more { margin-top: 12px; }
+
+/* Sales tab: red so it stands apart from the everyday tabs */
+.tab.tab-sales { background: #a8322b; color: #fff; }
+.tab.tab-sales:hover { background: #932922; }
+.tab.tab-sales.active { background: #6f1e18; color: #fff; box-shadow: inset 0 0 0 2px rgba(255,255,255,.35); }
+.pay-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sl-years { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.sl-years::-webkit-scrollbar { display: none; }
+.sl-year { flex: none; display: flex; flex-direction: column; align-items: flex-start; gap: 0; padding: 8px 16px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; font: 600 1rem "Jost", sans-serif; }
+.sl-year.active { border-color: #a8322b; box-shadow: inset 0 0 0 1px #a8322b; }
+.sl-year-num { font-size: 1.15rem; font-weight: 700; }
+.sl-year-tag { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); min-height: 1em; }
+.sl-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 14px; }
+.sl-stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
+.sl-stat.big { grid-column: 1 / -1; background: #a8322b; border-color: #a8322b; color: #fff; }
+.sl-stat-label { font-size: .82rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; opacity: .8; }
+.sl-stat-value { font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sl-stat.big .sl-stat-value { font-size: 2rem; }
+@media (min-width: 600px) { .sl-summary { grid-template-columns: repeat(4, 1fr); } }
+.sl-cap { margin-top: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.sl-cap-text { margin: 0 0 8px; font-size: .95rem; }
+.sl-bar { height: 10px; border-radius: 999px; background: var(--cream); overflow: hidden; }
+.sl-bar-fill { height: 100%; border-radius: 999px; background: var(--ok); }
+.sl-bar-fill.near { background: #d18a1a; }
+.sl-bar-fill.over { background: #a8322b; }
+.sl-cap-warn { margin: 8px 0 0; font-weight: 600; color: #9a5d0a; font-size: .92rem; }
+.sl-cap-warn.over { color: #a8322b; }
+.sl-download { margin-top: 14px; }
+.sl-head { margin-top: 26px; }
+.sl-months { display: flex; flex-direction: column; gap: 10px; }
+.sl-month { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.sl-month summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px; cursor: pointer; list-style: none; }
+.sl-month summary::-webkit-details-marker { display: none; }
+.sl-month summary::after { content: "›"; font-size: 1.4rem; color: var(--muted); transition: transform .15s; }
+.sl-month[open] summary::after { transform: rotate(90deg); }
+.sl-month-name { font-weight: 700; font-size: 1.08rem; }
+.sl-month-sub { color: var(--muted); font-size: .88rem; }
+.sl-month-net { margin-left: auto; font-weight: 700; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.sl-txns { list-style: none; margin: 0; padding: 0 14px 10px; border-top: 1px solid var(--line); }
+.sl-txn { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.sl-txn:last-child { border-bottom: 0; }
+.sl-txn-top { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; }
+.sl-txn-amt { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sl-txn.refund .sl-txn-amt { color: #a8322b; }
+.sl-txn-meta { color: var(--muted); font-size: .86rem; }
+.sl-foot { margin-top: 18px; }

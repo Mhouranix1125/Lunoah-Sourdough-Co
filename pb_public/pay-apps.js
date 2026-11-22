@@ -28,7 +28,7 @@
     zelle: {
       name: "Zelle",
       logo: badge("#6D1ED4", glyph("Z", 30) + '<rect x="22.5" y="6" width="3" height="7" fill="#fff"/><rect x="22.5" y="35" width="3" height="7" fill="#fff"/>'),
-      phone: { label: "Zelle phone number", placeholder: "313-384-0304" },
+      phone: { label: "Zelle phone number", placeholder: "(555) 123-4567" },
       email: { label: "Zelle email (if you use email instead)", placeholder: "" },
       tip: "Open your bank's app and choose Zelle.",
     },

@@ -56,6 +56,11 @@
   </div>
 
   <main>
+    <!-- Shown when Nadia has days off now or coming up (Pickup Times → Time off in the admin). -->
+    <div id="away-banner" class="away-banner" role="status" hidden>
+      <svg class="away-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 1.8 20.5h20.4L12 2.5Zm0 6v5.5m0 3.2v.3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <p id="away-text"></p>
+    </div>
     <section class="hero">
       <div class="hero-text">
         <p class="eyebrow">Small-batch · Naturally fermented</p>
@@ -117,7 +122,7 @@
           <h3>3. Pick up</h3>
           <p id="pickup-location" class="pickup-location" hidden>📍 <span id="pickup-location-text"></span></p>
           <p id="pickup"></p>
-          <p class="muted small pickup-late">Running late or need to change your pickup? Text Nadia and she'll sort it out with you.</p>
+          <p class="muted small pickup-late">Running late or need to change your pickup? Email Nadia and she'll sort it out with you.</p>
         </div>
       </div>
       <p id="order-note" class="note"></p>

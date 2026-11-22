@@ -16,7 +16,6 @@
   };
   const fileUrl = (rec, field, thumb) =>
     `/api/files/${rec.collectionName}/${rec.id}/${encodeURIComponent(rec[field])}` + (thumb ? `?thumb=${thumb}` : "");
-  const digits = (p) => (p || "").replace(/[^\d+]/g, "");
 
   function el(tag, attrs = {}, ...kids) {
     const e = document.createElement(tag);
@@ -51,7 +50,25 @@
     } catch (_) { online = false; }
     renderGrid();
     await pickupReady;
+    renderAway();
     resumeFromStripe();
+  }
+
+  // Red banner when Nadia has full days off now or coming up (her private note is never shown).
+  function renderAway() {
+    const banner = $("#away-banner");
+    if (!pickupData) { banner.hidden = true; return; }
+    const today = S.localParts(new Date(), S.SHOP_TZ).date;
+    const ahead = Math.max(Number(shop.book_ahead_days) || 21, 14);
+    const ranges = S.awayRanges(pickupData.blocks, today, ahead);
+    const open = S.availableSlots({
+      hours: pickupData.hours, blocks: pickupData.blocks, taken: pickupData.taken,
+      leadDays: shop.lead_days ?? 2, slotMinutes: shop.slot_minutes || 15, bookAheadDays: Math.max(ahead, 60),
+      now: new Date(), tz: S.SHOP_TZ,
+    });
+    const msg = S.awayMessage(ranges, today, open.length ? open[0].date : "");
+    banner.hidden = !msg;
+    if (msg) $("#away-text").replaceChildren(el("strong", {}, msg.title), " ", msg.text);
   }
 
   function renderShop() {
@@ -91,10 +108,12 @@
       $(".nadia-photo-wrap").hidden = !shop.nadia_photo;
     }
 
-    const phone = digits(shop.phone);
-    if (phone) {
-      $("#phone-line").replaceChildren("Questions? Text Nadia at ", el("a", { href: "sms:" + phone }, shop.phone), ".");
-      $("#review-ask").replaceChildren("Questions before you pay? Text Nadia at ", el("a", { href: "sms:" + phone }, shop.phone), ".");
+    // Customers reach Nadia by email (Shop Info → contact email). Her phone number is never shown.
+    const mail = (shop.contact_email || "").trim();
+    if (mail) {
+      const link = () => el("a", { href: "mailto:" + mail }, mail);
+      $("#phone-line").replaceChildren("Questions? Email Nadia at ", link(), ".");
+      $("#review-ask").replaceChildren("Questions before you pay? Email Nadia at ", link(), ".");
       $("#review-ask").hidden = false;
     }
     if (shop.instagram) {
@@ -147,7 +166,9 @@
     const loaves = breads.filter((b) => !isExtra(b));
     const extras = breads.filter(isExtra);
     $("#ordering-paused").hidden = online;
-    if (!online) $("#ordering-paused").textContent = `Online ordering is paused. Text Nadia at ${shop.phone || "the number on this page"}.`;
+    if (!online) $("#ordering-paused").textContent = shop.contact_email
+      ? `Online ordering is paused. Email Nadia at ${shop.contact_email}.`
+      : "Online ordering is paused. Please check back soon.";
     if (!loaves.length) grid.innerHTML = '<p class="muted">Fresh bread is coming soon. Check back shortly!</p>';
     else grid.replaceChildren(...loaves.map((b) => productCard(b, false)));
 
@@ -390,7 +411,9 @@
   function backToTimes(msg) {
     pick.time = "";
     goStep(1);
-    refreshTaken().then(() => { computeSlots(); renderCal(); });
+    // Reload everything (hours, time off, bookings): the time may have closed because Nadia
+    // just added time off, not only because someone else booked it.
+    loadPickup().then(() => { computeSlots(); renderCal(); renderAway(); });
     $("#pickup-notice").textContent = msg;
     $("#pickup-notice").hidden = false;
   }
@@ -420,7 +443,7 @@
       return;
     }
     renderReview();
-    if (data.code === "taken") return backToTimes(`Sorry, ${S.formatTime(body.time)} was just taken. Please pick another time.`);
+    if (data.code === "taken") return backToTimes(`Sorry, ${S.formatTime(body.time)} isn't available any more. Please pick another time.`);
     if (data.code === "sold_out" || data.code === "unavailable") {
       const b = breads.find((x) => x.name === data.bread);
       if (b) { delete cart[b.id]; b.sold_out = true; renderGrid(); updateBar(); }

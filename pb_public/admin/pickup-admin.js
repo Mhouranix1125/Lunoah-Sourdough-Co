@@ -18,9 +18,11 @@ window.PickupAdmin = function ({ api, toast, busy }) {
   }
 
   const getBlocks = () => api(`/api/collections/pickup_blocks/records?perPage=500&sort=start_date&filter=${encodeURIComponent(`end_date >= '${today()}'`)}`);
-  // Upcoming pickups, plus any cancelled order whose refund failed (until Nadia retries it).
+  // Upcoming pickups (they take up pickup times). The Orders tab shows and manages them.
   const getBookings = () => api(`/api/collections/bookings/records?perPage=500&sort=date,time&filter=${encodeURIComponent(
-    `(date >= '${today()}' && status != 'cancelled') || refund_status = 'failed'`)}`);
+    `date >= '${today()}' && status != 'cancelled'`)}`);
+  // Tell the Orders tab that orders changed (a phone order was added, or time off cancelled some).
+  const ordersChanged = () => document.dispatchEvent(new CustomEvent("lunoah:orders-changed"));
   const getShop = () => api("/api/collections/shop/records?perPage=1");
 
   function showShop() {
@@ -50,16 +52,15 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     showShop();
     renderWeek();
     renderBlocks();
-    renderBookings();
     renderPreview();
   }
 
-  // A booking was cancelled: refresh the list and the preview (keeps unsaved hours edits).
+  // Orders changed: refresh the bookings behind the preview (keeps unsaved hours edits).
   async function reloadBookings() {
     bookings = (await getBookings()).items;
-    renderBookings();
     renderPreview();
   }
+  document.addEventListener("lunoah:orders-changed", () => reloadBookings().catch(() => {}));
 
   // Time off changed: refresh only the time-off list (keeps unsaved hours edits).
   async function reloadBlocks() {
@@ -73,74 +74,6 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     shop = (await getShop()).items[0];
     showShop();
     renderPreview();
-  }
-
-  // ----- Upcoming pickups -----
-  function renderBookings() {
-    const box = $("#pk-bookings");
-    if (!bookings.length) {
-      box.replaceChildren(h("p", "hint", "No upcoming pickups yet."));
-      return;
-    }
-    const parts = [];
-    let day = "";
-    let ul = null;
-    for (const b of bookings) {
-      if (b.date !== day) {
-        day = b.date;
-        parts.push(h("h3", "pk-day-head", S.formatDate(b.date, "short")));
-        ul = h("ul", "pk-blocks");
-        parts.push(ul);
-      }
-      const li = h("li", "pk-block pk-booking");
-      const info = h("div");
-      info.append(h("div", "name", `${S.formatTime(b.time)} · ${b.name}`));
-      const cents = b.amount_cents || Math.round((Number(b.total) || 0) * 100);
-      const amount = `$${(cents / 100).toFixed(2)}`;
-      info.append(
-        b.refund_status === "failed" ? h("span", "badge-pill bad", "Refund failed")
-        : b.status === "paid" ? h("span", "badge-pill ok", `Paid ${amount}`)
-        : b.status === "held" ? h("span", "badge-pill", "Paying now…")
-        : h("span", "badge-pill", "Paid outside the site"));
-      const meta = [b.items, b.phone, b.notes ? `“${b.notes}”` : ""].filter(Boolean).join(" · ");
-      if (meta) info.append(h("div", "muted small-print", meta));
-      li.append(info);
-
-      if (b.refund_status === "failed") {
-        const retry = h("button", "btn ghost small", "Retry refund");
-        retry.type = "button";
-        retry.addEventListener("click", async () => {
-          busy(retry, true);
-          try {
-            const r = await api("/api/lunoah/admin/retry-refund", { method: "POST", body: { id: b.id } });
-            if (r.refund_status === "refunded") toast(`Refunded ${amount} to ${b.name}.`);
-            else toast("The refund still didn't go through. Please try again later.", "bad");
-            await reloadBookings();
-          } catch (err) { toast(err.message, "bad"); } finally { busy(retry, false); }
-        });
-        li.append(retry);
-      } else if (b.status !== "held") {
-        const cancel = h("button", "btn ghost small danger-text", "Cancel");
-        cancel.type = "button";
-        cancel.setAttribute("aria-label", `Cancel ${b.name}'s ${S.formatTime(b.time)} pickup`);
-        cancel.addEventListener("click", async () => {
-          const when = `${S.formatTime(b.time)} pickup on ${S.formatDate(b.date, "short")}`;
-          const q = b.status === "paid"
-            ? `Cancel ${b.name}'s ${when} and refund ${amount} to their card?`
-            : `Cancel ${b.name}'s ${when}? That time will open up for other customers.`;
-          if (!confirm(q)) return;
-          try {
-            const r = await api("/api/lunoah/admin/cancel", { method: "POST", body: { id: b.id } });
-            if (r.refund_status === "failed") toast("Cancelled, but the refund didn't go through. Tap “Retry refund”.", "bad");
-            else toast(`Pickup cancelled${r.refund_status === "refunded" ? ` and ${amount} refunded` : ""}. ${S.formatTime(b.time)} is open again.`);
-            await reloadBookings();
-          } catch (err) { toast(err.message, "bad"); }
-        });
-        li.append(cancel);
-      }
-      ul.append(li);
-    }
-    box.replaceChildren(...parts);
   }
 
   // ----- Regular hours -----
@@ -231,10 +164,12 @@ window.PickupAdmin = function ({ api, toast, busy }) {
       ul.replaceChildren(h("li", "hint", "No time off planned."));
       return;
     }
+    const t = today();
     ul.replaceChildren(...blocks.map((b) => {
       const li = h("li", "pk-block");
       const info = h("div");
       info.append(h("div", "name", blockLabel(b)));
+      if (b.start_date <= t) info.append(h("span", "badge-pill ok", "On now"));
       if (b.note) info.append(h("div", "muted small-print", b.note));
       const del = h("button", "btn ghost small danger-text", "Delete");
       del.type = "button";
@@ -251,8 +186,14 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     }));
   }
 
+  const blockError = (msg) => {
+    $("#bk-error").textContent = msg;
+    $("#bk-error").hidden = !msg; // shown inside the box (a toast would sit behind it)
+  };
+
   $("#pk-add-block").addEventListener("click", () => {
     $("#block-form").reset();
+    blockError("");
     $("#bk-start").value = today();
     $("#bk-end").value = today();
     $("#bk-start").min = today();
@@ -264,36 +205,73 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     $("#bk-end").min = $("#bk-start").value;
     if ($("#bk-end").value < $("#bk-start").value) $("#bk-end").value = $("#bk-start").value;
   });
-  $("#bk-allday").addEventListener("change", () => ($("#bk-times").hidden = $("#bk-allday").checked));
+  $("#bk-allday").addEventListener("change", () => {
+    $("#bk-times").hidden = $("#bk-allday").checked;
+    // Start with real times. Empty time boxes on an iPhone show a grey "12:30 PM" that looks
+    // filled in but isn't. Use that day's pickup hours when there are some.
+    if (!$("#bk-allday").checked && !$("#bk-from").value && !$("#bk-to").value) {
+      const day = $("#bk-start").value ? hours.filter((x) => x.weekday === S.weekday($("#bk-start").value)) : [];
+      const first = day.slice().sort((a, b) => (a.start < b.start ? -1 : 1))[0];
+      $("#bk-from").value = first ? first.start : "09:00";
+      $("#bk-to").value = first ? first.end : "13:00";
+    }
+    blockError("");
+  });
+  $("#bk-end").addEventListener("change", () => blockError(""));
   $("#bk-cancel").addEventListener("click", () => $("#block-dialog").close());
 
+  // Is the new time off already fully covered by one she has? (Saves a pointless duplicate.)
+  const alreadyCovered = (n) => blocks.some((b) =>
+    b.start_date <= n.start_date && n.end_date <= b.end_date &&
+    (S.blockIsAllDay(b) || (!n.all_day && b.from <= n.from && n.to <= b.to)));
+
+  const pickupLine = (b) => `• ${S.formatDate(b.date, "short")} ${S.formatTime(b.time)}: ${b.name}`;
+
+  let savingBlock = false;
   $("#block-form").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const start = $("#bk-start").value;
-    const end = $("#bk-end").value;
+    if (savingBlock) return; // a double tap must not save it twice
     const allDay = $("#bk-allday").checked;
-    const from = $("#bk-from").value;
-    const to = $("#bk-to").value;
-    if (!start || !end) return toast("Please choose the first and last day.", "bad");
-    if (end < start) return toast("The last day can't be before the first day.", "bad");
-    if (!allDay && (!from || !to || to <= from)) return toast("Please choose a start and end time (end after start).", "bad");
-    // Booked pickups inside the new time off: warn, and cancel (refunding paid ones) if she agrees.
-    const toMin = (t) => { const [hh, mm] = t.split(":").map(Number); return hh * 60 + mm; };
-    const len = (shop && shop.slot_minutes) || 15;
-    const hit = bookings.filter((b) => (b.status === "paid" || b.status === "manual") && b.date >= start && b.date <= end &&
-      (allDay || (toMin(b.time) < toMin(to) && toMin(from) < toMin(b.time) + len)));
-    if (hit.length) {
-      const list = hit.map((b) => `• ${S.formatDate(b.date, "short")} ${S.formatTime(b.time)}: ${b.name}`).join("\n");
-      const one = hit.length === 1;
-      if (!confirm(`${hit.length} booked ${one ? "pickup falls" : "pickups fall"} in this time off:\n${list}\n\nCancel ${one ? "it" : "them"} (paid orders are refunded) and save the time off?`)) return;
-    }
-    const btn = e.submitter || e.target.querySelector('[type=submit]');
+    const block = {
+      start_date: $("#bk-start").value,
+      end_date: $("#bk-end").value,
+      all_day: allDay,
+      from: allDay ? "" : $("#bk-from").value,
+      to: allDay ? "" : $("#bk-to").value,
+      note: $("#bk-note").value.trim(),
+    };
+    const problem = S.checkBlock(block, today());
+    if (problem) return blockError(problem);
+    if (alreadyCovered(block)) return blockError("You already have time off that covers this.");
+    blockError("");
+
+    const btn = e.submitter || e.target.querySelector("[type=submit]");
+    savingBlock = true;
     busy(btn, true);
     try {
-      await api("/api/collections/pickup_blocks/records", {
-        method: "POST",
-        body: { start_date: start, end_date: end, all_day: allDay, from: allDay ? "" : from, to: allDay ? "" : to, note: $("#bk-note").value.trim() },
-      });
+      // Check against the latest pickups, not the ones loaded when the page opened.
+      bookings = (await getBookings()).items;
+      const len = (shop && shop.slot_minutes) || 15;
+      const inside = bookings.filter((b) => b.status !== "cancelled" && !b.pickup && S.blockCoversSlot(block, b.date, b.time, len));
+      const hit = inside.filter((b) => b.status === "paid" || b.status === "manual");
+      const paying = inside.filter((b) => b.status === "held");
+
+      if (hit.length || paying.length) {
+        const parts = [];
+        if (hit.length) {
+          const one = hit.length === 1;
+          parts.push(`${hit.length} booked ${one ? "pickup falls" : "pickups fall"} in this time off:\n${hit.map(pickupLine).join("\n")}\n\n` +
+            `${one ? "It" : "They"} will be cancelled, and paid orders refunded in full.`);
+        }
+        if (paying.length) {
+          parts.push(`Someone is paying right now for:\n${paying.map(pickupLine).join("\n")}\n\n` +
+            "If they finish, it will show in Orders. You can cancel it there for a full refund.");
+        }
+        if (!confirm(`${parts.join("\n\n")}\n\nSave the time off?`)) return;
+      }
+
+      // Save the time off first, so no new customer can book these times while we cancel.
+      await api("/api/collections/pickup_blocks/records", { method: "POST", body: block });
       let failed = 0;
       for (const b of hit) {
         try {
@@ -302,12 +280,18 @@ window.PickupAdmin = function ({ api, toast, busy }) {
         } catch (_) { failed++; }
       }
       $("#block-dialog").close();
-      if (failed) toast(`Time off added, but ${failed} refund${failed === 1 ? "" : "s"} didn't go through. See “Refund failed” under Upcoming pickups.`, "bad");
-      else toast(hit.length ? `Time off added. ${hit.length} pickup${hit.length === 1 ? "" : "s"} cancelled.` : "Time off added");
+      const when = blockLabel(block);
+      if (failed) toast(`Time off saved, but ${failed} refund${failed === 1 ? "" : "s"} didn't go through. See Orders to retry.`, "bad");
+      else toast(hit.length ? `Time off saved (${when}). ${hit.length} pickup${hit.length === 1 ? "" : "s"} cancelled.` : `Time off saved: ${when}. Customers can't pick these times.`);
       await reloadBlocks();
-      if (hit.length) await reloadBookings();
-    } catch (err) { toast(err.message, "bad"); }
-    finally { busy(btn, false); }
+      await reloadBookings();
+      if (hit.length) ordersChanged();
+    } catch (err) {
+      blockError(err.message || "The time off didn't save. Please try again.");
+    } finally {
+      savingBlock = false;
+      busy(btn, false);
+    }
   });
 
   // ----- Add a pickup (phone / in-person orders) -----
@@ -356,16 +340,20 @@ window.PickupAdmin = function ({ api, toast, busy }) {
     const name = $("#bk2-name").value.trim();
     if (!date || !time) return toast("Please choose a day and time.", "bad");
     if (!name) return toast("Please enter a name.", "bad");
+    const pay = window.LunoahMoney.readPayment($("#bk2-amount").value, $("#bk2-via").value);
+    if (pay.error) return toast(pay.error, "bad");
     const btn = e.submitter || $("#bk2-save");
     busy(btn, true);
     try {
       await api("/api/collections/bookings/records", {
         method: "POST",
-        body: { date, time, name, items: $("#bk2-note").value.trim(), total: 0, order_code: "PHONE", status: "manual", refund_status: "none" },
+        body: { date, time, name, phone: $("#bk2-phone").value.trim().slice(0, 20), items: $("#bk2-note").value.trim(),
+          amount_cents: pay.cents, total: pay.cents / 100, paid_via: pay.via, order_code: "PHONE", status: "manual", refund_status: "none" },
       });
       $("#booking-dialog").close();
-      toast("Pickup added.");
+      toast("Phone order added.");
       await reloadBookings();
+      ordersChanged();
     } catch (err) {
       if (/unique/i.test(err.message || "")) {
         toast("That time was just taken. Please pick another.", "bad");

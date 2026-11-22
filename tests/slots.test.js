@@ -151,3 +151,95 @@ test("availableSlots: an injected today replaces the clock", () => {
   const r = S.availableSlots(base({ leadDays: 0, now: est("2026-11-14"), today: { date: "2026-11-12", minutes: 720 } }));
   assert.equal(r[0].date, "2026-11-13");
 });
+
+// ----- Time off: checkBlock, damaged entries, blockCoversSlot -----
+const blk = (over = {}) => ({ start_date: "2026-12-01", end_date: "2026-12-03", all_day: true, from: "", to: "", note: "", ...over });
+const TODAY = "2026-11-22";
+
+test("checkBlock: a normal all-day vacation is fine", () => {
+  assert.equal(S.checkBlock(blk(), TODAY), "");
+  assert.equal(S.checkBlock(blk({ start_date: TODAY, end_date: TODAY }), TODAY), "", "today is allowed");
+});
+
+test("checkBlock: rejects missing, impossible, reversed and past dates", () => {
+  assert.match(S.checkBlock(blk({ start_date: "" }), TODAY), /first and last day/);
+  assert.match(S.checkBlock(blk({ end_date: "2026-02-30" }), TODAY), /first and last day/);
+  assert.match(S.checkBlock(blk({ end_date: "2026-11-30" }), TODAY), /before the first day/);
+  assert.match(S.checkBlock(blk({ start_date: "2026-11-21" }), TODAY), /past/);
+  assert.match(S.checkBlock(blk({ end_date: "2028-01-01" }), TODAY), /up to a year/);
+});
+
+test("checkBlock: part-day time off needs both times, end after start, any minute allowed", () => {
+  assert.equal(S.checkBlock(blk({ all_day: false, from: "10:05", to: "11:50" }), TODAY), "");
+  assert.match(S.checkBlock(blk({ all_day: false, from: "", to: "" }), TODAY), /start and end time/);
+  assert.match(S.checkBlock(blk({ all_day: false, from: "10:00", to: "" }), TODAY), /start and end time/);
+  assert.match(S.checkBlock(blk({ all_day: false, from: "11:00", to: "11:00" }), TODAY), /after the start/);
+  assert.match(S.checkBlock(blk({ all_day: false, from: "14:00", to: "09:00" }), TODAY), /after the start/);
+});
+
+test("a damaged part-day entry (no or backwards times) closes the whole day instead of nothing", () => {
+  const now = est("2026-11-23", "08:00"); // Monday
+  for (const bad of [{ from: "", to: "" }, { from: "12:00", to: "10:00" }]) {
+    const r = S.availableSlots(base({ now, blocks: [blk({ start_date: "2026-11-27", end_date: "2026-11-27", all_day: false, ...bad })] }));
+    assert.ok(!dates(r).includes("2026-11-27"), JSON.stringify(bad));
+    assert.ok(dates(r).includes("2026-11-28"));
+  }
+});
+
+test("part-day time off at odd minutes removes exactly the overlapping slots", () => {
+  const now = est("2026-11-23", "08:00");
+  const r = S.availableSlots(base({ now, blocks: [blk({ start_date: "2026-11-27", end_date: "2026-11-27", all_day: false, from: "10:10", to: "11:05" })] }));
+  const fri = r.find((d) => d.date === "2026-11-27").times;
+  assert.deepEqual(fri, ["09:00", "09:30", "11:30", "12:00", "12:30"]);
+});
+
+test("time off spanning several days and a month boundary closes every day", () => {
+  const now = est("2026-11-23", "08:00");
+  const r = S.availableSlots(base({ now, bookAheadDays: 21, blocks: [blk({ start_date: "2026-11-27", end_date: "2026-12-05" })] }));
+  for (const d of ["2026-11-27", "2026-11-28", "2026-12-04", "2026-12-05"]) assert.ok(!dates(r).includes(d), d);
+  assert.ok(dates(r).includes("2026-12-11"));
+});
+
+test("blockCoversSlot: dates, all day, partial overlap and slot length", () => {
+  const part = blk({ all_day: false, from: "10:00", to: "11:00" });
+  assert.equal(S.blockCoversSlot(blk(), "2026-12-02", "09:00", 15), true);
+  assert.equal(S.blockCoversSlot(blk(), "2026-12-04", "09:00", 15), false);
+  assert.equal(S.blockCoversSlot(part, "2026-12-01", "09:45", 15), false, "ends exactly at 10:00");
+  assert.equal(S.blockCoversSlot(part, "2026-12-01", "09:50", 15), true, "runs into 10:00");
+  assert.equal(S.blockCoversSlot(part, "2026-12-01", "10:45", 15), true);
+  assert.equal(S.blockCoversSlot(part, "2026-12-01", "11:00", 15), false);
+});
+
+// ----- Customer away banner -----
+test("awayRanges: only full days off, within the horizon, merged when back-to-back", () => {
+  const blocks = [
+    blk({ start_date: "2026-11-27", end_date: "2026-11-28" }),
+    blk({ start_date: "2026-11-29", end_date: "2026-11-30" }), // back-to-back: merges
+    blk({ start_date: "2026-12-05", end_date: "2026-12-05", all_day: false, from: "10:00", to: "11:00" }), // part-day: ignored
+    blk({ start_date: "2026-12-10", end_date: "2026-12-10" }),
+    blk({ start_date: "2027-03-01", end_date: "2027-03-05" }), // too far away
+    blk({ start_date: "2026-11-01", end_date: "2026-11-05" }), // over
+  ];
+  assert.deepEqual(S.awayRanges(blocks, TODAY, 21), [
+    { start: "2026-11-27", end: "2026-11-30" },
+    { start: "2026-12-10", end: "2026-12-10" },
+  ]);
+});
+
+test("awayRanges: time off already under way starts today", () => {
+  assert.deepEqual(S.awayRanges([blk({ start_date: "2026-11-20", end_date: "2026-11-25" })], TODAY, 21), [{ start: TODAY, end: "2026-11-25" }]);
+});
+
+test("awayMessage: upcoming, single day, away now, back today, and nothing", () => {
+  assert.equal(S.awayMessage([], TODAY, "2026-11-24"), null);
+  const soon = S.awayMessage([{ start: "2026-12-01", end: "2026-12-03" }], TODAY, "2026-11-24");
+  assert.equal(soon.title, "Heads up: Nadia will be away Tue, Dec 1 through Thu, Dec 3.");
+  assert.match(soon.text, /no pickups on those days/);
+  const one = S.awayMessage([{ start: "2026-12-01", end: "2026-12-01" }], TODAY, "");
+  assert.equal(one.title, "Heads up: Nadia will be away Tue, Dec 1.");
+  assert.match(one.text, /that day/);
+  const now = S.awayMessage([{ start: TODAY, end: "2026-11-25" }, { start: "2026-12-10", end: "2026-12-10" }], TODAY, "2026-11-27");
+  assert.equal(now.title, "Nadia is away until Wed, Nov 25.");
+  assert.match(now.text, /next pickup day is Fri, Nov 27\. She'll also be away Thu, Dec 10\./);
+  assert.equal(S.awayMessage([{ start: TODAY, end: TODAY }], TODAY, "").title, "Nadia is away today.");
+});

@@ -6,6 +6,12 @@
   const money = (c) => "$" + (c / 100).toFixed(2);
   let polls = 0;
 
+  // How to reach Nadia: by email (her phone number is never shown).
+  const ask = (mail, lower) => {
+    const t = mail ? `Please email Nadia at ${mail}.` : "Please reply to your confirmation email.";
+    return lower ? t[0].toLowerCase() + t.slice(1) : t;
+  };
+
   function el(tag, text, cls) {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -45,19 +51,19 @@
         $("#op-cancel-box").hidden = false;
         $("#op-cancel-note").textContent = `Changed your mind? You can cancel for a full refund until ${o.cancel_until_label}.`;
       } else {
-        $("#op-msg").textContent = `This order can no longer be cancelled online. Please text Nadia at ${o.phone}.`;
+        $("#op-msg").textContent = `This order can no longer be cancelled online. ${ask(o.contact)}`;
         $("#op-msg").hidden = false;
       }
     } else if (o.status === "held") {
       $("#op-title").textContent = "Confirming your payment…";
       $("#op-lead").textContent = "This usually takes a few seconds.";
       if (polls++ < 15) setTimeout(load, 2000);
-      else $("#op-lead").textContent = `Still confirming. You'll get an email shortly. If you don't, text Nadia at ${o.phone}.`;
+      else $("#op-lead").textContent = `Still confirming. You'll get an email shortly. If you don't, ${ask(o.contact, true)}`;
     } else if (o.status === "cancelled") {
       $("#op-title").textContent = "Order cancelled";
       $("#op-lead").textContent = o.refund_status === "refunded"
         ? `${money(o.amount_cents)} is on its way back to your card (5–10 days).`
-        : `Your refund is being processed. Questions? Text Nadia at ${o.phone}.`;
+        : `Your refund is being processed. Questions? ${ask(o.contact)}`;
     } else {
       $("#op-title").textContent = "Your pickup is booked";
       $("#op-lead").textContent = "";
@@ -95,7 +101,7 @@
       if (r.ok) return show(d);
       $("#op-cancel-box").hidden = true;
       $("#op-msg").textContent = d.code === "closed"
-        ? `This order can no longer be cancelled online. Please text Nadia at ${d.phone}.`
+        ? `This order can no longer be cancelled online. ${ask(d.contact)}`
         : d.message || "Something went wrong. Please try again.";
       $("#op-msg").hidden = false;
     } catch (_) {

@@ -109,23 +109,24 @@ after Stripe confirms the payment. Without the steps below, the site shows "Onli
    ```
    Admin → **Shop Info** should now say "Online card payments: **On**".
 5. **Emails** (order notices to Nadia, confirmations with the cancel link to customers):
-   `/_/` → Settings → Mail settings → turn on SMTP. With the bakery Gmail: host `smtp.gmail.com`, port `587`,
-   username = the Gmail address, password = a Google **app password** (Google Account → Security → App passwords).
-   Sender name `Lunoah Sourdough Co.`, sender address = the Gmail address. Click **Send test email**.
-   Then in Admin → **Shop Info**, set **Email for new orders**.
+   ✅ Done, sent through **Brevo**. `/_/` → Settings → Mail settings holds Brevo's SMTP relay details
+   (host `smtp-relay.brevo.com`, port `587`, Brevo SMTP login and key, from the Brevo dashboard → SMTP & API).
+   If emails stop, check the Brevo dashboard first (sending limits, sender/domain verification), then
+   **Send test email** in the PocketBase dashboard. Admin → **Shop Info** → **Email for new orders** sets where Nadia's notices go.
 6. **Real test:** order the cheapest loaf with a real card. Check that both emails arrive, then use the
    **Cancel my order** link in the confirmation email and confirm the refund shows in Stripe.
 
 ## 5. Launch checklist
 - [ ] Google Voice number set up and entered in Shop Info
 - [x] Domain bought (lunoahsourdoughco.com, Namecheap); auto-renew + privacy on
-- [ ] Server running, `https://` works for both `lunoahsourdoughco.com` and `www`
-- [ ] Nadia's login created, she's changed her password (Shop Info → Change my password)
+- [x] Server running, `https://` works for both `lunoahsourdoughco.com` and `www`
+- [x] Nadia's login created (she still changes her password herself) (Shop Info → Change my password)
 - [ ] Sample breads replaced with real ones and real photos
-- [ ] Stripe account in Nadia's name, live keys + webhook set, "Online card payments: On"
-- [ ] Order emails arrive (Nadia + customer); a real order placed, cancelled and refunded
-- [ ] Automatic backups on
-- [ ] Pepperoni & Cheese settled with MDARD (or hidden); loaf labels printed (section 7)
+- [x] Stripe account in Nadia's name, live keys + webhook set, "Online card payments: On"
+- [x] Order emails set up (SMTP)
+- [ ] Real order placed, cancelled and refunded; both emails arrive
+- [x] Automatic backups on (daily, keep 7)
+- [ ] Off-server copy of backups (S3: Backblaze B2 or Cloudflare R2)
 
 ## 6. Leaving this Mac (after launch)
 

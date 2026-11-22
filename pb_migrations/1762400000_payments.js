@@ -52,7 +52,6 @@ migrate((app) => {
 
   const zelle = new Record(pm);
   zelle.set("kind", "zelle");
-  zelle.set("phone", "313-384-0304");
   zelle.set("note", "Shows as NADIA in your bank's app.");
   zelle.set("enabled", true);
   zelle.set("sort", 20);

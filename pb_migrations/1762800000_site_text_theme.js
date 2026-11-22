@@ -11,7 +11,7 @@ migrate((app) => {
   for (const r of app.findAllRecords("shop")) {
     r.set("pickup_location", "Dearborn Park, Dearborn, MI");
     r.set("order_received", "Your order has been received. Nadia will reach out to you shortly.");
-    r.set("allergy_note", "Our breads are baked in a home kitchen that also handles wheat (gluten), sesame, tree nuts, peanuts, milk, eggs and soy. We can't guarantee any bread is free of allergens. If you have a severe allergy, please text Nadia before ordering.");
+    r.set("allergy_note", "Our breads are baked in a home kitchen that also handles wheat (gluten), sesame, tree nuts, peanuts, milk, eggs and soy. We can't guarantee any bread is free of allergens. If you have a severe allergy, please email Nadia before ordering.");
     r.set("theme", "basic");
     r.set("pickup_info", "Nadia will text you the exact meeting spot when she confirms your order.");
     app.save(r);

@@ -14,12 +14,25 @@
   let removeNadia = false;
 
   // ---------- helpers ----------
+  // Reads a dollar amount typed by Nadia ("15", "$15.50") with how it was paid. Used by phone orders.
+  window.LunoahMoney = {
+    readPayment(text, via) {
+      const t = String(text || "").replace(/[$,\s]/g, "");
+      if (!t) return via ? { error: "Please enter the amount they paid." } : { cents: 0, via: "" };
+      if (!/^\d{1,5}(\.\d{1,2})?$/.test(t)) return { error: "Please enter the amount like 15 or 15.50." };
+      return { cents: Math.round(Number(t) * 100), via: via || "" };
+    },
+  };
   const money = (n) => "$" + (Number.isInteger(Number(n)) ? Number(n) : Number(n).toFixed(2));
   const fileUrl = (rec, field, thumb) =>
     `/api/files/${rec.collectionName}/${rec.id}/${encodeURIComponent(rec[field])}` + (thumb ? `?thumb=${thumb}` : "");
 
   function toast(msg, kind = "ok") {
     const t = $("#toast");
+    // An open dialog sits on top of everything else on the page, so a message outside it would be
+    // hidden behind it. Show the message inside the open dialog instead.
+    const host = document.querySelector("dialog[open]") || document.body;
+    if (t.parentElement !== host) host.append(t);
     t.textContent = msg;
     t.className = "toast " + kind;
     t.hidden = false;
@@ -163,18 +176,29 @@
   document.querySelectorAll(".tab").forEach((t) =>
     t.addEventListener("click", () => {
       document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("active", x === t));
-      for (const name of ["breads", "extras", "shop", "pickup", "pay"]) $("#tab-" + name).hidden = t.dataset.tab !== name;
+      for (const name of ["orders", "breads", "extras", "shop", "pickup", "pay", "sales"]) $("#tab-" + name).hidden = t.dataset.tab !== name;
+      if (t.dataset.tab === "sales") salesAdmin.load().catch((err) => toast(err.message, "bad"));
+      if (location.hash) history.replaceState(null, "", location.pathname);
     })
   );
+  // A link like /admin#pickup (e.g. from the reminder email, /admin#orders) opens that tab.
+  function openTabFromHash() {
+    const t = document.querySelector(`.tab[data-tab="${location.hash.slice(1)}"]`);
+    if (t) t.click();
+  }
 
   const pickupAdmin = window.PickupAdmin({ api, toast, busy });
+  const ordersAdmin = window.OrdersAdmin({ api, toast, busy });
+  const salesAdmin = window.SalesAdmin({ api, toast });
 
   async function showApp() {
     $("#login-view").hidden = true;
     $("#setup-view").hidden = true;
     $("#nosetup-view").hidden = true;
     $("#app-view").hidden = false;
-    await Promise.all([loadBreads(), loadShop(), loadPay(), pickupAdmin.load().catch((err) => toast(err.message, "bad"))]);
+    openTabFromHash();
+    await Promise.all([loadBreads(), loadShop(), loadPay(), pickupAdmin.load().catch((err) => toast(err.message, "bad")),
+      ordersAdmin.load().catch((err) => toast(err.message, "bad"))]);
   }
 
   // ---------- payment methods ----------
@@ -567,7 +591,7 @@
     markSwatch();
     $("#x-title").value = shop.extras_title || "";
     $("#x-intro").value = shop.extras_intro || "";
-    $("#s-phone").value = shop.phone || "";
+    $("#s-contact").value = shop.contact_email || "";
     $("#s-tagline").value = shop.tagline || "";
     $("#s-about").value = shop.about || "";
     $("#s-pickup").value = shop.pickup_info || "";
@@ -629,7 +653,7 @@
     const btn = e.submitter;
     const fd = new FormData();
     fd.append("theme", $("#s-theme").value);
-    fd.append("phone", $("#s-phone").value.trim());
+    fd.append("contact_email", $("#s-contact").value.trim());
     fd.append("tagline", $("#s-tagline").value.trim());
     fd.append("about", $("#s-about").value.trim());
     fd.append("pickup_info", $("#s-pickup").value.trim());

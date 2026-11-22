@@ -21,7 +21,7 @@ const SHOP = {
   "book_ahead_days": 7,
   "pickup_location": "Dearborn, MI",
   "order_received": "You're all set! Nadia will text you shortly with her home address for pickup.",
-  "allergy_note": "Our breads are baked in a home kitchen that also handles wheat (gluten), sesame, tree nuts, peanuts, milk, eggs and soy. We can't guarantee any bread is free of allergens. If you have a severe allergy, please text Nadia before ordering.",
+  "allergy_note": "Our breads are baked in a home kitchen that also handles wheat (gluten), sesame, tree nuts, peanuts, milk, eggs and soy. We can't guarantee any bread is free of allergens. If you have a severe allergy, please email Nadia before ordering.",
   "theme": "halloween",
   "nadia_title": "Meet Nadia",
   "nadia_story": "Testing things. Testing things. Testing things. Test Test."

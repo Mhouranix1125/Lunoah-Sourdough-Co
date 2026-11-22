@@ -131,7 +131,7 @@ function checkout(e) {
       unavailable: "One of the items in your basket is no longer available. Please refresh the page.",
       bad_qty: "Please check the quantities in your order.",
       sold_out: (priced.bread || "An item") + " just sold out. We've updated your basket.",
-      too_many: "Online orders are limited to " + O.MAX_LOAVES + " items. For bigger orders, please text Nadia.",
+      too_many: "Online orders are limited to " + O.MAX_LOAVES + " items. For bigger orders, please email Nadia.",
       too_small: "Your order is too small to pay online.",
     };
     return fail(e, 400, priced.error, msgs[priced.error], { bread: priced.bread || "" });
@@ -210,7 +210,7 @@ function summary(rec) {
     refund_status: rec.getString("refund_status"),
     cancel_until: deadline || null, cancel_until_label: deadline ? T.clock(deadline) : "",
     can_cancel: !!deadline && Date.now() < deadline,
-    location: s.getString("pickup_location"), phone: s.getString("phone"), message: s.getString("order_received"),
+    location: s.getString("pickup_location"), contact: s.getString("contact_email"), message: s.getString("order_received"),
   };
 }
 

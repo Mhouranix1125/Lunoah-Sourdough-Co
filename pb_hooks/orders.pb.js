@@ -59,7 +59,7 @@ routerAdd("POST", "/api/lunoah/order/cancel", (e) => {
   const s = B.summary(rec);
   if (s.status === "cancelled") return e.json(200, s);
   if (s.status !== "paid") return B.fail(e, 409, "not_paid", "This order isn't paid yet.");
-  if (!s.can_cancel) return B.fail(e, 409, "closed", "This order can no longer be cancelled online.", { phone: s.phone });
+  if (!s.can_cancel) return B.fail(e, 409, "closed", "This order can no longer be cancelled online.", { contact: s.contact });
   B.cancelBooking(rec, "customer");
   return e.json(200, B.summary(B.findById(rec.id)));
 });
@@ -72,6 +72,29 @@ routerAdd("POST", "/api/lunoah/admin/cancel", (e) => {
   B.cancelBooking(rec, "nadia");
   return e.json(200, { status: rec.getString("status"), refund_status: rec.getString("refund_status") });
 }, $apis.requireAuth("bakers"));
+
+// Nadia ticks an order off: result "picked_up", "no_show", or "" to undo.
+routerAdd("POST", "/api/lunoah/admin/pickup", (e) => {
+  const B = require(`${__hooks}/lib/booking.js`);
+  const body = e.requestInfo().body || {};
+  const result = String(body.result || "");
+  if (["picked_up", "no_show", ""].indexOf(result) < 0) return B.fail(e, 400, "bad_result", "Please try again.");
+  const rec = B.findById(String(body.id || ""));
+  if (!rec) return B.fail(e, 404, "not_found", "That order no longer exists.");
+  const st = rec.getString("status");
+  if (st === "cancelled") return B.fail(e, 409, "cancelled", "This order was cancelled, so it can't be ticked off.");
+  if (st === "held") return B.fail(e, 409, "held", "This customer is still paying. Try again in a few minutes.");
+  rec.set("pickup", result);
+  rec.set("pickup_marked_at", result ? Date.now() : 0);
+  rec.set("reminded", true); // once she has looked at it, no reminder email for it
+  $app.save(rec);
+  return e.json(200, { pickup: rec.getString("pickup"), pickup_marked_at: rec.getInt("pickup_marked_at") });
+}, $apis.requireAuth("bakers"));
+
+cronAdd("lunoah_pickup_reminders", "*/10 * * * *", () => {
+  try { require(`${__hooks}/lib/reminders.js`).run(); }
+  catch (err) { $app.logger().error("lunoah reminders", "error", String(err)); }
+});
 
 routerAdd("POST", "/api/lunoah/admin/retry-refund", (e) => {
   const B = require(`${__hooks}/lib/booking.js`);
