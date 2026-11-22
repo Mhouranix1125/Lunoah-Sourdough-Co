@@ -151,3 +151,22 @@ From MDARD's Cottage Food FAQ (michigan.gov/mdard → Cottage Food):
 - **Labels:** every loaf needs a printed label (name and address of the business, ingredients by weight, allergens,
   and the "Made in a home kitchen…" statement). Check MDARD's labeling guide for exact wording before printing.
 - Local zoning rules may also apply; check with the city/township.
+
+## 8. Backlog (later)
+
+- **Promotional emails to past customers (Brevo).** Don't send them from the Proton inbox: it isn't
+  allowed for bulk mail and has no unsubscribe link. Use Brevo, which already sends the order emails
+  and has the domain verified (free plan: 300 emails/day, newsletter editor, automatic unsubscribe).
+  Site work when we pick this up:
+  1. Checkout checkbox: "Email me about new breads and specials" (saved on the order).
+  2. Admin "Download mailing list" button: CSV of opted-in customers (name, email, last order date)
+     to import into Brevo.
+  3. Optional later: add opt-ins to the Brevo list automatically instead of downloading.
+  Every promotional email needs an unsubscribe link, the business's postal address and an honest
+  subject line (CAN-SPAM); Brevo adds the first two.
+- **Shop phone number.** Google Voice wouldn't verify the bakery account; customers reach Nadia by
+  email for now. Options: Google Voice on an older Google account, a second line on her phone
+  (Tello / US Mobile eSIM), or Quo (formerly OpenPhone).
+- **Off-server copy of backups** (PocketBase → Settings → Backups → S3: Backblaze B2 or Cloudflare R2).
+- **Update Nadia's PowerPoint guide:** new login (the Proton address), Orders, Sales, Adjust photo,
+  the "Fresh from the oven" photo, phone-order payments.
