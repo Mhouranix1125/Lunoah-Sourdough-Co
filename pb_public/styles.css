@@ -134,7 +134,8 @@ section[id] { scroll-margin-top: 16px; }
 .eyebrow { font-family: var(--caps); text-transform: uppercase; letter-spacing: .18em; font-size: .78rem; color: var(--crust); font-weight: 600; margin: 0 0 14px; }
 .hero h1 { font-size: clamp(2.6rem, 6vw, 4.3rem); }
 .lead { font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 1.4rem; line-height: 1.45; color: var(--muted); max-width: 30em; margin: 0 0 28px; }
-.hero-img img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 24px; background: var(--cream); }
+.hero-img { border-radius: 24px; overflow: hidden; } /* clips a zoomed photo to the rounded frame */
+.hero-img img { display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 24px; background: var(--cream); }
 /* No top photo: the text takes the full width */
 .hero.no-photo { grid-template-columns: 1fr; }
 .hero.no-photo .hero-text { max-width: 40em; }
@@ -158,7 +159,9 @@ section[id] { scroll-margin-top: 16px; }
 .nadia-board:not(:has(.nadia-photo-wrap:not([hidden]))) { grid-template-columns: 1fr; }
 .nadia-photo-wrap { margin: 0; }
 .photo-frame { padding: 10px; border-radius: 3px; transform: rotate(-1.5deg); }
-.photo-frame img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border: 12px solid #f7f0e3; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); outline: 1px solid rgba(40, 20, 5, .35); }
+/* The cream mat holds the photo and clips it, so a zoomed or repositioned photo stays inside the frame. */
+.photo-mat { aspect-ratio: 1 / 1; overflow: hidden; border: 12px solid #f7f0e3; background: #f7f0e3; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); outline: 1px solid rgba(40, 20, 5, .35); }
+.photo-frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
 .nadia-text h2 { margin-bottom: .4em; }
 .nadia-text h2::after { content: ""; display: block; width: 110px; height: 20px; margin-top: 12px; background: var(--sprig) left center / contain no-repeat; }
@@ -332,7 +335,7 @@ dialog input:focus, dialog textarea:focus { outline: none; border-color: var(--c
   .nadia-board { grid-template-columns: 1fr; gap: 28px; padding: 28px 22px 30px; }
   .nadia-photo-wrap { width: min(260px, 82%); margin: 0 auto; }
   .photo-frame { padding: 8px; }
-  .photo-frame img { border-width: 9px; }
+  .photo-mat { border-width: 9px; }
   .order-cols { grid-template-columns: 1fr; gap: 22px; }
   .site-header nav { gap: 14px; }
   .pay-panel { flex-direction: column; gap: 20px; padding: 18px; }

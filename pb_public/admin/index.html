@@ -144,9 +144,10 @@
         <label>Nadia's story <span class="muted">(blank line = new paragraph)</span><textarea id="s-nadia-story" rows="8" maxlength="5000"></textarea></label>
         <div class="photo-field">
           <span class="label">Nadia's photo <span class="muted">(shown beside your story)</span></span>
-          <div class="photo-box" id="nadia-box"><img id="nadia-preview" alt=""><span class="photo-empty">No photo yet</span></div>
+          <div class="photo-box square" id="nadia-box"><img id="nadia-preview" alt=""><span class="photo-empty">No photo yet</span></div>
           <div class="row">
             <label class="btn ghost">Choose photo<input type="file" id="nadia-file" accept="image/*" hidden></label>
+            <button type="button" id="nadia-adjust" class="btn ghost">Adjust photo</button>
             <button type="button" id="nadia-remove" class="btn ghost danger-text">Remove photo</button>
           </div>
         </div>
@@ -161,6 +162,7 @@
           <div class="photo-box" id="hero-box"><img id="hero-preview" alt=""><span class="photo-empty">No photo yet</span></div>
           <div class="row">
             <label class="btn ghost">Choose photo<input type="file" id="hero-file" accept="image/*" hidden></label>
+            <button type="button" id="hero-adjust" class="btn ghost">Adjust photo</button>
             <button type="button" id="hero-remove" class="btn ghost danger-text">Remove photo</button>
           </div>
         </div>
@@ -275,6 +277,7 @@
         </label>
         <div class="row">
           <label class="btn ghost small" for="photo-file">Change photo</label>
+          <button type="button" id="photo-adjust" class="btn ghost small">Adjust photo</button>
           <button type="button" id="photo-remove" class="btn ghost small danger-text">Remove photo</button>
         </div>
       </div>
@@ -313,6 +316,26 @@
         <button class="btn ghost big" type="button" id="bk2-cancel">Cancel</button>
       </div>
     </form>
+  </dialog>
+
+  <!-- ADJUST PHOTO: choose what part of a photo shows, or crop it (admin/photo-editor.js) -->
+  <dialog id="photo-dialog" class="photo-dialog">
+    <div class="form">
+      <h2 id="pe-title">Adjust photo</h2>
+      <p class="muted pe-help">Drag the photo to choose what shows. Pinch, or use the slider, to zoom.</p>
+      <div id="pe-frame" class="pe-frame"><img id="pe-img" alt="" draggable="false"></div>
+      <label class="pe-zoom">Zoom <input type="range" id="pe-zoom" min="1" max="4" step="0.01" value="1"></label>
+      <div class="row pe-row">
+        <button type="button" id="pe-fit" class="btn ghost small">Show whole photo</button>
+        <button type="button" id="pe-reset" class="btn ghost small">Reset</button>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" id="pe-save" class="btn big">Save position</button>
+        <button type="button" id="pe-crop" class="btn ghost big">Crop to this</button>
+      </div>
+      <p class="muted small-print pe-note"><strong>Save position</strong> keeps your whole photo, so you can change it later. <strong>Crop to this</strong> keeps only what's in the frame.</p>
+      <button type="button" id="pe-cancel" class="btn ghost full">Cancel</button>
+    </div>
   </dialog>
 
   <!-- PHONE ORDER PAYMENT (from an order card) -->
@@ -357,6 +380,8 @@
 
   <div id="toast" class="toast" hidden></div>
   <script src="/pay-apps.js"></script>
+  <script src="/photo-pos.js"></script>
+  <script src="/admin/photo-editor.js"></script>
   <script src="/slots.js"></script>
   <script src="/admin/pickup-admin.js"></script>
   <script src="/admin/orders-view.js"></script>

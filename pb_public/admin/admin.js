@@ -6,12 +6,6 @@
   let breads = [];
   let shop = null;
   let editing = null; // bread record or null for new
-  let pendingPhoto = null; // File to upload
-  let removePhoto = false;
-  let pendingHero = null;
-  let removeHero = false;
-  let pendingNadia = null;
-  let removeNadia = false;
 
   // ---------- helpers ----------
   // Reads a dollar amount typed by Nadia ("15", "$15.50") with how it was paid. Used by phone orders.
@@ -405,8 +399,9 @@
       const li = document.createElement("li");
       li.className = "bread";
       const img = document.createElement("img");
-      img.src = b.photo ? fileUrl(b, "photo", "400x300") : w.placeholder;
+      img.src = b.photo ? fileUrl(b, "photo", "400x0") : w.placeholder;
       img.alt = "";
+      if (b.photo) window.LunoahPhoto.apply(img, b.photo_pos, { zoom: false });
 
       const info = document.createElement("div");
       const name = document.createElement("div");
@@ -497,11 +492,55 @@
     imgEl.nextElementSibling.hidden = !!src;
   }
 
+  // One photo upload spot: choose a photo (then Adjust opens straight away), adjust, remove.
+  // The preview box has the same shape as the photo's spot on the website.
+  const Photo = window.LunoahPhoto;
+  function photoSlot({ preview, box, file, adjust, remove, aspect, title }) {
+    const s = { pending: null, remove: false, pos: Photo.normalize(null), src: "", full: "" };
+    const shape = () => (typeof aspect === "function" ? aspect() : aspect);
+    const render = () => {
+      box.style.aspectRatio = String(shape());
+      setPreview(preview, s.src);
+      Photo.apply(preview, s.pos);
+      adjust.hidden = !s.src;
+      remove.hidden = !s.src;
+    };
+    s.reset = (src, full, pos) => { s.pending = null; s.remove = false; s.src = src; s.full = full || src; s.pos = Photo.normalize(pos); render(); };
+    async function openAdjust() {
+      if (!s.full) return;
+      const r = await window.PhotoEditor.open({ src: s.full, aspect: shape(), pos: s.pos, title });
+      if (!r) return;
+      if (r.file) { s.pending = r.file; s.remove = false; s.src = s.full = URL.createObjectURL(r.file); }
+      s.pos = r.pos;
+      render();
+      toast(r.file ? "Cropped. Tap Save to keep it." : "Position set. Tap Save to keep it.");
+    }
+    file.addEventListener("change", async (e) => {
+      const f = e.target.files[0];
+      e.target.value = "";
+      if (!f) return;
+      try {
+        const small = await shrinkPhoto(f);
+        s.pending = small; s.remove = false; s.src = s.full = URL.createObjectURL(small); s.pos = Photo.normalize(null);
+        render();
+        await openAdjust();
+      } catch (err) { toast(err.message, "bad"); }
+    });
+    adjust.addEventListener("click", (e) => { e.preventDefault(); openAdjust(); });
+    remove.addEventListener("click", () => { s.pending = null; s.remove = true; s.src = s.full = ""; s.pos = Photo.normalize(null); render(); });
+    s.appendTo = (fd, field, posField) => {
+      if (s.pending) fd.append(field, s.pending);
+      else if (s.remove) fd.append(field, "");
+      fd.append(posField, JSON.stringify(s.pos));
+    };
+    s.render = render;
+    return s;
+  }
+
   let editingExtra = false;
   function openEdit(b, extra) {
     editing = b || null;
     editingExtra = !!extra;
-    pendingPhoto = null; removePhoto = false;
     $("#edit-title").textContent = extra ? (b ? "Edit item" : "Add an item") : (b ? "Edit bread" : "Add a new bread");
     $("#e-name-label").textContent = extra ? "Name" : "Name of bread";
     $("#e-name").placeholder = extra ? "e.g. Lunoah tote bag" : "e.g. Classic Country Loaf";
@@ -512,8 +551,7 @@
     $("#e-desc").value = b ? b.description : "";
     $("#e-hidden").checked = b ? !!b.hidden : false;
     $("#delete-bread").hidden = !b;
-    setPreview($("#photo-preview"), b && b.photo ? fileUrl(b, "photo", "800x600") : "");
-    $("#photo-remove").hidden = !(b && b.photo);
+    breadPhoto.reset(b && b.photo ? fileUrl(b, "photo", "800x0") : "", b && b.photo ? fileUrl(b, "photo") : "", b && b.photo_pos);
     $("#edit-dialog").showModal();
   }
 
@@ -521,22 +559,10 @@
   $("#add-extra").addEventListener("click", () => openEdit(null, true));
   $("#cancel-edit").addEventListener("click", () => $("#edit-dialog").close());
 
-  $("#photo-file").addEventListener("change", async (e) => {
-    const f = e.target.files[0];
-    e.target.value = "";
-    if (!f) return;
-    try {
-      pendingPhoto = await shrinkPhoto(f);
-      removePhoto = false;
-      setPreview($("#photo-preview"), URL.createObjectURL(pendingPhoto));
-      $("#photo-remove").hidden = false;
-    } catch (err) { toast(err.message, "bad"); }
-  });
-
-  $("#photo-remove").addEventListener("click", () => {
-    pendingPhoto = null; removePhoto = true;
-    setPreview($("#photo-preview"), "");
-    $("#photo-remove").hidden = true;
+  // Bread cards show photos 4:3; Beyond the Basket items are tall (about 3:4).
+  const breadPhoto = photoSlot({
+    preview: $("#photo-preview"), box: $("#photo-box"), file: $("#photo-file"), adjust: $("#photo-adjust"), remove: $("#photo-remove"),
+    aspect: () => (editingExtra ? 3 / 4 : 4 / 3), title: "Adjust photo",
   });
 
   $("#edit-form").addEventListener("submit", async (e) => {
@@ -549,8 +575,7 @@
     fd.append("size", $("#e-size").value.trim());
     if (!editing) fd.append("kind", editingExtra ? "extra" : "bread");
     fd.append("hidden", $("#e-hidden").checked ? "true" : "false");
-    if (pendingPhoto) fd.append("photo", pendingPhoto);
-    else if (removePhoto) fd.append("photo", "");
+    breadPhoto.appendTo(fd, "photo", "photo_pos");
     if (!editing) fd.append("sort", String((ofKind(editingExtra).length + 1) * 10));
 
     busy(btn, true);
@@ -604,48 +629,20 @@
     fetch("/api/lunoah/checkout-config").then((r) => r.json())
       .then((c) => ($("#s-stripe").textContent = c.online ? "On" : "Not set up yet"))
       .catch(() => ($("#s-stripe").textContent = "Unknown"));
-    pendingHero = null; removeHero = false;
-    setPreview($("#hero-preview"), shop.hero ? fileUrl(shop, "hero", "1600x0") : "");
-    $("#hero-remove").hidden = !shop.hero;
+    heroPhoto.reset(shop.hero ? fileUrl(shop, "hero", "1600x0") : "", shop.hero ? fileUrl(shop, "hero") : "", shop.hero_pos);
     $("#s-nadia-title").value = shop.nadia_title || "";
     $("#s-nadia-story").value = shop.nadia_story || "";
-    pendingNadia = null; removeNadia = false;
-    setPreview($("#nadia-preview"), shop.nadia_photo ? fileUrl(shop, "nadia_photo", "600x600") : "");
-    $("#nadia-remove").hidden = !shop.nadia_photo;
+    nadiaPhoto.reset(shop.nadia_photo ? fileUrl(shop, "nadia_photo", "800x0") : "", shop.nadia_photo ? fileUrl(shop, "nadia_photo") : "", shop.nadia_pos);
   }
 
-  $("#nadia-file").addEventListener("change", async (e) => {
-    const f = e.target.files[0];
-    e.target.value = "";
-    if (!f) return;
-    try {
-      pendingNadia = await shrinkPhoto(f);
-      removeNadia = false;
-      setPreview($("#nadia-preview"), URL.createObjectURL(pendingNadia));
-      $("#nadia-remove").hidden = false;
-    } catch (err) { toast(err.message, "bad"); }
+  // Meet Nadia shows her photo square; the top-of-page photo is 4:3.
+  const nadiaPhoto = photoSlot({
+    preview: $("#nadia-preview"), box: $("#nadia-box"), file: $("#nadia-file"), adjust: $("#nadia-adjust"), remove: $("#nadia-remove"),
+    aspect: 1, title: "Adjust Nadia's photo",
   });
-  $("#nadia-remove").addEventListener("click", () => {
-    pendingNadia = null; removeNadia = true;
-    setPreview($("#nadia-preview"), "");
-    $("#nadia-remove").hidden = true;
-  });
-
-  $("#hero-file").addEventListener("change", async (e) => {
-    const f = e.target.files[0];
-    e.target.value = "";
-    if (!f) return;
-    try {
-      pendingHero = await shrinkPhoto(f);
-      removeHero = false;
-      setPreview($("#hero-preview"), URL.createObjectURL(pendingHero));
-      $("#hero-remove").hidden = false;
-    } catch (err) { toast(err.message, "bad"); }
-  });
-  $("#hero-remove").addEventListener("click", () => {
-    pendingHero = null; removeHero = true;
-    setPreview($("#hero-preview"), "");
-    $("#hero-remove").hidden = true;
+  const heroPhoto = photoSlot({
+    preview: $("#hero-preview"), box: $("#hero-box"), file: $("#hero-file"), adjust: $("#hero-adjust"), remove: $("#hero-remove"),
+    aspect: 4 / 3, title: "Adjust the top photo",
   });
 
   $("#shop-form").addEventListener("submit", async (e) => {
@@ -663,12 +660,10 @@
     fd.append("allergy_note", $("#s-allergy").value.trim());
     fd.append("instagram", $("#s-insta").value.trim());
     fd.append("notify_email", $("#s-notify").value.trim());
-    if (pendingHero) fd.append("hero", pendingHero);
-    else if (removeHero) fd.append("hero", "");
+    heroPhoto.appendTo(fd, "hero", "hero_pos");
     fd.append("nadia_title", $("#s-nadia-title").value.trim());
     fd.append("nadia_story", $("#s-nadia-story").value.trim());
-    if (pendingNadia) fd.append("nadia_photo", pendingNadia);
-    else if (removeNadia) fd.append("nadia_photo", "");
+    nadiaPhoto.appendTo(fd, "nadia_photo", "nadia_pos");
     busy(btn, true);
     try {
       await api(`/api/collections/shop/records/${shop.id}`, { method: "PATCH", body: fd });

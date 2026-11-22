@@ -14,6 +14,8 @@
     n = Number(n) || 0;
     return "$" + (Number.isInteger(n) ? n : n.toFixed(2));
   };
+  const Photo = window.LunoahPhoto;
+  const positioned = (img, pos) => { if (pos) Photo.apply(img, pos); return img; };
   const fileUrl = (rec, field, thumb) =>
     `/api/files/${rec.collectionName}/${rec.id}/${encodeURIComponent(rec[field])}` + (thumb ? `?thumb=${thumb}` : "");
 
@@ -89,7 +91,7 @@
     // Nadia's own top photo, if she added one; otherwise the hero text stands alone
     $("#hero-wrap").hidden = !shop.hero;
     document.querySelector(".hero").classList.toggle("no-photo", !shop.hero);
-    if (shop.hero) $("#hero-img").src = fileUrl(shop, "hero", "1600x0");
+    if (shop.hero) { $("#hero-img").src = fileUrl(shop, "hero", "1600x0"); Photo.apply($("#hero-img"), shop.hero_pos); }
 
     // "Meet Nadia" section: only when she has written a story
     const story = (shop.nadia_story || "").trim();
@@ -104,7 +106,8 @@
       }));
       const ph = $("#nadia-photo");
       ph.hidden = !shop.nadia_photo;
-      if (shop.nadia_photo) ph.src = fileUrl(shop, "nadia_photo", "600x600");
+      // Whole photo (not a server-cut square), shown the way Nadia positioned it in the admin.
+      if (shop.nadia_photo) { ph.src = fileUrl(shop, "nadia_photo", "800x0"); Photo.apply(ph, shop.nadia_pos); }
       $(".nadia-photo-wrap").hidden = !shop.nadia_photo;
     }
 
@@ -139,7 +142,7 @@
       el(
         "div",
         { class: "card-img" },
-        el("img", { src: b.photo ? fileUrl(b, "photo", extra ? "400x300" : "800x600") : placeholder, alt: b.name, loading: "lazy" }),
+        positioned(el("img", { src: b.photo ? fileUrl(b, "photo", extra ? "400x0" : "800x0") : placeholder, alt: b.name, loading: "lazy" }), b.photo && b.photo_pos),
         b.sold_out ? el("span", { class: "badge" }, "Sold out") : null
       ),
       el(
