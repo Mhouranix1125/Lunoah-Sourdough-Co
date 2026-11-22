@@ -141,17 +141,17 @@
   }
 
   // Hero photo stack: Nadia's top photo (if she chose one) in front, then her newest bread photos,
-  // as overlapping prints. Before there are any photos, a single print of the Lunoah crest.
+  // as overlapping prints. Before there are any photos, a single print of the loaf sketch.
   function renderPrints() {
     const prints = [];
-    if (shop.hero) prints.push({ src: fileUrl(shop, "hero", "1600x0"), pos: shop.hero_pos, alt: "Fresh bread from Lunoah Sourdough Co." });
+    if (shop.hero) prints.push({ src: fileUrl(shop, "hero", "1600x0"), pos: shop.hero_pos, alt: "Fresh bread from Lunoah Sourdough Co.", caption: "Fresh from the oven" });
     breads
       .filter((b) => b.photo && !b.hidden)
       .sort((a, b) => (a.created < b.created ? 1 : -1)) // newest first
       .slice(0, 3 - prints.length)
       .forEach((b) => prints.push({ src: fileUrl(b, "photo", "800x0"), pos: b.photo_pos, alt: b.name, caption: b.name }));
     const crest = !prints.length;
-    if (crest) prints.push({ src: "/img/logo/lunoah-logo-1200.png", alt: "Lunoah Sourdough Co.", caption: "Lunoah Sourdough Co.", crest: true });
+    if (crest) prints.push({ src: "/img/placeholder-loaf.webp", alt: "A hand-drawn sourdough loaf", caption: "Fresh from the oven", crest: true });
 
     const box = $("#hero-prints");
     box.dataset.count = String(prints.length);

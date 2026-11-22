@@ -500,8 +500,9 @@ body::before {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: none;
 }
 .print:not(:has(figcaption)) { padding-bottom: 34px; }
-.print-crest .print-mat { background: radial-gradient(circle, #2a2320 0 60%, #1a1513 100%); }
-.print-crest .print-mat img { object-fit: contain; padding: 7%; }
+/* The loaf sketch, before there are bread photos: shown whole, on its own paper colour. */
+.print-crest .print-mat { background: rgb(239, 228, 209); }
+.print-crest .print-mat img { object-fit: contain; }
 /* Positions: front, back-left, back-right */
 .print[data-n="0"] { z-index: 3; left: 21%; top: 9%; transform: rotate(-2.5deg); }
 .print[data-n="1"] { z-index: 2; left: 2%;  top: 0;  transform: rotate(-9deg); }

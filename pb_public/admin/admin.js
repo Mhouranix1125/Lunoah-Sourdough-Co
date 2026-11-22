@@ -642,7 +642,7 @@
   });
   const heroPhoto = photoSlot({
     preview: $("#hero-preview"), box: $("#hero-box"), file: $("#hero-file"), adjust: $("#hero-adjust"), remove: $("#hero-remove"),
-    aspect: 4 / 3, title: "Adjust the top photo",
+    aspect: 1, title: "Adjust the \u201cFresh from the oven\u201d photo", // a square print at the top of the website
   });
 
   $("#shop-form").addEventListener("submit", async (e) => {

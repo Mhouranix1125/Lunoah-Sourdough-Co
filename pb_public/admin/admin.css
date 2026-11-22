@@ -299,3 +299,6 @@ dialog form { padding: 24px; }
 .pe-zoom input { flex: 1; accent-color: var(--crust); }
 .pe-row { display: flex; gap: 8px; }
 .pe-note { margin: 0; }
+
+/* Square photo previews (Nadia's photo, the "Fresh from the oven" photo) stay a sensible size */
+.photo-box.square { width: min(100%, 320px); }
